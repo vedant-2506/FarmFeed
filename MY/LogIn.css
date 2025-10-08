@@ -1,0 +1,29 @@
+body, html {
+  height: 100%;
+  margin: 0;
+}
+
+#bgCarousel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.login-container {
+  position: relative;
+  z-index: 2; /* show above carousel */
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-card {
+  width: 350px;
+  padding: 25px;
+  background: rgba(255, 255, 255, 0.9); /* slight transparency */
+  border-radius: 12px;
+}
