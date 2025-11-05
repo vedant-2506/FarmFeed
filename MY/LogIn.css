@@ -1,8 +1,12 @@
+/* Full height and no margin */
 body, html {
   height: 100%;
   margin: 0;
+  font-family: 'Poppins', sans-serif;
+  overflow: hidden;
 }
 
+/* Carousel styling */
 #bgCarousel {
   position: fixed;
   top: 0;
@@ -12,18 +16,42 @@ body, html {
   height: 100%;
 }
 
+#bgCarousel img {
+  height: 100vh;
+  object-fit: cover;
+  filter: brightness(70%);
+}
+
+/* Login form container */
 .login-container {
   position: relative;
-  z-index: 2; /* show above carousel */
+  z-index: 2;
   height: 100vh;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
+/* Login card */
 .login-card {
   width: 350px;
-  padding: 25px;
-  background: rgba(255, 255, 255, 0.9); /* slight transparency */
-  border-radius: 12px;
+  padding: 30px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 15px;
+  backdrop-filter: blur(8px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.login-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.2);
+}
+
+.btn-success {
+  background-color: #28a745;
+  border: none;
+}
+
+.btn-success:hover {
+  background-color: #218838;
 }

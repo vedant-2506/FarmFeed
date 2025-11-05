@@ -1,15 +1,12 @@
-
 .navbar .container-fluid {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-
 .navbar-nav.me-auto {
   flex: 1;
 }
-
 
 .navbar form {
   flex: 2;
@@ -24,47 +21,41 @@
   justify-content: flex-end;
 }
 
-
 .navbar-brand img {
   height: 60px;
   width: auto;
 }
 
-.navbar-nav li {
-  list-style: none ;
+#cart {
+  position: absolute;
+  right: 100px;
 }
-
 
 .carousel-inner img {
   height: 450px;
   object-fit: cover;
 }
 
-
 .card-img-top {
   height: 220px;
   object-fit: cover;
 }
+
 .card {
   transition: transform 0.2s;
 }
+
 .card:hover {
   transform: translateY(-5px);
-  box-shadow: 6px 18px black;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
-
 
 .dropdown-menu {
   min-width: 200px;
   border-radius: 10px;
 }
+
 .dropdown-menu .btn {
   border-radius: 8px;
   font-weight: 500;
-}
-
-
-#cart{
-  position: absolute;
-  right: 100px;
 }

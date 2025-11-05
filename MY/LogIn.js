@@ -1,6 +1,3 @@
-// login.js
-
-
 document.addEventListener("DOMContentLoaded", () => {
 
 
@@ -18,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Temporary demo validation
+    // demo data
     if (userId === "admin" && password === "12345") {
       alert("Login Successful! Redirecting...");
     //   window.location.href = "dashboard.html"; // Example redirect

@@ -1,5 +1,3 @@
-// signup.js
-
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.querySelector("form");
 
@@ -16,7 +14,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const aadhaarInput = form.querySelector('input[placeholder="Aadhaar Number"]'); 
         const aadhaar = aadhaarInput ? aadhaarInput.value.trim() : '';
 
-        // Validation: either email or aadhaar is required
+        //  either email or aadhaar is required
         if (!email && !aadhaar) {
             alert(" Please enter at least Email or Aadhaar Number.");
             return;
@@ -33,13 +31,13 @@ document.addEventListener("DOMContentLoaded", () => {
        
 
         if (!passwordPattern.test(password)) {
-            alert("⚠️ Password must be at least 6 characters and include:\n- At least 1 uppercase letter\n- At least 1 lowercase letter\n- At least 1 number\n- At least 1 special character");
+            alert(" Password must be at least 6 characters and include:\n- At least 1 uppercase letter\n- At least 1 lowercase letter\n- At least 1 number\n- At least 1 special character");
             return;
         }
 
         // Optionally, validate phone number
         if (phone.length < 10) {
-            alert("⚠️ Please enter a valid phone number.");
+            alert(" Please enter a valid phone number.");
             return;
         }
 
