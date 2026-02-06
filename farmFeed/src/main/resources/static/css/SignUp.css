@@ -1,0 +1,67 @@
+* { 
+  box-sizing: border-box; 
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+#bgCarousel {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#bgCarousel .carousel-item,
+#bgCarousel .carousel-item img {
+  height: 100vh;
+}
+
+#bgCarousel img {
+  object-fit: cover;
+  width: 100%;
+  height: 100vh;
+  filter: brightness(0.75); 
+}
+
+
+.signup-container {
+  position: relative;
+  z-index: 2;             
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+}
+
+
+.signup-card {
+  width: 420px;
+  max-width: calc(100% - 40px);
+  padding: 26px;
+  background: rgba(255, 255, 255, 0.92); 
+  border-radius: 12px;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.15);
+  backdrop-filter: blur(6px);
+}
+
+
+.btn-success {
+  background-color: #28a745;
+  border: 0;
+}
+.btn-success:hover {
+  background-color: #218838;
+}
+/* .form-control:focus {
+  border-color: #28a745;
+  box-shadow: 0 0 5px rgba(40, 167, 69, 0.5);
+} */

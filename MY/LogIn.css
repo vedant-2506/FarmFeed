@@ -1,57 +1,61 @@
-/* Full height and no margin */
-body, html {
-  height: 100%;
-  margin: 0;
-  font-family: 'Poppins', sans-serif;
-  overflow: hidden;
-}
-
-/* Carousel styling */
-#bgCarousel {
-  position: fixed;
-  top: 0;
-  left: 0;
-  z-index: 0;
-  width: 100%;
-  height: 100%;
-}
-
-#bgCarousel img {
-  height: 100vh;
-  object-fit: cover;
-  filter: brightness(70%);
-}
-
-/* Login form container */
-.login-container {
-  position: relative;
-  z-index: 2;
-  height: 100vh;
+.navbar .container-fluid {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
 }
 
-/* Login card */
-.login-card {
-  width: 350px;
-  padding: 30px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 15px;
-  backdrop-filter: blur(8px);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.navbar-nav.me-auto {
+  flex: 1;
 }
 
-.login-card:hover {
-  transform: scale(1.02);
-  box-shadow: 0px 8px 25px rgba(0, 0, 0, 0.2);
+.navbar form {
+  flex: 2;
+  display: flex;
+  justify-content: center;
+  padding-left: 70px;
 }
 
-.btn-success {
-  background-color: #28a745;
-  border: none;
+.navbar-nav.ms-auto {
+  flex: 1;
+  display: flex;
+  justify-content: flex-end;
 }
 
-.btn-success:hover {
-  background-color: #218838;
+.navbar-brand img {
+  height: 60px;
+  width: auto;
+}
+
+#cart {
+  position: absolute;
+  right: 100px;
+}
+
+.carousel-inner img {
+  height: 450px;
+  object-fit: cover;
+}
+
+.card-img-top {
+  height: 220px;
+  object-fit: cover;
+}
+
+.card {
+  transition: transform 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+.dropdown-menu {
+  min-width: 200px;
+  border-radius: 10px;
+}
+
+.dropdown-menu .btn {
+  border-radius: 8px;
+  font-weight: 500;
 }
