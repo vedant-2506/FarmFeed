@@ -139,3 +139,35 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
+
+
+
+
+
+//filter 
+document.addEventListener("DOMContentLoaded", () => {
+  const filterButtons = document.querySelectorAll(".filter-btn");
+  const products = document.querySelectorAll(".col");
+
+  filterButtons.forEach(button => {
+    button.addEventListener("click", () => {
+
+      // Remove active class
+      filterButtons.forEach(btn => btn.classList.remove("active"));
+      button.classList.add("active");
+
+      const filter = button.getAttribute("data-filter");
+
+      products.forEach(product => {
+        const category = product.getAttribute("data-category");
+
+        if (filter === "all" || category === filter) {
+          product.style.display = "block";
+        } else {
+          product.style.display = "none";
+        }
+      });
+    });
+  });
+});

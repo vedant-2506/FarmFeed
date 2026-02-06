@@ -1,3 +1,11 @@
+/* Logo Styling */
+.navbar-brand img.logo {
+  height: 55px;       /* Adjust size as you like */
+  width: auto;        /* Maintain proportion */
+  object-fit: contain;
+}
+
+/* Navbar alignment */
 .navbar .container-fluid {
   display: flex;
   justify-content: space-between;
@@ -8,6 +16,7 @@
   flex: 1;
 }
 
+/* Search center */
 .navbar form {
   flex: 2;
   display: flex;
@@ -21,26 +30,25 @@
   justify-content: flex-end;
 }
 
-.navbar-brand img {
-  height: 60px;
-  width: auto;
-}
-
+/* Cart alignment */
 #cart {
   position: absolute;
   right: 100px;
 }
 
+/* Carousel Image */
 .carousel-inner img {
   height: 450px;
   object-fit: cover;
 }
 
+/* Product Card Image */
 .card-img-top {
   height: 220px;
   object-fit: cover;
 }
 
+/* Card Hover Animation */
 .card {
   transition: transform 0.2s;
 }
@@ -50,6 +58,7 @@
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
+/* Dropdown Styling */
 .dropdown-menu {
   min-width: 200px;
   border-radius: 10px;
@@ -58,4 +67,24 @@
 .dropdown-menu .btn {
   border-radius: 8px;
   font-weight: 500;
+}
+
+
+
+
+/* Filter Bar Styling */
+.filter-bar {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #ddd;
+}
+
+.filter-btn {
+  border-radius: 20px;
+  padding: 6px 18px;
+  font-size: 14px;
+}
+
+.filter-btn.active {
+  background-color: #198754;
+  color: white;
 }
