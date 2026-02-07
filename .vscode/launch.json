@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "FarmFeedApplication",
+            "request": "launch",
+            "mainClass": "com.example.farmFeed.FarmFeedApplication",
+            "projectName": "farmfeed"
+        },
+        {
+            "type": "java",
             "name": "Current File",
             "request": "launch",
             "mainClass": "${file}"
