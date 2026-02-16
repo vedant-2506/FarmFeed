@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendor Dashboard | FarmFeed</title>
+  <link rel="stylesheet" href="vendor.css">
+
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+
+<body>
+
+  <!-- NavBar -->
+  <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm sticky-top">
+    <div class="container-fluid">
+       
+      <a class="navbar-brand" href="#">
+        <img src="../src/LOGO.png" alt="Logo">
+      </a>
+
+      <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navMenu">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navMenu">
+
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+          <li class="nav-item">
+            <a class="nav-link active" href="#">Dashboard</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link active" href="#products">My Products</a>
+          </li>
+
+          <li class="nav-item">
+            <a class="nav-link active" href="#orders">Orders</a>
+          </li>
+
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">More</a>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item" href="#">Help</a></li>
+              <li><a class="dropdown-item" href="#">Policies</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#">Contact Support</a></li>
+            </ul>
+          </li>
+
+        </ul>
+
+        <!-- Account Dropdown -->
+        <ul class="navbar-nav">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle me-1"></i> Vendor
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end shadow p-3">
+              <li class="mb-2">
+                <a href="#" class="btn btn-outline-success w-100">Profile</a>
+              </li>
+              <li>
+                <a href="Logout.html" class="btn btn-outline-danger w-100">Log Out</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+
+      </div>
+    </div>
+  </nav>
+
+  <!-- Vendor Banner -->
+  <div class="vendor-banner container mt-4">
+    <div class="banner-content">
+      <h2>Welcome Vendor!</h2>
+      <p>Manage your products, stock, orders & sales on FarmFeed.</p>
+      <!-- <a href="#add-product" class="btn btn-success px-4 py-2">Add New Product</a> -->
+    </div>
+  </div>
+
+
+  <!-- Quick Stats -->
+  <div class="container my-5">
+    <div class="row g-4 text-center">
+
+      <div class="col-md-3">
+        <div class="stat-card shadow-sm">
+          <i class="bi bi-box-seam stat-icon"></i>
+          <h4>120</h4>
+          <p>Total Products</p>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="stat-card shadow-sm">
+          <i class="bi bi-receipt stat-icon"></i>
+          <h4>75</h4>
+          <p>Orders Received</p>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="stat-card shadow-sm">
+          <i class="bi bi-cash-coin stat-icon"></i>
+          <h4>₹98,500</h4>
+          <p>Total Sales</p>
+        </div>
+      </div>
+
+      <div class="col-md-3">
+        <div class="stat-card shadow-sm">
+          <i class="bi bi-people stat-icon"></i>
+          <h4>40</h4>
+          <p>Repeat Customers</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- Product Management Section -->
+  <div class="container my-5" id="products">
+
+    <h3 class="section-title">My Products</h3>
+    
+    <div class="text-end mb-3">
+      <a href="AddProduct.html" class="btn btn-success">+ Add Product</a>
+
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+
+      <!-- One Product Card -->
+      <div class="col">
+        <div class="card h-100 shadow-sm product-card">
+          <img src="https://imgs.search.brave.com/8Ues7vOho-SowZyusrF0nz05eITiqBf8LFszypFswE8/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zLmFs/aWNkbi5jb20vQHNj/MDQva2YvSFRCMUhz/a2VYekR1SzFSalNz/emRxNnhHTHBYYW8u/anBnXzMwMHgzMDAu/anBn" 
+               class="card-img-top" alt="">
+          <div class="card-body">
+            <h5 class="card-title">Urea</h5>
+            <p class="card-text">High-nitrogen fertilizer for crop growth.</p>
+            <p><strong>Price: ₹600 / 50kg</strong></p>
+
+            <div class="d-flex justify-content-between">
+              <button class="btn btn-outline-success">Edit</button>
+              <button class="btn btn-outline-danger">Delete</button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Add more cards as needed -->
+
+    </div>
+  </div>
+
+
+  <!-- Orders Section -->
+  <div class="container my-5" id="orders">
+
+    <h3 class="section-title">Recent Orders</h3>
+
+    <table class="table table-hover shadow-sm">
+      <thead class="table-success">
+        <tr>
+          <th>Order ID</th>
+          <th>Product</th>
+          <th>Quantity</th>
+          <th>Total</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td>#1023</td>
+          <td>Urea</td>
+          <td>5 Bags</td>
+          <td>₹3000</td>
+          <td><span class="badge bg-warning">Pending</span></td>
+        </tr>
+        <tr>
+          <td>#1024</td>
+          <td>NPK</td>
+          <td>3 Bags</td>
+          <td>₹3300</td>
+          <td><span class="badge bg-success">Delivered</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
+
+
+
+
+
+
