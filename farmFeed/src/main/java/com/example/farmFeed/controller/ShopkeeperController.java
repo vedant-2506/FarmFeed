@@ -1,8 +1,8 @@
 package com.example.farmFeed.controller;
 
-import com.example.farmFeed.DTO.ChangePasswordRequest;
-import com.example.farmFeed.DTO.LoginRequest;
-import com.example.farmFeed.DTO.ShopkeeperRegisterRequest;
+import com.example.farmFeed.dto.ChangePasswordRequest;
+import com.example.farmFeed.dto.LoginRequest;
+import com.example.farmFeed.dto.ShopkeeperRegisterRequest;
 import com.example.farmFeed.entity.Shopkeeper;
 import com.example.farmFeed.service.ShopkeeperService;
 import jakarta.validation.Valid;

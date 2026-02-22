@@ -1,7 +1,7 @@
 package com.example.farmFeed.service;
 
-import com.example.farmFeed.DTO.LoginRequest;
-import com.example.farmFeed.DTO.ShopkeeperRegisterRequest;
+import com.example.farmFeed.dto.LoginRequest;
+import com.example.farmFeed.dto.ShopkeeperRegisterRequest;
 import com.example.farmFeed.entity.Shopkeeper;
 import com.example.farmFeed.repository.ShopkeeperRepository; // BUG FIX: was "shopkeeperRepository" (lowercase)
 import org.slf4j.Logger;

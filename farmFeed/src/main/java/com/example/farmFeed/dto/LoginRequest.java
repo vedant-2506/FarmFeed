@@ -1,4 +1,4 @@
-package com.example.farmFeed.DTO;
+package com.example.farmFeed.dto;
 
 import jakarta.validation.constraints.NotBlank;
 

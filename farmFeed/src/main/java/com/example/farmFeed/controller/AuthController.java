@@ -1,23 +1,9 @@
 package com.example.farmFeed.controller;
 
-import com.example.farmFeed.DTO.ChangePasswordRequest;
-import com.example.farmFeed.DTO.LoginRequest;
-import com.example.farmFeed.DTO.RegisterRequest;
+import com.example.farmFeed.dto.ChangePasswordRequest;
+import com.example.farmFeed.dto.LoginRequest;
+import com.example.farmFeed.dto.RegisterRequest;
 import com.example.farmFeed.entity.Farmer;
-/**
- * AuthService - A service class responsible for handling authentication-related business logic.
- * This service provides methods for user authentication, credential validation, token generation,
- * and other security-related operations for the FarmFeed application.
- * 
- * Note: The import cannot be resolved, which suggests:
- * 1. The AuthService class may not exist in the service package
- * 2. The package structure may be incorrect
- * 3. Maven/Gradle dependencies may not be properly configured
- * 4. The project needs to be rebuilt or refreshed
- * 
- * @author FarmFeed Development Team
- * @version 1.0
- */
 import com.example.farmFeed.service.AuthService;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
@@ -176,7 +162,7 @@ public class AuthController {
         public String getUserType() { return userType; }
     }
 
-    private static class ProfileResponse {
+        private static class ProfileResponse {
         private final Long   id;
         private final String name;
         private final String phone;
@@ -194,3 +180,219 @@ public class AuthController {
     }
 }
 
+
+// package com.example.farmFeed.controller;
+
+// import com.example.farmFeed.DTO.ChangePasswordRequest;
+// import com.example.farmFeed.DTO.LoginRequest;
+// import com.example.farmFeed.DTO.RegisterRequest;
+// import com.example.farmFeed.entity.Farmer;
+// import com.example.farmFeed.service.AuthService;
+// import jakarta.validation.Valid;
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
+// import org.springframework.http.*;
+// import org.springframework.web.bind.annotation.*;
+
+// @RestController
+// @RequestMapping("/api/auth")
+// @CrossOrigin(origins = "*")
+// public class AuthController {
+
+//     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+
+//     private final AuthService authService;
+
+//     public AuthController(AuthService authService) {
+//         this.authService = authService;
+//     }
+
+//     //REGISTER FARMER
+//     @PostMapping("/register")
+//     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest request) {
+
+//         log.info("Registration request for phone: {}", request.getPhone());
+
+//         try {
+//             Farmer farmer = authService.registerFarmer(request);
+
+//             return ResponseEntity.status(HttpStatus.CREATED)
+//                     .body(new ApiResponse(
+//                             "Registration successful",
+//                             farmer.getId(),
+//                             farmer.getName(),
+//                             farmer.getPhone()
+//                     ));
+
+//         } catch (RuntimeException e) {
+//             log.error("Registration failed: {}", e.getMessage());
+//             return ResponseEntity.badRequest()
+//                     .body(new ErrorResponse(e.getMessage()));
+//         }
+//     }
+
+
+//     //LOGIN FARMER
+//     @PostMapping("/login")
+//     public ResponseEntity<?> login(@Valid @RequestBody LoginRequest request) {
+
+//         log.info("Login request for phone: {}", request.getPhone());
+
+//         try {
+//             Farmer farmer = authService.authenticateFarmer(request);
+
+//             return ResponseEntity.ok(new LoginResponse(
+//                     "Login successful",
+//                     farmer.getId(),
+//                     farmer.getName(),
+//                     farmer.getPhone(),
+//                     farmer.getAddress(),
+//                     "FARMER"
+//             ));
+
+//         } catch (RuntimeException e) {
+//             log.warn("Login failed: {}", e.getMessage());
+//             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+//                     .body(new ErrorResponse(e.getMessage()));
+//         }
+//     }
+
+
+//     //CHANGE PASSWORD
+//     @PutMapping("/change-password/{farmerId}")
+//     public ResponseEntity<?> changePassword(
+//             @PathVariable Long farmerId,
+//             @Valid @RequestBody ChangePasswordRequest request) {
+
+//         log.info("Password change request for farmer ID: {}", farmerId);
+
+//         if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+//             return ResponseEntity.badRequest()
+//                     .body(new ErrorResponse("New password and confirm password do not match"));
+//         }
+
+//         try {
+//             authService.changePassword(
+//                     farmerId,
+//                     request.getCurrentPassword(),
+//                     request.getNewPassword()
+//             );
+
+//             return ResponseEntity.ok(
+//                     new ApiResponse("Password changed successfully",
+//                             farmerId, null, null)
+//             );
+
+//         } catch (RuntimeException e) {
+//             log.error("Password change failed: {}", e.getMessage());
+//             return ResponseEntity.badRequest()
+//                     .body(new ErrorResponse(e.getMessage()));
+//         }
+//     }
+
+
+//     // GET PROFILE
+//     @GetMapping("/profile/{farmerId}")
+//     public ResponseEntity<?> getProfile(@PathVariable Long farmerId) {
+
+//         log.info("Fetching profile for farmer ID: {}", farmerId);
+
+//         try {
+//             Farmer farmer = authService.getFarmerById(farmerId);
+
+//             return ResponseEntity.ok(
+//                     new ProfileResponse(
+//                             farmer.getId(),
+//                             farmer.getName(),
+//                             farmer.getPhone(),
+//                             farmer.getAddress()
+//                     )
+//             );
+
+//         } catch (RuntimeException e) {
+//             return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                     .body(new ErrorResponse(e.getMessage()));
+//         }
+//     }
+
+
+
+//     //RESPONSE CLASSES
+
+//     static class ErrorResponse {
+//         private final String error;
+
+//         public ErrorResponse(String error) {
+//             this.error = error;
+//         }
+
+//         public String getError() {
+//             return error;
+//         }
+//     }
+
+//     static class ApiResponse {
+//         private final String message;
+//         private final Long id;
+//         private final String name;
+//         private final String phone;
+
+//         public ApiResponse(String message, Long id, String name, String phone) {
+//             this.message = message;
+//             this.id = id;
+//             this.name = name;
+//             this.phone = phone;
+//         }
+
+//         public String getMessage() { return message; }
+//         public Long getId() { return id; }
+//         public String getName() { return name; }
+//         public String getPhone() { return phone; }
+//     }
+
+//     static class LoginResponse {
+//         private final String message;
+//         private final Long id;
+//         private final String name;
+//         private final String phone;
+//         private final String address;
+//         private final String role;
+
+//         public LoginResponse(String message, Long id, String name,
+//                              String phone, String address, String role) {
+//             this.message = message;
+//             this.id = id;
+//             this.name = name;
+//             this.phone = phone;
+//             this.address = address;
+//             this.role = role;
+//         }
+
+//         public String getMessage() { return message; }
+//         public Long getId() { return id; }
+//         public String getName() { return name; }
+//         public String getPhone() { return phone; }
+//         public String getAddress() { return address; }
+//         public String getRole() { return role; }
+//     }
+
+//     static class ProfileResponse {
+//         private final Long id;
+//         private final String name;
+//         private final String phone;
+//         private final String address;
+
+//         public ProfileResponse(Long id, String name,
+//                                String phone, String address) {
+//             this.id = id;
+//             this.name = name;
+//             this.phone = phone;
+//             this.address = address;
+//         }
+
+//         public Long getId() { return id; }
+//         public String getName() { return name; }
+//         public String getPhone() { return phone; }
+//         public String getAddress() { return address; }
+//     }
+// }
