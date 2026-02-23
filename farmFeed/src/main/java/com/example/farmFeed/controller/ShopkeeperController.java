@@ -114,13 +114,13 @@ public class ShopkeeperController {
 
     // ── Inner Response Classes ────────────────────────────────────────────────
 
-    private static class ErrorResponse {
+    public static class ErrorResponse {
         private final String error;
         public ErrorResponse(String error) { this.error = error; }
         public String getError() { return error; }
     }
 
-    private static class SuccessResponse {
+    public static class SuccessResponse {
         private final String message;
         private final Long   shopkeeperId;
         private final String name;
@@ -141,7 +141,7 @@ public class ShopkeeperController {
         public String getShopName()       { return shopName; }
     }
 
-    private static class LoginResponse {
+    public static class LoginResponse {
         private final String message;
         private final Long   shopkeeperId;
         private final String name;
@@ -168,7 +168,7 @@ public class ShopkeeperController {
         public String getUserType()       { return userType; }
     }
 
-    private static class ProfileResponse {
+    public static class ProfileResponse {
         private final Long   id;
         private final String name;
         private final String phone;

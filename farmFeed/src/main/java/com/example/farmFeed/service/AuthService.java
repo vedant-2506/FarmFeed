@@ -59,7 +59,7 @@ public class AuthService {
         return farmer;
     }
 
-    // ── Change Password ───────────────────────────────────────────
+    //Change Password 
     @Transactional
     public void changePassword(Long farmerId, String currentPassword, String newPassword) {
         log.info("Changing password for farmer ID: {}", farmerId);
@@ -86,8 +86,11 @@ public class AuthService {
 
     // ── Get Profile ───────────────────────────────────────────────
     public Farmer getFarmerById(Long farmerId) {
+        if (farmerId == null) {
+            throw new RuntimeException("Farmer ID cannot be null");
+        }
         return farmerRepository.findById(farmerId)
-                .orElseThrow(() -> new RuntimeException("Farmer not found"));
+            .orElseThrow(() -> new RuntimeException("Farmer not found"));
     }
 }
 

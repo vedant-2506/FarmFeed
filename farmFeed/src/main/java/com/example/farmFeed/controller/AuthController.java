@@ -115,13 +115,13 @@ public class AuthController {
 
     // ── Inner Response Classes ────────────────────────────────────────────────
 
-    private static class ErrorResponse {
+    public static class ErrorResponse {
         private final String error;
         public ErrorResponse(String error) { this.error = error; }
         public String getError() { return error; }
     }
 
-    private static class SuccessResponse {
+    public static class SuccessResponse {
         private final String message;
         private final Long   farmerId;
         private final String name;
@@ -138,7 +138,7 @@ public class AuthController {
         public String getPhone()   { return phone; }
     }
 
-    private static class LoginResponse {
+    public static class LoginResponse {
         private final String message;
         private final Long   farmerId;
         private final String name;
@@ -162,7 +162,7 @@ public class AuthController {
         public String getUserType() { return userType; }
     }
 
-        private static class ProfileResponse {
+        public static class ProfileResponse {
         private final Long   id;
         private final String name;
         private final String phone;

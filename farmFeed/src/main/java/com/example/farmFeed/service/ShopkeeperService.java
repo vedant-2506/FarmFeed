@@ -110,7 +110,9 @@ public class ShopkeeperService {
     @Transactional
     public void changePassword(Long shopkeeperId, String currentPassword, String newPassword) {
         log.info("Changing password for shopkeeper ID: {}", shopkeeperId);
-
+        if (shopkeeperId == null) {
+            throw new RuntimeException("Shopkeeper ID cannot be null");
+        }
         Shopkeeper sk = shopkeeperRepo.findById(shopkeeperId)
                 .orElseThrow(() -> new RuntimeException("Shopkeeper not found"));
 
@@ -127,8 +129,11 @@ public class ShopkeeperService {
     // ── Get Profile ───────────────────────────────────────────────────────────
 
     public Shopkeeper getShopkeeperById(Long shopkeeperId) {
+        if (shopkeeperId == null) {
+            throw new RuntimeException("Shopkeeper ID cannot be null");
+        }
         return shopkeeperRepo.findById(shopkeeperId)
-                .orElseThrow(() -> new RuntimeException("Shopkeeper not found"));
+            .orElseThrow(() -> new RuntimeException("Shopkeeper not found"));
     }
 
     // ── Helpers
