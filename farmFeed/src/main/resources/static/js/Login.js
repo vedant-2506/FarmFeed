@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+  const BASE_URL = window.location.origin;
 
   // FARMER LOGIN
   const farmerForm = document.getElementById("farmerLoginForm");
@@ -6,19 +7,19 @@ document.addEventListener("DOMContentLoaded", () => {
   farmerForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const email = document.getElementById("farmerEmail").value.trim();
+    const phone = document.getElementById("farmerPhone").value.trim();
     const password = document.getElementById("farmerPassword").value.trim();
 
-    if (!email || !password) {
+    if (!phone || !password) {
       alert("Please fill all fields");
       return;
     }
 
     try {
-      const response = await fetch("http://localhost:9090/api/Farmer/Login", {
+      const response = await fetch(`${BASE_URL}/api/farmer/Login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password })
+        body: JSON.stringify({ phone, password })
       });
 
       const data = await response.json();
@@ -51,7 +52,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      const response = await fetch("http://localhost:9090/api/Vendor/Login", {
+      const response = await fetch(`${BASE_URL}/api/shopkeeper/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password })

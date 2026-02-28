@@ -1,0 +1,173 @@
+═══════════════════════════════════════════════════════════════════════════
+  FARMFEED DATABASE FIX - MANUAL SETUP INSTRUCTIONS
+═══════════════════════════════════════════════════════════════════════════
+
+⚠️  IMPORTANT: Your database connection was BROKEN due to merge conflict in 
+    application.properties. This has been FIXED in the backend code.
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 1: VERIFY MYSQL IS RUNNING
+═══════════════════════════════════════════════════════════════════════════
+
+Open Command Prompt and check if MySQL is running:
+
+  C:\> mysql -u root -p
+  Enter password: root
+
+You should see: mysql>
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 2: EXECUTE THE SQL CLEANUP SCRIPT
+═══════════════════════════════════════════════════════════════════════════
+
+Option A: Using MySQL Command Line (RECOMMENDED)
+────────────────────────────────────────────────
+
+1. Open Command Prompt
+2. Connect to MySQL:
+   
+   C:\> mysql -u root -p
+   Enter password: root
+
+3. Execute the script:
+
+   mysql> source C:/Users/swami/OneDrive/Desktop/FarmFeed/farmFeed/MYSQL_FIX.sql;
+
+OR
+
+   mysql> source "C:\Users\swami\OneDrive\Desktop\FarmFeed\farmFeed\MYSQL_FIX.sql";
+
+(Use forward slashes / instead of backslashes \)
+
+═══════════════════════════════════════════════════════════════════════════
+
+Option B: Using MySQL Workbench
+────────────────────────────────
+
+1. Open MySQL Workbench
+2. Create a new query tab
+3. Copy all content from MYSQL_FIX.sql
+4. Paste into the query editor
+5. Click the "Execute" button (⚡ icon) or press Ctrl+Enter
+6. Check the output for "2 rows affected" messages
+
+═══════════════════════════════════════════════════════════════════════════
+
+Option C: Using PhpMyAdmin (if available)
+──────────────────────────────────────────
+
+1. Open http://localhost/phpmyadmin
+2. Click on "farmfeed" database
+3. Go to "SQL" tab
+4. Paste the content from MYSQL_FIX.sql
+5. Click "Go" button
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 3: VERIFY DATABASE WAS UPDATED
+═══════════════════════════════════════════════════════════════════════════
+
+After running the script, verify with these commands:
+
+  mysql> USE farmfeed;
+  
+  mysql> SHOW TABLES;
+  
+Expected output:
+  +--------------------+
+  | Tables_in_farmfeed |
+  +--------------------+
+  | cart               |
+  | farmer             |
+  | fertilizers        |
+  | orders             |
+  | payment            |
+  | shopkeeper         |
+  +--------------------+
+
+  mysql> DESCRIBE farmer;
+  
+Expected columns:
+  ✓ farmer_id (PRIMARY KEY)
+  ✓ full_name (VARCHAR 100)
+  ✓ phone (VARCHAR 15, UNIQUE)  ← For farmer login
+  ✓ password (VARCHAR 100)
+  ✓ address (VARCHAR 255)
+  ✓ created_at (TIMESTAMP)
+
+  mysql> DESCRIBE shopkeeper;
+  
+Expected columns:
+  ✓ shop_id (PRIMARY KEY)
+  ✓ owner_name (VARCHAR 100)
+  ✓ shop_name (VARCHAR 100)
+  ✓ licence_number (VARCHAR 50, UNIQUE)
+  ✓ shop_address (VARCHAR 255)
+  ✓ email (VARCHAR 100, UNIQUE)  ← For vendor login
+  ✓ password (VARCHAR 100)       ← CRITICAL: This was missing before!
+  ✓ created_at (TIMESTAMP)
+
+═══════════════════════════════════════════════════════════════════════════
+STEP 4: TEST YOUR APPLICATION
+═══════════════════════════════════════════════════════════════════════════
+
+1. Restart Spring Boot application
+2. Go to Sign Up page (SignUp.html)
+3. Try signing up as Farmer:
+   - Full Name: Test Farmer
+   - Phone: 9876543220
+   - Address: Test Address
+   - Password: test123
+   
+4. Try signing up as Vendor:
+   - Owner Name: Test Owner
+   - Shop Name: Test Shop
+   - License: LIC999
+   - Address: Test Address
+   - Email: test@example.com
+   - Password: test123
+
+5. Go to Login page (Login.html)
+6. Try logging in with:
+   - Farmer: Phone=9876543210, Password=pass123
+   - Vendor: Email=greenagro@example.com, Password=pass123
+
+═══════════════════════════════════════════════════════════════════════════
+TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════════
+
+❌ ERROR: "Access denied for user 'root'@'localhost'"
+✅ SOLUTION: Check MySQL password is "root" (case sensitive)
+
+❌ ERROR: "Unknown database 'farmfeed'"
+✅ SOLUTION: Create database first with: CREATE DATABASE farmfeed;
+
+❌ ERROR: Still getting signup errors
+✅ SOLUTION: 
+   1. Check Spring Boot console for error messages
+   2. Verify MySQL is running: mysql -u root -p
+   3. Check database connection: USE farmfeed; SHOW TABLES;
+   4. Restart Spring Boot application fresh
+
+❌ ERROR: "Syntax error in SQL statement"
+✅ SOLUTION: 
+   1. Check file path uses forward slashes (/)
+   2. Ensure file is MYSQL_FIX.sql in FarmFeed directory
+   3. Try copying SQL manually instead of using source command
+
+═══════════════════════════════════════════════════════════════════════════
+WHAT WAS FIXED
+═══════════════════════════════════════════════════════════════════════════
+
+✅ application.properties - Removed merge conflict, kept MySQL config
+✅ farmer table - Changed "contact_number" to "phone", removed unused columns
+✅ shopkeeper table - Added missing "password" column
+✅ All unused columns removed (gender, age, old contact fields)
+✅ Added proper indexes for performance
+✅ Added created_at timestamps for tracking
+
+═══════════════════════════════════════════════════════════════════════════
+
+Questions? Check the application logs in Spring Boot console for detailed 
+error messages that will help identify any remaining issues.
+
+═══════════════════════════════════════════════════════════════════════════
