@@ -34,11 +34,11 @@
 // }
 
 
-server.port=${PORT:8080}
+server.port=${PORT:3306}
 
-spring.datasource.url=jdbc:mysql://HOST:3306/farmfeed
-spring.datasource.username=root
-spring.datasource.password=root
+spring.datasource.url=mysql://root:YUypwtDRtsvTckhNbfhnWbLwSwJbEtfA@ballast.proxy.rlwy.net:11633/railway
+spring.datasource.username=mysql.railway.internal
+spring.datasource.password=YUypwtDRtsvTckhNbfhnWbLwSwJbEtfA
 
 spring.jpa.hibernate.ddl-auto=update
 spring.jpa.show-sql=true
