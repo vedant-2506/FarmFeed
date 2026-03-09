@@ -62,7 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (response.ok && data.success) {
         alert("Vendor Login Successful!");
-        window.location.href = "VendorHome.html";
+        window.location.href = "vendo.html";
       } else {
         alert(data.error || "Invalid Vendor Credentials");
       }
