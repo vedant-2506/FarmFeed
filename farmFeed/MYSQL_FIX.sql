@@ -119,18 +119,6 @@ CREATE TABLE orders (
 -- Step 4: INSERT SAMPLE DATA
 -- ========================================================
 
--- Sample Fertilizers
-INSERT INTO fertilizers (name, price, description, stock) VALUES
-('Urea Fertilizer', 600, 'High-nitrogen fertilizer used for boosting plant growth and improving crop yields.', 100),
-('DAP Fertilizer', 1200, 'Diammonium phosphate, rich in nitrogen and phosphorus, ideal for crop root development.', 80),
-('Potash Fertilizer', 950, 'Helps in improving crop resistance against diseases and enhances water retention.', 120),
-('NPK Fertilizer', 1100, 'Balanced fertilizer with Nitrogen, Phosphorus, and Potassium for overall crop health.', 90),
-('Organic Compost', 400, 'Eco-friendly compost that improves soil fertility and promotes sustainable farming.', 150),
-('Bio Fertilizer', 750, 'Contains living microorganisms that enhance soil nutrient availability and plant growth.', 70),
-('Superphosphate', 850, 'Phosphorus-rich fertilizer for root growth and early plant development.', 110),
-('Vermicompost', 500, 'Organic fertilizer produced using earthworms, improves soil structure and fertility.', 130),
-('Zinc Sulphate', 700, 'Micronutrient fertilizer essential for chlorophyll production and plant metabolism.', 95),
-('Ammonium Sulphate', 950, 'Rich source of nitrogen and sulfur, improves leafy vegetable growth and yields.', 85);
 
 -- Sample Farmers (using PHONE for login - matching SignUp form)
 INSERT INTO farmer (full_name, phone, password, address) VALUES
