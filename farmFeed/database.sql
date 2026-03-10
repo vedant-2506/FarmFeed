@@ -25,13 +25,11 @@ CREATE TABLE fertilizers (
 -- Create farmer table
 CREATE TABLE farmer (
     farmer_id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    contact_number VARCHAR(15) NOT NULL,
-    gender VARCHAR(30),
-    email VARCHAR(50) UNIQUE NOT NULL,
-    password VARCHAR(30) NOT NULL,
-    address VARCHAR(100),
-    age INT
+    full_name VARCHAR(100) NOT NULL,
+    phone VARCHAR(15) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL,
+    address VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create cart table
@@ -83,11 +81,13 @@ CREATE TABLE orders (
 -- Create shopkeeper table
 CREATE TABLE shopkeeper (
     shop_id INT AUTO_INCREMENT PRIMARY KEY,
-    shop_name VARCHAR(50) NOT NULL,
-    owner_name VARCHAR(50) NOT NULL,
-    licence_number VARCHAR(30) UNIQUE NOT NULL,
-    email VARCHAR(50) UNIQUE NOT NULL,
-    address VARCHAR(150) NOT NULL
+    owner_name VARCHAR(100) NOT NULL,
+    shop_name VARCHAR(100) NOT NULL,
+    licence_number VARCHAR(50) UNIQUE NOT NULL,
+    shop_address VARCHAR(255) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Insert sample fertilizers data
@@ -103,19 +103,16 @@ INSERT INTO fertilizers (name, price, description, stock) VALUES
 ('Zinc Sulphate', 700, 'Micronutrient fertilizer essential for chlorophyll production and plant metabolism.', 95),
 ('Ammonium Sulphate', 950, 'Rich source of nitrogen and sulfur, improves leafy vegetable growth and yields.', 85);
 
--- Insert sample farmer data
-INSERT INTO farmer (name, contact_number, gender, email, password, address, age) VALUES
-('Rajesh Kumar', '9876543210', 'Male', 'rajesh@example.com', 'pass123', 'Pune, Maharashtra', 35),
-('Priya Sharma', '9876543211', 'Female', 'priya@example.com', 'pass123', 'Mumbai, Maharashtra', 28),
-('Amit Patel', '9876543212', 'Male', 'amit@example.com', 'pass123', 'Nashik, Maharashtra', 42);
+-- Insert sample farmer data (matching new schema)
+INSERT INTO farmer (full_name, phone, password, address) VALUES
+('Rajesh Kumar', '9876543210', 'pass123', 'Pune, Maharashtra'),
+('Priya Sharma', '9876543211', 'pass123', 'Mumbai, Maharashtra'),
+('Amit Patel', '9876543212', 'pass123', 'Nashik, Maharashtra');
 
--- Insert sample shopkeeper data
-INSERT INTO shopkeeper (shop_name, owner_name, licence_number, email, address) VALUES
-('Green Agro Store', 'Suresh Patil', 'LIC001', 'greenagro@example.com', 'Shop 12, Market Road, Pune'),
-('Farm Fresh Supplies', 'Meena Singh', 'LIC002', 'farmfresh@example.com', 'Plot 45, Agricultural Market, Mumbai');
-
--- Show all fertilizers to verify
-SELECT * FROM fertilizers;
+-- Insert sample shopkeeper data (matching new schema)
+INSERT INTO shopkeeper (owner_name, shop_name, licence_number, shop_address, email, password) VALUES
+('Suresh Patil', 'Green Agro Store', 'LIC001', 'Shop 12, Market Road, Pune', 'greenagro@example.com', 'pass123'),
+('Meena Singh', 'Farm Fresh Supplies', 'LIC002', 'Plot 45, Agricultural Market, Mumbai', 'farmfresh@example.com', 'pass123');
 
 -- Show counts
 SELECT 'Fertilizers' as TableName, COUNT(*) as RecordCount FROM fertilizers
