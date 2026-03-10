@@ -12,7 +12,7 @@ DROP TABLE IF EXISTS shopkeeper;
 
 -- Create fertilizers table
 CREATE TABLE fertilizers (
-    fertilizer_id INT AUTO_INCREMENT PRIMARY KEY,
+    fertilizer_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
     image LONGBLOB,
     price INT NOT NULL,
@@ -24,27 +24,24 @@ CREATE TABLE fertilizers (
 
 -- Create farmer table
 CREATE TABLE farmer (
-    farmer_id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(50) NOT NULL,
-    contact_number VARCHAR(15) NOT NULL,
-    gender VARCHAR(30),
-    email VARCHAR(50) UNIQUE NOT NULL,
-    password VARCHAR(30) NOT NULL,
-    address VARCHAR(100),
-    age INT
+    farmer_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    contact_number VARCHAR(15) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL,
+    address VARCHAR(500)
 );
 
 -- Create cart table
 CREATE TABLE cart (
-    cart_id INT AUTO_INCREMENT PRIMARY KEY,
-    farmer_id INT NOT NULL,
-    fertilizer_id INT NOT NULL,
+    cart_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    farmer_id BIGINT NOT NULL,
+    fertilizer_id BIGINT NOT NULL,
     quantity INT NOT NULL DEFAULT 1,
     CONSTRAINT fk_cart_farmer
         FOREIGN KEY (farmer_id)
         REFERENCES farmer(farmer_id)
         ON DELETE CASCADE,
-        CONSTRAINT fk_cart_fertilizer
+    CONSTRAINT fk_cart_fertilizer
         FOREIGN KEY (fertilizer_id)
         REFERENCES fertilizers(fertilizer_id)
         ON DELETE CASCADE
@@ -52,8 +49,8 @@ CREATE TABLE cart (
 
 -- Create payment table
 CREATE TABLE payment (
-    payment_id INT AUTO_INCREMENT PRIMARY KEY,
-    farmer_id INT NOT NULL,
+    payment_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    farmer_id BIGINT NOT NULL,
     amount DECIMAL(10,2),
     payment_date DATETIME DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT fk_payment_farmer
@@ -64,11 +61,11 @@ CREATE TABLE payment (
 
 -- Create orders table
 CREATE TABLE orders (
-    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    order_id BIGINT AUTO_INCREMENT PRIMARY KEY,
     order_date DATE NOT NULL,
-    farmer_id INT NOT NULL,
+    farmer_id BIGINT NOT NULL,
     delivery_id INT,
-    payment_id INT,
+    payment_id BIGINT,
     total_amount DECIMAL(10,2),
     CONSTRAINT fk_orders_farmer
         FOREIGN KEY (farmer_id)
@@ -82,12 +79,13 @@ CREATE TABLE orders (
 
 -- Create shopkeeper table
 CREATE TABLE shopkeeper (
-    shop_id INT AUTO_INCREMENT PRIMARY KEY,
-    shop_name VARCHAR(50) NOT NULL,
-    owner_name VARCHAR(50) NOT NULL,
-    licence_number VARCHAR(30) UNIQUE NOT NULL,
-    email VARCHAR(50) UNIQUE NOT NULL,
-    address VARCHAR(150) NOT NULL
+    shopkeeper_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    shop_name VARCHAR(200) NOT NULL,
+    contact_number VARCHAR(15) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL,
+    license_number VARCHAR(50),
+    address VARCHAR(500)
 );
 
 -- Insert sample fertilizers data

@@ -3,48 +3,18 @@ package com.example.farmFeed.service;
 import com.example.farmFeed.dto.LoginRequest;
 import com.example.farmFeed.dto.ShopkeeperRegisterRequest;
 import com.example.farmFeed.entity.Shopkeeper;
-import com.example.farmFeed.repository.ShopkeeperRepository; // BUG FIX: was "shopkeeperRepository" (lowercase)
+import com.example.farmFeed.repository.ShopkeeperRepository; 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * ============================================================
- * ShopkeeperService — Shopkeeper Authentication Service
- * ============================================================
- *
- * Handles all operations for /api/shopkeeper/** endpoints:
- *
- *   registerShopkeeper()      → POST /api/shopkeeper/register
- *   authenticateShopkeeper()  → POST /api/shopkeeper/login
- *   changePassword()          → PUT  /api/shopkeeper/change-password/{id}
- *   getShopkeeperById()       → GET  /api/shopkeeper/profile/{id}
- *
- * FLOW — Registration:
- *   1. Check if phone already registered (existsByPhone)
- *   2. Check if shop name already taken (existsByShopName)
- *   3. Validate password strength
- *   4. Hash password with BCrypt
- *   5. Save Shopkeeper to DB
- *
- * FLOW — Login:
- *   1. Find shopkeeper by phone
- *   2. Verify password with BCrypt
- *   3. Return Shopkeeper on success
- *
- * BUG FIXED:
- *   - Import was "shopkeeperRepository" (lowercase class name).
- *     On Linux (case-sensitive), this caused a compile error.
- *     Fixed to "ShopkeeperRepository" (PascalCase).
- */
 @Service
 public class ShopkeeperService {
 
     private static final Logger log = LoggerFactory.getLogger(ShopkeeperService.class);
 
-    // BUG FIX: type updated from shopkeeperRepository → ShopkeeperRepository
     private final ShopkeeperRepository shopkeeperRepo;
     private final PasswordEncoder      passwordEncoder;
 

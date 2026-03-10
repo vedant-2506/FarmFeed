@@ -5,44 +5,27 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+// import org.springframework.security.core.userdetails.User;
+// import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
-/**
- * ============================================================
- * FarmFeed Security Configuration
- * ============================================================
- * 
- * CRITICAL FILE - Application won't start without this!
- * 
- * Purpose:
- * 1. Provides BCrypt password encoder bean (used by AuthService & ShopkeeperService)
- * 2. Configures HTTP security to allow public access to:
- *    - All static resources (HTML, CSS, JS)
- *    - Authentication endpoints (login, register)
- *    - Fertilizer API endpoints
- * 3. Disables CSRF for REST API
- * 
- * Location: src/main/java/com/example/farmFeed/config/SecurityConfig.java
- */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    /**
-     * BCrypt Password Encoder Bean
-     * 
-     * Strength: 12 (2^12 = 4096 rounds of hashing)
-     * This is injected into:
-     * - AuthService (farmer authentication)
-     * - ShopkeeperService (shopkeeper authentication)
-     * 
-     * @return BCrypt password encoder
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(12);
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        // Empty user - not used since all auth is handled via custom endpoints
+        return new InMemoryUserDetailsManager();
     }
 
     /**
