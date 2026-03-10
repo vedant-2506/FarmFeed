@@ -11,39 +11,56 @@ public class Farmer {
     @Column(name = "farmer_id")
     private Long id;
 
-    private String name;
-    private String email;
-    private String password;
-    
-    @Column(name = "contact_number")
+    @Column(name = "full_name", nullable = false)
+    private String fullName;
+
+    @Column(nullable = false, unique = true)
     private String phone;
-    
-    private String gender;
+
+    @Column(nullable = false)
+    private String password;
+
+    @Column(name = "address")
     private String address;
-    private Integer age;
 
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() { 
+        return id; 
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public void setId(Long id) { 
+        this.id = id; 
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public String getFullName() { 
+        return fullName; 
+    }
 
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    public void setFullName(String fullName) { 
+        this.fullName = fullName; 
+    }
 
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
+    public String getPhone() { 
+        return phone; 
+    }
 
-    public String getGender() { return gender; }
-    public void setGender(String gender) { this.gender = gender; }
+    public void setPhone(String phone) { 
+        this.phone = phone; 
+    }
 
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+    public String getPassword() { 
+        return password; 
+    }
 
-    public Integer getAge() { return age; }
-    public void setAge(Integer age) { this.age = age; }
+    public void setPassword(String password) { 
+        this.password = password; 
+    }
+
+    public String getAddress() { 
+        return address; 
+    }
+
+    public void setAddress(String address) { 
+        this.address = address; 
+    }
 }

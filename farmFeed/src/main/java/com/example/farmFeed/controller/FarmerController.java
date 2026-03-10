@@ -14,7 +14,7 @@ import java.util.Map;
 
 @RestController
 @CrossOrigin(origins = "*")
-@RequestMapping("/api/Farmer")
+@RequestMapping("/api/farmer")
 public class FarmerController {
 
     private static final Logger logger = LoggerFactory.getLogger(FarmerController.class);
@@ -28,72 +28,73 @@ public class FarmerController {
     @PostMapping("/SignUp")
     public ResponseEntity<?> SignUp(@RequestBody Farmer farmer) {
         try {
-            logger.info("Sign up request received for email: {}", farmer.getEmail());
+            logger.info("Sign up request received for phone: {}", farmer.getPhone());
             
-            // Check if email already exists
-            Optional<Farmer> existing = service.findByEmail(farmer.getEmail());
+            // Check if phone already exists
+            Optional<Farmer> existing = service.findByPhone(farmer.getPhone());
             if (existing.isPresent()) {
-                logger.warn("Email already registered: {}", farmer.getEmail());
+                logger.warn("Phone already registered: {}", farmer.getPhone());
                 return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Email already registered"));
+                    .body(Map.of("success", false, "error", "Phone number already registered"));
             }
 
-            logger.info("Saving new farmer: {} with email: {}", farmer.getName(), farmer.getEmail());
+            logger.info("Saving new farmer: {} with phone: {}", farmer.getFullName(), farmer.getPhone());
             Farmer savedFarmer = service.save(farmer);
             
-            logger.info("Farmer saved successfully! ID: {}, Email: {}", savedFarmer.getId(), savedFarmer.getEmail());
+            logger.info("Farmer saved successfully! ID: {}, Phone: {}", savedFarmer.getId(), savedFarmer.getPhone());
             return ResponseEntity.ok(Map.of(
                 "success", true,
                 "message", "Sign up successful",
                 "farmer_id", savedFarmer.getId(),
-                "email", savedFarmer.getEmail()
+                "phone", savedFarmer.getPhone(),
+                "fullName", savedFarmer.getFullName()
             ));
         } catch (Exception e) {
             logger.error("Sign up failed with error: {}", e.getMessage(), e);
             return ResponseEntity.badRequest()
-                .body(Map.of("error", "Sign up failed: " + e.getMessage()));
+                .body(Map.of("success", false, "error", "Sign up failed: " + e.getMessage()));
         }
     }
 
     /**
-     * POST /api/Farmer/Login - Login farmer
+     * POST /api/Farmer/Login - Login farmer with phone and password
      */
     @PostMapping("/Login")
     public ResponseEntity<?> Login(@RequestBody Map<String, String> credentials) {
         try {
-            String email = credentials.get("email");
+            String phone = credentials.get("phone");
             String password = credentials.get("password");
 
-            logger.info("Login attempt for email: {}", email);
+            logger.info("Login attempt for phone: {}", phone);
 
-            if (email == null || password == null) {
-                logger.warn("Login attempt without email or password");
+            if (phone == null || password == null) {
+                logger.warn("Login attempt without phone or password");
                 return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Email and password required"));
+                    .body(Map.of("success", false, "error", "Phone number and password required"));
             }
 
-            Optional<Farmer> farmer = service.login(email, password);
+            Optional<Farmer> farmer = service.login(phone, password);
 
             if (farmer.isPresent()) {
                 Farmer f = farmer.get();
-                logger.info("Login successful for: {}", email);
+                logger.info("Login successful for phone: {}", phone);
                 return ResponseEntity.ok(Map.of(
                     "success", true,
                     "message", "Login successful",
                     "farmer_id", f.getId(),
-                    "email", f.getEmail(),
-                    "name", f.getName() != null ? f.getName() : "Farmer"
+                    "phone", f.getPhone(),
+                    "fullName", f.getFullName() != null ? f.getFullName() : "Farmer",
+                    "address", f.getAddress()
                 ));
             } else {
-                logger.warn("Login failed - invalid credentials for email: {}", email);
+                logger.warn("Login failed - invalid credentials for phone: {}", phone);
                 return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Invalid email or password"));
+                    .body(Map.of("success", false, "error", "Invalid phone number or password"));
             }
         } catch (Exception e) {
             logger.error("Login error: {}", e.getMessage(), e);
             return ResponseEntity.badRequest()
-                .body(Map.of("error", e.getMessage()));
+                .body(Map.of("success", false, "error", e.getMessage()));
         }
     }
 }
-

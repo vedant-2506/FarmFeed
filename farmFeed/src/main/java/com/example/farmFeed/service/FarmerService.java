@@ -24,7 +24,7 @@ public class FarmerService {
     @Transactional
     public Farmer save(Farmer farmer) {
         try {
-            logger.info("Saving farmer with email: {}", farmer.getEmail());
+            logger.info("Saving farmer with phone: {}", farmer.getPhone());
             Farmer savedFarmer = repository.save(farmer);
             logger.info("Farmer saved successfully with ID: {}", savedFarmer.getId());
             return savedFarmer;
@@ -35,19 +35,19 @@ public class FarmerService {
     }
 
     /**
-     * Login farmer with email and password
+     * Login farmer with phone and password
      */
     @Transactional(readOnly = true)
-    public Optional<Farmer> login(String email, String password) {
-        logger.info("Attempting login for email: {}", email);
-        return repository.findByEmailAndPassword(email, password);
+    public Optional<Farmer> login(String phone, String password) {
+        logger.info("Attempting login for phone: {}", phone);
+        return repository.findByPhoneAndPassword(phone, password);
     }
 
     /**
-     * Find farmer by email
+     * Find farmer by phone
      */
     @Transactional(readOnly = true)
-    public Optional<Farmer> findByEmail(String email) {
-        return repository.findByEmail(email);
+    public Optional<Farmer> findByPhone(String phone) {
+        return repository.findByPhone(phone);
     }
 }

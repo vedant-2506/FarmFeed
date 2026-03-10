@@ -46,6 +46,9 @@ document.addEventListener("DOMContentLoaded", function() {
   // Setup all "Add to Cart" buttons
   setupAddToCartButtons();
   
+  // Load all products on page load
+  loadAllProducts();
+  
   console.log("✅ All event listeners attached");
 });
 
