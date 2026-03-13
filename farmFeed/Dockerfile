@@ -2,12 +2,13 @@ FROM eclipse-temurin:17-jdk
 
 WORKDIR /app
 
-# Copy the farmFeed subfolder contents
+# Copy the farmFeed subfolder (where pom.xml and mvnw are)
 COPY farmFeed/ .
 
-# Make mvnw executable
+# Make Maven wrapper executable
 RUN chmod +x mvnw
 
+# Build the jar
 RUN ./mvnw clean package -DskipTests
 
 EXPOSE 8080
