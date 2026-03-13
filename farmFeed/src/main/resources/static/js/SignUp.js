@@ -30,8 +30,15 @@ farmerForm.addEventListener("submit", async (e) => {
   const password = document.getElementById("farmerPassword").value.trim();
   const confirmPassword = document.getElementById("farmerConfirmPassword").value.trim();
 
-  if (!fullName || !address || !phone || !password || !confirmPassword) { alert("Please fill all fields"); return; }
-  if (password !== confirmPassword) { alert("Passwords do not match"); return; }
+  if (!fullName || !address || !phone || !password || !confirmPassword) {
+    alert("Please fill all fields"); return;
+  }
+  if (!/^\d{10}$/.test(phone)) {
+    alert("Phone number must be exactly 10 digits"); return;
+  }
+  if (password !== confirmPassword) {
+    alert("Passwords do not match"); return;
+  }
 
   try {
     const response = await fetch(`${BASE_URL}/api/farmer/SignUp`, {
@@ -59,8 +66,12 @@ vendorForm.addEventListener("submit", async (e) => {
   const password = document.getElementById("vendorPassword").value.trim();
   const confirmPassword = document.getElementById("vendorConfirmPassword").value.trim();
 
-  if (!ownerName || !shopName || !licenseNumber || !shopAddress || !email || !password || !confirmPassword) { alert("Please fill all fields"); return; }
-  if (password !== confirmPassword) { alert("Passwords do not match"); return; }
+  if (!ownerName || !shopName || !licenseNumber || !shopAddress || !email || !password || !confirmPassword) {
+    alert("Please fill all fields"); return;
+  }
+  if (password !== confirmPassword) {
+    alert("Passwords do not match"); return;
+  }
 
   try {
     const response = await fetch(`${BASE_URL}/api/shopkeeper/register`, {
