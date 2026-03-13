@@ -3,29 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <title>FarmFeed | Sign Up</title>
-
-    <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Your CSS -->
     <link rel="stylesheet" href="css/SignUp.css">
 </head>
 <body>
 
-<!-- Carousel Background -->
+<!-- FULL SCREEN CAROUSEL -->
 <div id="bgCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="4000">
     <div class="carousel-inner">
 
         <div class="carousel-item active">
-            <img src="https://images.unsplash.com/photo-1500382017468-9049fed747ef" class="carousel-img">
+            <img src="https://thumbs.dreamstime.com/b/agriculture-vegetable-field-landscape-view-freshly-growing-84090367.jpg" class="carousel-img">
         </div>
 
         <div class="carousel-item">
-            <img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6" class="carousel-img">
+            <img src="https://img.freepik.com/premium-photo/indian-farmer-cotton-field_54391-2206.jpg" class="carousel-img">
         </div>
 
         <div class="carousel-item">
-            <img src="https://images.unsplash.com/photo-1499529112087-3cb3b73cec95" class="carousel-img">
+            <img src="https://kj1bcdn.b-cdn.net/media/39201/farmer-applying-fertilizer.jpg" class="carousel-img">
         </div>
 
     </div>
@@ -33,61 +29,99 @@
 
 <!-- Overlay -->
 <div class="overlay">
-
     <div class="card-box">
 
-        <h2 id="title">Sign Up</h2>
+        <!-- Logo / Branding -->
+        <div class="brand">
+            <span class="brand-icon"></span>
+            <span class="brand-name">FarmFeed</span>
+        </div>
 
+        <h2 id="title">Create Account</h2>
+        <p class="subtitle">Join us as a Farmer or Vendor</p>
+
+        <!-- Toggle -->
         <div class="toggle">
-            <button type="button" id="farmerBtn" class="active">Farmer</button>
+            <button type="button" id="farmerBtn" class="active"> Farmer</button>
             <button type="button" id="vendorBtn">Vendor</button>
         </div>
 
         <!-- Farmer Form -->
         <form id="farmerForm">
-            <input type="text" id="farmerFullName" placeholder="Full Name">
-            <textarea id="farmerAddress" placeholder="Address"></textarea>
-            <input type="text" id="farmerPhone" placeholder="Phone">
-
-            <div class="row">
+            <div class="input-group-custom">
+                <span class="input-icon"></span>
+                <input type="text" id="farmerFullName" placeholder="Full Name" required>
+            </div>
+            <div class="input-group-custom">
+                <span class="input-icon"></span>
+                <textarea id="farmerAddress" placeholder="Address" required></textarea>
+            </div>
+            <div class="input-group-custom">
+                <span class="input-icon"></span>
+                <input type="text" id="farmerPhone" placeholder="Phone Number" required>
+            </div>
+            <div class="row g-2">
                 <div class="col">
-                    <input type="password" id="farmerPassword" placeholder="Password">
+                    <div class="input-group-custom">
+                        <span class="input-icon"></span>
+                        <input type="password" id="farmerPassword" placeholder="Password" required>
+                    </div>
                 </div>
                 <div class="col">
-                    <input type="password" id="farmerConfirmPassword" placeholder="Confirm Password">
+                    <div class="input-group-custom">
+                        <span class="input-icon"></span>
+                        <input type="password" id="farmerConfirmPassword" placeholder="Confirm" required>
+                    </div>
                 </div>
             </div>
-
-            <button type="submit" class="submit">Sign Up as Farmer</button>
+            <button type="submit" class="submit">Sign Up as Farmer </button>
+            <p class="login-link">Already have an account? <a href="Login.html">Login</a></p>
         </form>
 
         <!-- Vendor Form -->
         <form id="vendorForm" style="display:none;">
-            <input type="text" id="vendorOwnerName" placeholder="Owner Name">
-            <input type="text" id="vendorShopName" placeholder="Shop Name">
-            <input type="text" id="vendorLicenseNumber" placeholder="License Number">
-            <textarea id="vendorShopAddress" placeholder="Shop Address"></textarea>
-            <input type="email" id="vendorEmail" placeholder="Email">
-
-            <div class="row">
+            <div class="input-group-custom">
+                <span class="input-icon"></span>
+                <input type="text" id="vendorOwnerName" placeholder="Owner Name" required>
+            </div>
+            <div class="input-group-custom">
+                <span class="input-icon"></span>
+                <input type="text" id="venorShopName" placeholder="Shop Name" required>
+            </div>
+            <div class="input-group-custom">
+                <span class="input-icon"></span>
+                <input type="text" id="vendorLicenseNumber" placeholder="License Number" required>
+            </div>
+            <div class="input-group-custom">
+                <span class="input-icon"></span>
+                <textarea id="vendorShopAddress" placeholder="Shop Address" required></textarea>
+            </div>
+            <div class="input-group-custom">
+                <span class="input-icon"></span>
+                <input type="email" id="vendorEmail" placeholder="Email" required>
+            </div>
+            <div class="row g-2">
                 <div class="col">
-                    <input type="password" id="vendorPassword" placeholder="Password">
+                    <div class="input-group-custom">
+                        <span class="input-icon"></span>
+                        <input type="password" id="vendorPassword" placeholder="Password" required>
+                    </div>
                 </div>
                 <div class="col">
-                    <input type="password" id="vendorConfirmPassword" placeholder="Confirm Password">
+                    <div class="input-group-custom">
+                        <span class="input-icon"></span>
+                        <input type="password" id="vendorConfirmPassword" placeholder="Confirm" required>
+                    </div>
                 </div>
             </div>
-
-            <button type="submit" class="submit">Sign Up as Vendor</button>
+            <button type="submit" class="submit">Sign Up as Vendor </button>
+            <p class="login-link">Already have an account? <a href="Login.html">Login</a></p>
         </form>
 
     </div>
-
 </div>
 
-<!-- Bootstrap JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-
 <script src="js/SignUp.js"></script>
 
 </body>
