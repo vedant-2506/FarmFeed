@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vendor Dashboard | FarmFeed</title>
   <link rel="stylesheet" href="css/vendor.css">
-
-  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 </head>
@@ -14,57 +12,63 @@
 <body>
 
   <!-- NavBar -->
-  <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm sticky-top">
-    <div class="container-fluid">
-       
-      <a class="navbar-brand" href="#">
-        <img src="../src/LOGO.png" alt="Logo">
-      </a>
+  <nav class="navbar navbar-expand-lg sticky-top shadow-sm">
+    <div class="container-fluid px-4">
+
+  <a class="navbar-brand" href="Home.html">
+  <img src="logo.png" alt="logo" style="height:60px; width:auto;">
+</a>
 
       <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navMenu">
         <span class="navbar-toggler-icon"></span>
       </button>
 
       <div class="collapse navbar-collapse" id="navMenu">
-
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
           <li class="nav-item">
-            <a class="nav-link active" href="#">Dashboard</a>
+            <a class="nav-link" href="#">Dashboard</a>
           </li>
-
           <li class="nav-item">
-            <a class="nav-link active" href="#products">My Products</a>
+            <a class="nav-link" href="#products"> My Products</a>
           </li>
-
           <li class="nav-item">
-            <a class="nav-link active" href="#orders">Orders</a>
+            <a class="nav-link" href="#orders"> Orders</a>
           </li>
-
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">More</a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#">Help</a></li>
-              <li><a class="dropdown-item" href="#">Policies</a></li>
+              <li><a class="dropdown-item" href="#"> Help</a></li>
+              <li><a class="dropdown-item" href="#"> Policies</a></li>
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#">Contact Support</a></li>
+              <li><a class="dropdown-item" href="#"> Contact Support</a></li>
             </ul>
           </li>
-
         </ul>
 
         <!-- Account Dropdown -->
         <ul class="navbar-nav">
           <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
-              <i class="bi bi-person-circle me-1"></i> Vendor
+            <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle fs-5"></i>
+              <span id="vendorNameDisplay">Vendor</span>
             </a>
-            <ul class="dropdown-menu dropdown-menu-end shadow p-3">
+            <ul class="dropdown-menu dropdown-menu-end shadow p-3" style="min-width:200px">
               <li class="mb-2">
-                <a href="#" class="btn btn-outline-success w-100">Profile</a>
+                <div class="vendor-profile-info text-center mb-2">
+                  <i class="bi bi-person-circle fs-1 text-success"></i>
+                  <p class="mb-0 fw-bold" id="vendorNameCard">Vendor</p>
+                  <small class="text-muted" id="vendorEmailCard">vendor@email.com</small>
+                </div>
+              </li>
+              <li class="mb-2">
+                <a href="#" class="btn btn-outline-success w-100">
+                  <i class="bi bi-person me-1"></i> Profile
+                </a>
               </li>
               <li>
-                <a href="Logout.html" class="btn btn-outline-danger w-100">Log Out</a>
+                <a href="Login.html" class="btn btn-outline-danger w-100">
+                  <i class="bi bi-box-arrow-right me-1"></i> Log Out
+                </a>
               </li>
             </ul>
           </li>
@@ -76,46 +80,48 @@
 
   <!-- Vendor Banner -->
   <div class="vendor-banner container mt-4">
+    <div class="banner-overlay"></div>
     <div class="banner-content">
-      <h2>Welcome Vendor!</h2>
+      <h2>Welcome, <span id="bannerVendorName">Vendor</span>!</h2>
       <p>Manage your products, stock, orders & sales on FarmFeed.</p>
-      <!-- <a href="#add-product" class="btn btn-success px-4 py-2">Add New Product</a> -->
+      <!-- <a href="AddProduct.html" class="btn btn-success px-4 py-2 fw-bold">
+        + Add New Product
+      </a> -->
     </div>
   </div>
-
 
   <!-- Quick Stats -->
   <div class="container my-5">
     <div class="row g-4 text-center">
 
-      <div class="col-md-3">
+      <div class="col-6 col-md-3">
         <div class="stat-card shadow-sm">
           <i class="bi bi-box-seam stat-icon"></i>
-          <h4>120</h4>
+          <h4 id="totalProducts">0</h4>
           <p>Total Products</p>
         </div>
       </div>
 
-      <div class="col-md-3">
+      <div class="col-6 col-md-3">
         <div class="stat-card shadow-sm">
           <i class="bi bi-receipt stat-icon"></i>
-          <h4>75</h4>
+          <h4 id="totalOrders">0</h4>
           <p>Orders Received</p>
         </div>
       </div>
 
-      <div class="col-md-3">
+      <div class="col-6 col-md-3">
         <div class="stat-card shadow-sm">
           <i class="bi bi-cash-coin stat-icon"></i>
-          <h4>₹98,500</h4>
+          <h4 id="totalSales">₹0</h4>
           <p>Total Sales</p>
         </div>
       </div>
 
-      <div class="col-md-3">
+      <div class="col-6 col-md-3">
         <div class="stat-card shadow-sm">
           <i class="bi bi-people stat-icon"></i>
-          <h4>40</h4>
+          <h4 id="totalCustomers">0</h4>
           <p>Repeat Customers</p>
         </div>
       </div>
@@ -123,87 +129,152 @@
     </div>
   </div>
 
-
   <!-- Product Management Section -->
   <div class="container my-5" id="products">
+    <h3 class="section-title"> My Products</h3>
 
-    <h3 class="section-title">My Products</h3>
-    
     <div class="text-end mb-3">
-      <a href="AddProduct.html" class="btn btn-success">+ Add Product</a>
-
+      <a href="AddProduct.html" class="btn btn-success fw-bold px-4">
+        <i class="bi bi-plus-circle me-1"></i> Add Product
+      </a>
     </div>
 
-    <div class="row row-cols-1 row-cols-md-3 g-4">
+    <div class="row row-cols-1 row-cols-md-3 g-4" id="productsContainer">
 
-      <!-- One Product Card -->
+      <!-- Sample Product Card -->
       <div class="col">
         <div class="card h-100 shadow-sm product-card">
-          <img src="https://imgs.search.brave.com/8Ues7vOho-SowZyusrF0nz05eITiqBf8LFszypFswE8/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zLmFs/aWNkbi5jb20vQHNj/MDQva2YvSFRCMUhz/a2VYekR1SzFSalNz/emRxNnhHTHBYYW8u/anBnXzMwMHgzMDAu/anBn" 
-               class="card-img-top" alt="">
+          <img src="https://imgs.search.brave.com/8Ues7vOho-SowZyusrF0nz05eITiqBf8LFszypFswE8/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9zLmFs/aWNkbi5jb20vQHNj/MDQva2YvSFRCMUhz/a2VYekR1SzFSalNz/emRxNnhHTHBYYW8u/anBnXzMwMHgzMDAu/anBn"
+               class="card-img-top" alt="Urea Fertilizer">
           <div class="card-body">
-            <h5 class="card-title">Urea</h5>
-            <p class="card-text">High-nitrogen fertilizer for crop growth.</p>
-            <p><strong>Price: ₹600 / 50kg</strong></p>
-
-            <div class="d-flex justify-content-between">
-              <button class="btn btn-outline-success">Edit</button>
-              <button class="btn btn-outline-danger">Delete</button>
+            <span class="badge bg-success mb-2">In Stock</span>
+            <h5 class="card-title">Urea Fertilizer</h5>
+            <p class="card-text text-muted small">High-nitrogen fertilizer for rapid crop growth.</p>
+            <p class="fw-bold text-success">₹600 / 50kg bag</p>
+            <div class="d-flex justify-content-between gap-2">
+              <button class="btn btn-outline-success w-50">
+                <i class="bi bi-pencil me-1"></i>Edit
+              </button>
+              <button class="btn btn-outline-danger w-50">
+                <i class="bi bi-trash me-1"></i>Delete
+              </button>
             </div>
-
           </div>
         </div>
       </div>
 
-      <!-- Add more cards as needed -->
+      <div class="col">
+        <div class="card h-100 shadow-sm product-card">
+          <img src="https://imgs.search.brave.com/ylsWAPAwNr2SATw0YlPy3TqLN2j9UT2CsOpLDTsDBJ8/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly90aWlt/Zy50aXN0YXRpYy5j/b20vZnAvMS8wMDUv/MTU5L251dHJpZW50/LWZlcnRpbGl6ZXIt/c3VscGhhdGUtcG90/YXNoLTg3MC5qcGc"
+               class="card-img-top" alt="DAP Fertilizer">
+          <div class="card-body">
+            <span class="badge bg-success mb-2">In Stock</span>
+            <h5 class="card-title">DAP Fertilizer</h5>
+            <p class="card-text text-muted small">Diammonium phosphate for strong root development.</p>
+            <p class="fw-bold text-success">₹1400 / 50kg bag</p>
+            <div class="d-flex justify-content-between gap-2">
+              <button class="btn btn-outline-success w-50">
+                <i class="bi bi-pencil me-1"></i>Edit
+              </button>
+              <button class="btn btn-outline-danger w-50">
+                <i class="bi bi-trash me-1"></i>Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card h-100 shadow-sm product-card">
+          <img src="https://imgs.search.brave.com/v5Dp7ubNl2kRE6HWAzA1h9PWqS3_fB6ChmN7H6CDR70/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly81Lmlt/aW1nLmNvbS9kYXRh/NS9TRUxMRVIvRGVm/YXVsdC8yMDI1Lzkv/NTQyMjY5NTY1L0tJ/L0FFL0lMLzE5MzQ0/NTU4OC9ucGstZmVy/dGlsaXplci0wMC0w/MC01MC0yNTB4MjUw/LmpwZw"
+               class="card-img-top" alt="Organic Compost">
+          <div class="card-body">
+            <span class="badge bg-warning text-dark mb-2">Low Stock</span>
+            <h5 class="card-title">NPK Fertilizer</h5>
+            <p class="card-text text-muted small">100% natural compost for organic farming.</p>
+            <p class="fw-bold text-success">₹450 / 50kg bag</p>
+            <div class="d-flex justify-content-between gap-2">
+              <button class="btn btn-outline-success w-50">
+                <i class="bi bi-pencil me-1"></i>Edit
+              </button>
+              <button class="btn btn-outline-danger w-50">
+                <i class="bi bi-trash me-1"></i>Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
     </div>
   </div>
 
-
   <!-- Orders Section -->
   <div class="container my-5" id="orders">
+    <h3 class="section-title">🧾 Recent Orders</h3>
 
-    <h3 class="section-title">Recent Orders</h3>
-
-    <table class="table table-hover shadow-sm">
-      <thead class="table-success">
-        <tr>
-          <th>Order ID</th>
-          <th>Product</th>
-          <th>Quantity</th>
-          <th>Total</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-
-      <tbody>
-        <tr>
-          <td>#1023</td>
-          <td>Urea</td>
-          <td>5 Bags</td>
-          <td>₹3000</td>
-          <td><span class="badge bg-warning">Pending</span></td>
-        </tr>
-        <tr>
-          <td>#1024</td>
-          <td>NPK</td>
-          <td>3 Bags</td>
-          <td>₹3300</td>
-          <td><span class="badge bg-success">Delivered</span></td>
-        </tr>
-      </tbody>
-    </table>
-
+    <div class="table-responsive">
+      <table class="table table-hover shadow-sm rounded overflow-hidden">
+        <thead class="table-success">
+          <tr>
+            <th>Order ID</th>
+            <th>Product</th>
+            <th>Farmer</th>
+            <th>Quantity</th>
+            <th>Total</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTableBody">
+          <tr>
+            <td><strong>#1023</strong></td>
+            <td>Urea</td>
+            <td>Ramesh Kumar</td>
+            <td>5 Bags</td>
+            <td>₹3,000</td>
+            <td><span class="badge bg-warning text-dark">Pending</span></td>
+            <td>
+              <button class="btn btn-sm btn-success">Accept</button>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>#1024</strong></td>
+            <td>NPK</td>
+            <td>Suresh Patil</td>
+            <td>3 Bags</td>
+            <td>₹3,300</td>
+            <td><span class="badge bg-success">Delivered</span></td>
+            <td>
+              <button class="btn btn-sm btn-outline-secondary" disabled>Done</button>
+            </td>
+          </tr>
+          <tr>
+            <td><strong>#1025</strong></td>
+            <td>DAP</td>
+            <td>Vijay Shinde</td>
+            <td>2 Bags</td>
+            <td>₹2,800</td>
+            <td><span class="badge bg-info text-dark">Shipped</span></td>
+            <td>
+              <button class="btn btn-sm btn-primary">Track</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
+  <!-- Footer -->
+  <footer class="footer mt-5">
+    <div class="container text-center">
+      <span class="brand-icon"></span>
+      <span class="brand-name">FarmFeed</span>
+      <p class="mt-2 mb-0 text-muted small">© 2025 FarmFeed. Connecting Farmers & Vendors.</p>
+    </div>
+  </footer>
+
+  <script src="js/vendor.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
-
-
-
-
-
-
