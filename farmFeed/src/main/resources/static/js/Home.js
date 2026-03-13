@@ -1,11 +1,20 @@
+
+
+
 // ============================================================
 // farmFeed - Home.js (COMPLETE WORKING VERSION)
+// ============================================================
+// This file handles:
+//   1. Search functionality (calls backend API)
+//   2. Add to cart functionality
+//   3. Cart count badge updates
+//   4. Dynamic product rendering
 // ============================================================
 
 // ===========================================================
 // CONFIGURATION
 // ===========================================================
-const API_BASE_URL = "https://farmfeed-backend.onrender.com/api/fertilizers";
+const API_BASE_URL = "http://localhost:9090/api/fertilizers";
 
 // Product image mapping (since images aren't stored in DB)
 const PRODUCT_IMAGES = {
@@ -21,150 +30,373 @@ const PRODUCT_IMAGES = {
   "Ammonium Sulphate": "https://5.imimg.com/data5/SELLER/Default/2022/5/ZH/YP/FA/150381740/ammonium-sulphate-fertilizer.jpg"
 };
 
+// ===========================================================
+// INITIALIZE WHEN PAGE LOADS
+// ===========================================================
 document.addEventListener("DOMContentLoaded", function() {
+  console.log("🌱 FarmFeed Initialized");
+  console.log("📡 API URL:", API_BASE_URL);
+  
+  // Update cart count from localStorage
   updateCartCount();
+  
+  // Setup search form handler
   setupSearchForm();
+  
+  // Setup all "Add to Cart" buttons
   setupAddToCartButtons();
-  loadAllProducts();
+  
+  console.log("✅ All event listeners attached");
 });
 
+// ===========================================================
+// SEARCH FUNCTIONALITY
+// ===========================================================
+
+/**
+ * Setup the search form to prevent default submit
+ * and call our custom search function
+ */
 function setupSearchForm() {
   const searchForm = document.getElementById("searchForm");
   const searchBox = document.getElementById("searchBox");
-  if (!searchForm) return;
+  
+  if (!searchForm) {
+    console.error("❌ Search form not found!");
+    return;
+  }
+  
+  // When user submits the search form
   searchForm.addEventListener("submit", function(event) {
+    // CRITICAL: Prevent the form from submitting normally
+    // This stops the page from refreshing or redirecting
     event.preventDefault();
+    
     const query = searchBox.value.trim();
-    if (!query) { loadAllProducts(); return; }
+    
+    console.log("🔍 Search triggered, query:", query);
+    
+    if (!query) {
+      // If search box is empty, show all products
+      loadAllProducts();
+      return;
+    }
+    
+    // Call the backend search API
     searchProducts(query);
   });
+  
+  console.log("✅ Search form listener attached");
 }
 
+/**
+ * Search products by calling the backend API
+ * GET /api/fertilizers/search?name={query}
+ */
 function searchProducts(query) {
+  const searchURL = `${API_BASE_URL}/search?name=${encodeURIComponent(query)}`;
+  
+  console.log("📡 Calling API:", searchURL);
+  
+  // Show loading state
   showLoadingState();
-  fetch(`${API_BASE_URL}/search?name=${encodeURIComponent(query)}`)
-    .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
-    .then(products => renderProducts(products))
-    .catch(error => showErrorMessage(`Search failed: ${error.message}`));
+  
+  // Call the backend
+  fetch(searchURL)
+    .then(response => {
+      console.log("📥 Response status:", response.status);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      return response.json();
+    })
+    .then(products => {
+      console.log("✅ Search results:", products);
+      console.log(`Found ${products.length} products`);
+      
+      // Render the filtered products
+      renderProducts(products);
+    })
+    .catch(error => {
+      console.error(" Search failed:", error);
+      showErrorMessage(`Search failed: ${error.message}. Is the backend running?`);
+    });
 }
 
+/**
+ * Load all products from backend
+ * GET /api/fertilizers
+ */
 function loadAllProducts() {
+  console.log(" Loading all products...");
+  
   showLoadingState();
+  
   fetch(API_BASE_URL)
-    .then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      return response.json();
+    })
     .then(products => {
+      console.log("✅ Loaded all products:", products.length);
       renderProducts(products);
+      
+      // Clear search box
       const searchBox = document.getElementById("searchBox");
       if (searchBox) searchBox.value = "";
     })
-    .catch(error => showErrorMessage("Failed to load products. Backend may be sleeping (free tier). Please wait 30 seconds and refresh."));
+    .catch(error => {
+      console.error("❌ Load failed:", error);
+      showErrorMessage("Failed to load products. Is the backend running?");
+    });
 }
 
+// ===========================================================
+// RENDER PRODUCTS
+// ===========================================================
+
+/**
+ * Render products to the page
+ * This replaces the static HTML cards with dynamic ones from the API
+ */
 function renderProducts(products) {
   const container = document.getElementById("products-container");
-  if (!container) return;
-
+  
+  if (!container) {
+    console.error("❌ Products container not found!");
+    return;
+  }
+  
+  // If no products found
   if (!products || products.length === 0) {
     container.innerHTML = `
       <div class="col-12 text-center my-5">
         <div class="alert alert-info">
-          <h4>No products found</h4>
-          <button class="btn btn-success" onclick="loadAllProducts()">Show All Products</button>
+          <i class="bi bi-info-circle fs-3"></i>
+          <h4 class="mt-3">No products found</h4>
+          <p class="text-muted">Try a different search term</p>
+          <button class="btn btn-success" onclick="loadAllProducts()">
+            Show All Products
+          </button>
         </div>
-      </div>`;
+      </div>
+    `;
     return;
   }
-
+  
+  // Build HTML for all products
   let html = "";
+  
   products.forEach(product => {
     const img = PRODUCT_IMAGES[product.name] || PRODUCT_IMAGES["Urea Fertilizer"];
+    const name = product.name;
+    const price = product.price;
+    const description = product.description || "";
     const stock = product.stock || 0;
+    
     html += `
       <div class="col">
         <div class="card h-100 shadow-sm">
-          <img src="${img}" class="card-img-top" alt="${product.name}">
+          <img src="${img}" class="card-img-top" alt="${name}">
           <div class="card-body">
-            <h5 class="card-title">${product.name}</h5>
-            <p class="card-text">${product.description || ""}</p>
-            <p><strong>Price: ₹${product.price}/50kg bag</strong></p>
+            <h5 class="card-title">${name}</h5>
+            <p class="card-text">${description}</p>
+            <p><strong>Price: ₹${price}/50kg bag</strong></p>
             <p class="text-muted small">Stock: ${stock} bags</p>
             <button class="btn btn-success add-cart-btn w-100"
                     data-id="${product.fertilizer_id}"
-                    data-name="${product.name}"
-                    data-price="${product.price}"
+                    data-name="${name}"
+                    data-price="${price}"
                     data-img="${img}"
                     ${stock === 0 ? 'disabled' : ''}>
               ${stock === 0 ? 'Out of Stock' : 'Add to Cart'}
             </button>
           </div>
         </div>
-      </div>`;
+      </div>
+    `;
   });
-
+  
+  // Update the page
   container.innerHTML = html;
+  
+  // Re-attach event listeners to new buttons
   setupAddToCartButtons();
+  
+  console.log(`✅ Rendered ${products.length} products`);
 }
+
+// ===========================================================
+// LOADING & ERROR STATES
+// ===========================================================
 
 function showLoadingState() {
   const container = document.getElementById("products-container");
-  if (container) container.innerHTML = `
-    <div class="col-12 text-center my-5">
-      <div class="spinner-border text-success" role="status"></div>
-      <p class="mt-3 text-muted">Loading products... (first load may take 30s on free tier)</p>
-    </div>`;
+  if (container) {
+    container.innerHTML = `
+      <div class="col-12 text-center my-5">
+        <div class="spinner-border text-success" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-3 text-muted">Loading products...</p>
+      </div>
+    `;
+  }
 }
 
 function showErrorMessage(message) {
   const container = document.getElementById("products-container");
-  if (container) container.innerHTML = `
-    <div class="col-12 text-center my-5">
-      <div class="alert alert-danger">
-        <h4>Error</h4><p>${message}</p>
-        <button class="btn btn-success" onclick="loadAllProducts()">Try Again</button>
+  if (container) {
+    container.innerHTML = `
+      <div class="col-12 text-center my-5">
+        <div class="alert alert-danger">
+          <i class="bi bi-exclamation-triangle fs-3"></i>
+          <h4 class="mt-3">Error</h4>
+          <p>${message}</p>
+          <button class="btn btn-success" onclick="loadAllProducts()">
+            Try Again
+          </button>
+        </div>
       </div>
-    </div>`;
+    `;
+  }
 }
 
+// ===========================================================
+// ADD TO CART FUNCTIONALITY
+// ===========================================================
+
+/**
+ * Setup event listeners for all "Add to Cart" buttons
+ * Works for both static HTML buttons and dynamically rendered ones
+ */
 function setupAddToCartButtons() {
-  document.querySelectorAll(".add-cart-btn").forEach(button => {
+  const buttons = document.querySelectorAll(".add-cart-btn");
+  
+  console.log(`🛒 Found ${buttons.length} cart buttons`);
+  
+  buttons.forEach(button => {
+    // Remove old listener (if any) by cloning
     const newButton = button.cloneNode(true);
     button.parentNode.replaceChild(newButton, button);
-    newButton.addEventListener("click", function() { handleAddToCart(this); });
+    
+    // Add fresh listener
+    newButton.addEventListener("click", function() {
+      handleAddToCart(this);
+    });
   });
 }
 
+/**
+ * Handle add to cart button click
+ */
 function handleAddToCart(button) {
-  const productId = button.dataset.id;
-  const productName = button.dataset.name;
-  const productPrice = button.dataset.price;
-  const productImg = button.dataset.img;
-
-  let cart = JSON.parse(localStorage.getItem("cart")) || [];
-  const existing = cart.find(item => item.name === productName);
-
-  if (existing) {
-    existing.quantity = (existing.quantity || 1) + 1;
+  // Get product info from button's data attributes or from the card
+  const card = button.closest(".card");
+  
+  let productId, productName, productPrice, productImg;
+  
+  // Try to get from data attributes first (for dynamic products)
+  if (button.dataset.id) {
+    productId = button.dataset.id;
+    productName = button.dataset.name;
+    productPrice = button.dataset.price;
+    productImg = button.dataset.img;
   } else {
-    cart.push({ id: productId, name: productName, price: productPrice, img: productImg, quantity: 1 });
+    // Fallback: get from card HTML (for static products)
+    productName = card.querySelector(".card-title").textContent.trim();
+    const priceText = card.querySelector("p strong").textContent;
+    productPrice = priceText.replace(/[^0-9]/g, ""); // Extract numbers only
+    productImg = card.querySelector("img").src;
+    productId = Date.now(); // Generate temporary ID
   }
-
+  
+  console.log("🛒 Adding to cart:", productName);
+  
+  // Get current cart from localStorage
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  
+  // Check if product already in cart
+  const existingProduct = cart.find(item => item.name === productName);
+  
+  if (existingProduct) {
+    // Increase quantity
+    existingProduct.quantity = (existingProduct.quantity || 1) + 1;
+    console.log(`📦 Updated quantity: ${productName} x${existingProduct.quantity}`);
+  } else {
+    // Add new product
+    cart.push({
+      id: productId,
+      name: productName,
+      price: productPrice,
+      img: productImg,
+      quantity: 1
+    });
+    console.log(`✅ Added new product: ${productName}`);
+  }
+  
+  // Save to localStorage
   localStorage.setItem("cart", JSON.stringify(cart));
+  
+  // Update cart count badge
   updateCartCount();
+  
+  // Visual feedback
+  showAddToCartFeedback(button, productName);
+}
 
-  const original = button.textContent;
+/**
+ * Show visual feedback when product is added to cart
+ */
+function showAddToCartFeedback(button, productName) {
+  // Change button text temporarily
+  const originalText = button.textContent;
   button.textContent = "Added ✓";
   button.disabled = true;
-  button.classList.replace("btn-success", "btn-secondary");
+  button.classList.remove("btn-success");
+  button.classList.add("btn-secondary");
+  
+  // Show alert
+  alert(`✅ ${productName} added to cart!`);
+  
+  // Revert button after 2 seconds
   setTimeout(() => {
-    button.textContent = original;
+    button.textContent = originalText;
     button.disabled = false;
-    button.classList.replace("btn-secondary", "btn-success");
+    button.classList.remove("btn-secondary");
+    button.classList.add("btn-success");
   }, 2000);
 }
 
+/**
+ * Update the cart count badge in the navbar
+ */
 function updateCartCount() {
   const cart = JSON.parse(localStorage.getItem("cart")) || [];
-  const total = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
-  const el = document.getElementById("cart-count");
-  if (el) el.textContent = total;
+  const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+  
+  const cartCountElement = document.getElementById("cart-count");
+  if (cartCountElement) {
+    cartCountElement.textContent = totalItems;
+  }
+  
+  console.log(`🛒 Cart count updated: ${totalItems}`);
 }
+
+// ===========================================================
+// UTILITY FUNCTIONS
+// ===========================================================
+
+/**
+ * Get product image URL by name
+ */
+function getProductImage(name) {
+  return PRODUCT_IMAGES[name] || PRODUCT_IMAGES["Urea Fertilizer"];
+}
+
+// ===========================================================
+console.log("✅ Home.js loaded successfully")
