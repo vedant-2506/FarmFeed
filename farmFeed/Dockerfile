@@ -2,7 +2,11 @@ FROM eclipse-temurin:17-jdk
 
 WORKDIR /app
 
-COPY . .
+# Copy the farmFeed subfolder contents
+COPY farmFeed/ .
+
+# Make mvnw executable
+RUN chmod +x mvnw
 
 RUN ./mvnw clean package -DskipTests
 
