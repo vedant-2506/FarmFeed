@@ -43,7 +43,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await response.json();
       if (response.ok && data.success) {
         alert("Vendor Login Successful!");
-        window.location.href = "vendo.html";
+        window.location.href = "vendor.html";
       } else {
         alert(data.error || "Invalid Vendor Credentials");
       }
