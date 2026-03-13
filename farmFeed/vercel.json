@@ -1,6 +1,31 @@
 {
+  "outputDirectory": "src/main/resources/static",
   "rewrites": [
     { "source": "/", "destination": "/Home.html" },
     { "source": "/(.*)", "destination": "/$1" }
   ]
 }
+```
+
+---
+
+## ✅ Fix 2 — Update Vercel Root Directory Setting
+
+1. Go to **[vercel.com](https://vercel.com)** → Your `farmfeed` project
+2. Click **Settings** → **General**
+3. Find **Root Directory**
+4. Change it to:
+```
+farmFeed
+```
+5. Click **Save**
+6. Go to **Deployments** → Click **Redeploy**
+
+---
+
+## What This Does
+```
+Root Directory:    farmFeed/
+Output Directory:  src/main/resources/static/
+                   ↓
+Vercel serves:     Home.html, Login.html, Cart.html etc. ✅
