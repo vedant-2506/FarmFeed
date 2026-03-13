@@ -1,96 +1,212 @@
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-/* Make carousel full screen */
+/* Full screen carousel */
 #bgCarousel,
 .carousel-inner,
 .carousel-item {
-    height:100vh;
+    height: 100vh;
+    width: 100%;
 }
 
-.carousel-img{
-    width:100%;
-    height:100vh;
-    object-fit:cover;
+.carousel-img {
+    width: 100%;
+    height: 100vh;
+    object-fit: cover;
+    object-position: center;
 }
 
 /* Overlay */
-.overlay{
-    position:absolute;
-    top:0;
-    left:0;
-    width:100%;
-    height:100vh;
-    background:rgba(0,0,0,0.5);
-
-    display:flex;
-    justify-content:center;
-    align-items:center;
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    overflow-y: auto;
+    padding: 20px 0;
 }
 
 /* Card */
-.card-box{
-    width:420px;
-    background:rgba(255,255,255,0.95);
-    padding:30px;
-    border-radius:15px;
-    z-index:2;
+.card-box {
+    width: 440px;
+    background: rgba(255, 255, 255, 0.97);
+    padding: 30px 32px;
+    border-radius: 20px;
+    z-index: 11;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.45);
+    margin: auto;
 }
 
-.card-box h2{
-    text-align:center;
-    color:#1e7d3f;
-    margin-bottom:15px;
+/* Brand / Logo */
+.brand {
+    text-align: center;
+    margin-bottom: 6px;
 }
 
-/* Toggle */
-.toggle{
-    text-align:center;
-    margin-bottom:15px;
+.brand-icon {
+    font-size: 2rem;
 }
 
-.toggle button{
-    padding:8px 20px;
-    border:none;
-    border-radius:5px;
-    background:#ccc;
-    cursor:pointer;
-    font-weight:bold;
-    margin:5px;
+.brand-name {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1e7d3f;
+    letter-spacing: 1px;
 }
 
-.toggle .active{
-    background:#1e7d3f;
-    color:white;
+/* Title */
+.card-box h2 {
+    text-align: center;
+    color: #1a1a1a;
+    margin-bottom: 2px;
+    font-weight: 700;
+    font-size: 1.3rem;
 }
 
-/* Inputs */
-input, textarea{
-    width:100%;
-    margin-top:10px;
-    padding:8px;
-    border-radius:5px;
-    border:1px solid #ccc;
+.subtitle {
+    text-align: center;
+    color: #888;
+    font-size: 0.85rem;
+    margin-bottom: 14px;
 }
 
-textarea{
-    height:60px;
-    resize:none;
+/* Toggle buttons */
+.toggle {
+    text-align: center;
+    margin-bottom: 16px;
+    background: #f0f0f0;
+    border-radius: 25px;
+    padding: 4px;
+    display: flex;
+    justify-content: center;
 }
 
-.submit{
-    width:100%;
-    margin-top:15px;
-    padding:10px;
-    background:#1e7d3f;
-    color:white;
-    border:none;
-    border-radius:5px;
+.toggle button {
+    flex: 1;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 22px;
+    background: transparent;
+    color: #555;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 0.9rem;
+    transition: all 0.25s;
 }
 
-.submit:hover{
-    background:#145c2d;
+.toggle button.active {
+    background: #1e7d3f;
+    color: white;
+    box-shadow: 0 2px 8px rgba(30,125,63,0.35);
+}
+
+.toggle button:hover:not(.active) {
+    background: rgba(30,125,63,0.1);
+    color: #1e7d3f;
+}
+
+/* Input groups with icons */
+.input-group-custom {
+    display: flex;
+    align-items: center;
+    border: 1.5px solid #ddd;
+    border-radius: 10px;
+    margin-top: 10px;
+    overflow: hidden;
+    transition: border 0.2s;
+    background: white;
+}
+
+.input-group-custom:focus-within {
+    border-color: #1e7d3f;
+    box-shadow: 0 0 0 3px rgba(30,125,63,0.12);
+}
+
+.input-icon {
+    padding: 0 10px;
+    font-size: 1rem;
+    background: #f8f8f8;
+    border-right: 1.5px solid #eee;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    min-height: 42px;
+}
+
+.input-group-custom input,
+.input-group-custom textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    outline: none;
+    font-size: 0.92rem;
+    background: transparent;
+    margin-top: 0;
+}
+
+.input-group-custom textarea {
+    height: 60px;
+    resize: none;
+}
+
+/* Submit button */
+.submit {
+    width: 100%;
+    margin-top: 16px;
+    padding: 12px;
+    background: linear-gradient(135deg, #1e7d3f, #25a050);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+}
+
+.submit:hover {
+    background: linear-gradient(135deg, #145c2d, #1e7d3f);
+    transform: translateY(-1px);
+    box-shadow: 0 5px 15px rgba(30,125,63,0.35);
+}
+
+.submit:active {
+    transform: translateY(0);
+}
+
+/* Login link */
+.login-link {
+    text-align: center;
+    margin-top: 14px;
+    font-size: 0.88rem;
+    color: #666;
+}
+
+.login-link a {
+    color: #1e7d3f;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+/* Mobile responsive */
+@media (max-width: 480px) {
+    .card-box {
+        width: 95%;
+        padding: 24px 16px;
+    }
 }
