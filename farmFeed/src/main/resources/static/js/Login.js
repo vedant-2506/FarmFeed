@@ -6,7 +6,10 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     const phone = document.getElementById("farmerPhone").value.trim();
     const password = document.getElementById("farmerPassword").value.trim();
+
     if (!phone || !password) { alert("Please fill all fields"); return; }
+    if (!/^\d{10}$/.test(phone)) { alert("Phone number must be exactly 10 digits"); return; }
+
     try {
       const response = await fetch(`${BASE_URL}/api/farmer/Login`, {
         method: "POST",
@@ -28,7 +31,9 @@ document.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     const email = document.getElementById("vendorEmail").value.trim();
     const password = document.getElementById("vendorPassword").value.trim();
+
     if (!email || !password) { alert("Please fill all fields"); return; }
+
     try {
       const response = await fetch(`${BASE_URL}/api/shopkeeper/login`, {
         method: "POST",
