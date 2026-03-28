@@ -1,9 +1,15 @@
 package com.example.farmFeed.entity;
 
 import jakarta.persistence.*;
+import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "shopkeeper")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Vendor {
 
     @Id
@@ -29,85 +35,43 @@ public class Vendor {
     @Column(nullable = false)
     private String password;
 
-    // Constructors
-    public Vendor() {}
+    @Column(name = "phone")
+    private String phone;
 
-    public Vendor(String ownerName, String shopName, String licenseNumber, 
-                  String shopAddress, String email, String password) {
-        this.ownerName = ownerName;
-        this.shopName = shopName;
-        this.licenseNumber = licenseNumber;
-        this.shopAddress = shopAddress;
-        this.email = email;
-        this.password = password;
+    @Column(name = "city")
+    private String city;
+
+    @Column(name = "state")
+    private String state;
+
+    @Column(name = "is_approved", columnDefinition = "BOOLEAN DEFAULT false")
+    private Boolean isApproved;
+
+    @Column(name = "is_active", columnDefinition = "BOOLEAN DEFAULT true")
+    private Boolean isActive;
+
+    @Column(name = "bank_account")
+    private String bankAccount;
+
+    @Column(name = "bank_name")
+    private String bankName;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+        if (isApproved == null) isApproved = false;
+        if (isActive == null) isActive = true;
     }
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getOwnerName() {
-        return ownerName;
-    }
-
-    public void setOwnerName(String ownerName) {
-        this.ownerName = ownerName;
-    }
-
-    public String getShopName() {
-        return shopName;
-    }
-
-    public void setShopName(String shopName) {
-        this.shopName = shopName;
-    }
-
-    public String getLicenseNumber() {
-        return licenseNumber;
-    }
-
-    public void setLicenseNumber(String licenseNumber) {
-        this.licenseNumber = licenseNumber;
-    }
-
-    public String getShopAddress() {
-        return shopAddress;
-    }
-
-    public void setShopAddress(String shopAddress) {
-        this.shopAddress = shopAddress;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    @Override
-    public String toString() {
-        return "Vendor{" +
-                "id=" + id +
-                ", ownerName='" + ownerName + '\'' +
-                ", shopName='" + shopName + '\'' +
-                ", licenseNumber='" + licenseNumber + '\'' +
-                ", shopAddress='" + shopAddress + '\'' +
-                ", email='" + email + '\'' +
-                '}';
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 }

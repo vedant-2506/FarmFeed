@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farmer Account - FarmFeed</title>
+  <link rel="stylesheet" href="css/Home.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    .account-header { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; padding: 30px 0; }
+    .profile-card { background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); padding: 30px; margin-bottom: 30px; }
+    .order-item { border-left: 4px solid #28a745; padding: 15px; margin-bottom: 15px; background: #f9f9f9; border-radius: 5px; }
+    .order-status { display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .status-completed { background: #d4edda; color: #155724; }
+    .status-pending { background: #fff3cd; color: #856404; }
+    .status-cancelled { background: #f8d7da; color: #721c24; }
+    .logout-btn { background: #dc3545; }
+    .logout-btn:hover { background: #c82333; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm sticky-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="Home.html">
+        <img src="logo.png" alt="logo" height="40">
+      </a>
+      <span class="navbar-text text-success fw-bold">Farmer Account</span>
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a href="Home.html" class="btn btn-outline-success btn-sm">← Back to Shop</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Account Header -->
+  <div class="account-header">
+    <div class="container">
+      <div class="d-flex justify-content-between align-items-center">
+        <div>
+          <h2 class="mb-1">Welcome, <span id="farmerName">Farmer</span>!</h2>
+          <p class="mb-0"><i class="bi bi-phone"></i> <span id="farmerPhone">Phone</span></p>
+          <p class="mb-0"><i class="bi bi-geo-alt"></i> <span id="farmerAddress">Address</span></p>
+        </div>
+        <div>
+          <button id="logoutBtn" class="btn btn-danger btn-lg logout-btn">
+            <i class="bi bi-box-arrow-right"></i> Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Account Content -->
+  <div class="container my-5">
+    <div class="row">
+      <div class="col-lg-3">
+        <!-- Profile Card -->
+        <div class="profile-card">
+          <h5 class="text-success mb-3">
+            <i class="bi bi-person-circle"></i> Profile Information
+          </h5>
+          <div class="mb-3">
+            <label class="text-muted small">Full Name</label>
+            <p id="profileName" class="fw-bold">Loading...</p>
+          </div>
+          <div class="mb-3">
+            <label class="text-muted small">Phone Number</label>
+            <p id="profilePhone" class="fw-bold">Loading...</p>
+          </div>
+          <div class="mb-3">
+            <label class="text-muted small">Address</label>
+            <p id="profileAddress" class="fw-bold">Loading...</p>
+          </div>
+          <a href="ForgotPassword.html" class="btn btn-outline-warning w-100">
+            <i class="bi bi-key"></i> Change Password
+          </a>
+        </div>
+      </div>
+
+      <div class="col-lg-9">
+        <!-- Purchase History -->
+        <div class="profile-card">
+          <h5 class="text-success mb-4">
+            <i class="bi bi-bag-check"></i> Purchase History
+          </h5>
+          <div id="ordersContainer">
+            <p class="text-muted text-center">No orders yet. <a href="Home.html">Start Shopping!</a></p>
+          </div>
+        </div>
+
+        <!-- Cart Summary -->
+        <div class="profile-card">
+          <h5 class="text-success mb-4">
+            <i class="bi bi-cart"></i> My Cart
+          </h5>
+          <div id="cartContainer">
+            <p class="text-muted text-center">Your cart is empty.</p>
+          </div>
+          <a href="Cart.html" class="btn btn-success w-100 mt-3">
+            <i class="bi bi-arrow-right"></i> Go to Cart
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-light text-dark pt-5 pb-4 mt-5 border-top">
+    <div class="container text-center">
+      <p class="mb-0">© 2026 <strong>farmFeed</strong> | All Rights Reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/config.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const BASE_URL = window.API_BASE_URL || window.location.origin;
+      const farmerId = localStorage.getItem("farmer_id");
+      const farmerName = localStorage.getItem("farmer_name") || "Farmer";
+      const farmerPhone = localStorage.getItem("farmer_phone") || "N/A";
+
+      // Check if user is logged in as farmer
+      if (!farmerId || !farmerName) {
+        alert("Please login as farmer first");
+        window.location.href = "Login.html";
+        return;
+      }
+
+      // Logout button
+      document.getElementById("logoutBtn").addEventListener("click", () => {
+        localStorage.clear();
+        window.location.href = "Login.html";
+      });
+
+      // Populate header
+      document.getElementById("farmerName").textContent = farmerName;
+      document.getElementById("farmerPhone").textContent = farmerPhone;
+
+      // Fetch farmer profile
+      if (farmerId) {
+        fetch(`${BASE_URL}/api/farmer/${farmerId}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data.success) {
+              document.getElementById("profileName").textContent = data.fullName || "N/A";
+              document.getElementById("profilePhone").textContent = data.phone || "N/A";
+              document.getElementById("profileAddress").textContent = data.address || "N/A";
+              document.getElementById("farmerAddress").textContent = data.address || "N/A";
+            }
+          })
+          .catch(err => console.log("Profile fetch error:", err));
+      }
+
+      // Load cart
+      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+      const cartContainer = document.getElementById("cartContainer");
+      if (cart.length > 0) {
+        let cartHTML = `<div class="table-responsive">
+          <table class="table table-sm">
+            <thead class="table-success">
+              <tr><th>Product</th><th>Price</th><th>Qty</th><th>Total</th></tr>
+            </thead>
+            <tbody>`;
+        let total = 0;
+        cart.forEach(item => {
+          const itemTotal = item.price * (item.qty || 1);
+          total += itemTotal;
+          cartHTML += `<tr>
+            <td>${item.name || "Product"}</td>
+            <td>Rs${item.price || 0}</td>
+            <td>${item.qty || 1}</td>
+            <td>Rs${itemTotal}</td>
+          </tr>`;
+        });
+        cartHTML += `</tbody></table></div>
+          <div class="alert alert-success mt-2">
+            <strong>Total: Rs${total.toLocaleString("en-IN")}</strong>
+          </div>`;
+        cartContainer.innerHTML = cartHTML;
+      }
+
+      // Logout
+      document.getElementById("logoutBtn").addEventListener("click", () => {
+        localStorage.removeItem("farmer_id");
+        localStorage.removeItem("farmer_name");
+        localStorage.removeItem("farmer_phone");
+        alert("Logged out successfully!");
+        window.location.href = "Login.html";
+      });
+    });
+  </script>
+</body>
+</html>

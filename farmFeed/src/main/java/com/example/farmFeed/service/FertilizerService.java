@@ -63,4 +63,11 @@ public class FertilizerService {
     public Map<String, Object> getFertilizerById(Integer id) {
         return repository.getFertilizerById(id);
     }
+
+    /**
+     * Get multiple fertilizers by IDs in a single optimized query
+     */
+    public List<Map<String, Object>> getFertilizersByIds(List<Integer> ids) {
+        return repository.getFertilizersByIds(ids);
+    }
 }

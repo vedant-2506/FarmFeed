@@ -19,6 +19,38 @@
 </head>
 
 <body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg bg-body-tertiary shadow-sm sticky-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="Home.html">
+        <img src="logo.png" alt="logo" height="40">
+      </a>
+      <span class="navbar-text text-success fw-bold">My Cart</span>
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a href="Home.html" class="btn btn-outline-success btn-sm">← Back to Shop</a>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+            <i class="bi bi-person-circle fs-5"></i>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end shadow p-3">
+            <li class="mb-2">
+              <a href="FarmerAccount.html" class="btn btn-outline-success w-100 btn-sm">
+                <i class="bi bi-person"></i> My Account
+              </a>
+            </li>
+            <li>
+              <button class="btn btn-outline-danger w-100 btn-sm" id="logoutBtn">
+                <i class="bi bi-box-arrow-right"></i> Logout
+              </button>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
   <!-- Background Carousel -->
   <div id="bgCarousel" class="carousel slide carousel-fade" data-bs-ride="carousel">
     <div class="carousel-inner">

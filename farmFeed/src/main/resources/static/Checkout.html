@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout | farmFeed</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    
+    .navbar { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    
+    .checkout-container { max-width: 1100px; margin: 40px auto; padding: 0 15px; }
+    
+    .checkout-card { 
+      background: white; 
+      border-radius: 12px; 
+      padding: 30px; 
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+      margin-bottom: 30px;
+    }
+    
+    .checkout-card h4 { 
+      color: #28a745; 
+      font-weight: 700; 
+      margin-bottom: 25px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid #28a745;
+    }
+    
+    .form-label { 
+      color: #333; 
+      font-weight: 600; 
+      margin-bottom: 8px;
+    }
+    
+    .form-control { 
+      border: 1px solid #ddd; 
+      border-radius: 8px; 
+      padding: 12px 15px;
+      font-size: 15px;
+    }
+    
+    .form-control:focus { 
+      border-color: #28a745; 
+      box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1);
+    }
+    
+    .section-divider { 
+      border-top: 2px dashed #ddd; 
+      margin: 30px 0;
+    }
+    
+    .order-summary { background: #f9f9f9; padding: 20px; border-radius: 8px; }
+    
+    .order-summary .summary-row { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .order-summary .summary-row.total { 
+      border-bottom: none;
+      padding-top: 15px;
+      font-weight: 700;
+      font-size: 18px;
+      color: #28a745;
+    }
+    
+    .summary-label { color: #666; }
+    .summary-value { font-weight: 600; color: #333; }
+    
+    .vendor-badge { 
+      display: inline-block;
+      background: #e8f5e9;
+      color: #28a745;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      margin: 5px 5px 5px 0;
+    }
+    
+    .order-item-box { 
+      background: #fafafa; 
+      padding: 15px; 
+      border-radius: 8px;
+      margin-bottom: 15px;
+      border-left: 4px solid #28a745;
+    }
+    
+    .btn-checkout { 
+      background: #28a745;
+      border: none;
+      padding: 14px 40px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 8px;
+      width: 100%;
+    }
+    
+    .btn-checkout:hover { 
+      background: #218838;
+      color: white;
+    }
+    
+    .btn-cancel { 
+      background: transparent;
+      border: 2px solid #ddd;
+      color: #666;
+      padding: 12px 30px;
+      font-weight: 600;
+      border-radius: 8px;
+    }
+    
+    .btn-cancel:hover { 
+      border-color: #ccc;
+      background: #f5f5f5;
+    }
+    
+    .progress-step { 
+      display: flex; 
+      align-items: center; 
+      margin-bottom: 30px;
+    }
+    
+    .step-number { 
+      background: #28a745; 
+      color: white; 
+      width: 40px; 
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      margin-right: 15px;
+    }
+    
+    .step-title { 
+      font-size: 16px; 
+      font-weight: 600; 
+      color: #333;
+    }
+    
+    .step-subtitle { 
+      font-size: 13px; 
+      color: #999;
+    }
+    
+    .payment-option { 
+      border: 2px solid #ddd; 
+      padding: 15px; 
+      border-radius: 8px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .payment-option:hover { 
+      border-color: #28a745;
+      background: #f0f8f5;
+    }
+    
+    .payment-option.selected { 
+      border-color: #28a745;
+      background: #e8f5e9;
+    }
+    
+    .payment-option input[type="radio"] { 
+      margin-right: 10px;
+    }
+    
+    .price-row { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center;
+      font-size: 15px;
+      color: #555;
+      margin-bottom: 10px;
+    }
+    
+    .price-row.important { 
+      font-weight: 700; 
+      font-size: 18px;
+      color: #28a745;
+      border-top: 2px solid #ddd;
+      padding-top: 10px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="Home.html">
+        <img src="logo.png" alt="logo" height="40">
+      </a>
+      <span class="navbar-text fw-bold text-success">Secure Checkout</span>
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a href="Cart.html" class="btn btn-outline-success btn-sm">← Back to Cart</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Checkout Container -->
+  <div class="checkout-container">
+    <div class="row">
+      <!-- Main Checkout Form -->
+      <div class="col-lg-8">
+        <!-- Progress -->
+        <div class="progress-step">
+          <div class="step-number">1</div>
+          <div>
+            <div class="step-title">Delivery Address</div>
+            <div class="step-subtitle">Where should we deliver?</div>
+          </div>
+        </div>
+
+        <!-- Delivery Address Form -->
+        <div class="checkout-card">
+          <h4><i class="bi bi-geo-alt"></i> Delivery Address</h4>
+          
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Full Name</label>
+              <input type="text" class="form-control" id="fullName" placeholder="Your name">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Phone Number</label>
+              <input type="tel" class="form-control" id="phone" placeholder="10-digit phone number">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Street Address</label>
+            <input type="text" class="form-control" id="streetAddress" placeholder="House no., Street name">
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">City</label>
+              <input type="text" class="form-control" id="city" placeholder="City">
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label">State</label>
+              <input type="text" class="form-control" id="state" placeholder="State">
+            </div>
+            <div class="col-md-3 mb-3">
+              <label class="form-label">Postal Code</label>
+              <input type="text" class="form-control" id="postalCode" placeholder="PIN code">
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="progress-step" style="margin-top: 40px;">
+          <div class="step-number">2</div>
+          <div>
+            <div class="step-title">Payment Method</div>
+            <div class="step-subtitle">How would you like to pay?</div>
+          </div>
+        </div>
+
+        <div class="checkout-card">
+          <h4><i class="bi bi-credit-card"></i> Select Payment Method</h4>
+          
+          <div class="payment-option selected" onclick="selectPayment('cash')">
+            <input type="radio" name="paymentMethod" value="cash" checked>
+            <span><strong>Cash on Delivery</strong></span>
+            <div class="text-muted" style="font-size: 12px; margin-top: 5px;">Pay when your order arrives</div>
+          </div>
+
+          <div class="payment-option" onclick="selectPayment('card')">
+            <input type="radio" name="paymentMethod" value="card">
+            <span><strong>Debit/Credit Card</strong></span>
+            <div class="text-muted" style="font-size: 12px; margin-top: 5px;">Visa, Mastercard, Rupay</div>
+          </div>
+
+          <div class="payment-option" onclick="selectPayment('online')">
+            <input type="radio" name="paymentMethod" value="online">
+            <span><strong>UPI / Online Banking</strong></span>
+            <div class="text-muted" style="font-size: 12px; margin-top: 5px;">Secure & Fast</div>
+          </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="progress-step" style="margin-top: 40px;">
+          <div class="step-number">3</div>
+          <div>
+            <div class="step-title">Review Your Order</div>
+            <div class="step-subtitle">Check items and vendors</div>
+          </div>
+        </div>
+
+        <div class="checkout-card">
+          <h4><i class="bi bi-bag-check"></i> Order Summary by Vendor</h4>
+          <div id="orderItemsContainer"></div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div style="margin-top: 40px; margin-bottom: 40px;">
+          <div class="row">
+            <div class="col-md-6">
+              <a href="Cart.html" class="btn btn-cancel w-100">
+                <i class="bi bi-arrow-left"></i> Back to Cart
+              </a>
+            </div>
+            <div class="col-md-6">
+              <button id="placeOrderBtn" class="btn btn-checkout">
+                <i class="bi bi-check-circle"></i> Place Order
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Summary Sidebar -->
+      <div class="col-lg-4">
+        <div class="checkout-card" style="position: sticky; top: 100px;">
+          <h4><i class="bi bi-receipt"></i> Order Total</h4>
+          
+          <div class="order-summary">
+            <div id="summaryContainer"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/config.js"></script>
+  
+  <script>
+    const BASE_URL = window.API_BASE_URL || window.location.origin;
+    let cart = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const farmerId = localStorage.getItem("farmer_id");
+      
+      if (!farmerId) {
+        alert("Please login first!");
+        window.location.href = "Login.html";
+        return;
+      }
+
+      // Load cart data
+      cart = JSON.parse(localStorage.getItem("cart")) || [];
+      
+      if (cart.length === 0) {
+        alert("Your cart is empty!");
+        window.location.href = "Cart.html";
+        return;
+      }
+
+      // Load farmer address if exists
+      const savedAddress = JSON.parse(localStorage.getItem("savedAddress") || "{}");
+      if (savedAddress.fullName) {
+        document.getElementById("fullName").value = savedAddress.fullName || "";
+        document.getElementById("phone").value = savedAddress.phone || "";
+        document.getElementById("streetAddress").value = savedAddress.streetAddress || "";
+        document.getElementById("city").value = savedAddress.city || "";
+        document.getElementById("state").value = savedAddress.state || "";
+        document.getElementById("postalCode").value = savedAddress.postalCode || "";
+      }
+
+      displayOrderItems();
+      displaySummary();
+
+      // Place order button
+      document.getElementById("placeOrderBtn").addEventListener("click", placeOrder);
+    });
+
+    function selectPayment(method) {
+      document.querySelectorAll(".payment-option").forEach(opt => opt.classList.remove("selected"));
+      document.querySelector(`[onclick="selectPayment('${method}')"]`).classList.add("selected");
+      document.querySelector(`input[value="${method}"]`).checked = true;
+    }
+
+    function displayOrderItems() {
+      const container = document.getElementById("orderItemsContainer");
+      container.innerHTML = "";
+
+      // Group by vendor
+      const byVendor = {};
+      cart.forEach(item => {
+        const vendorId = item.vendorId || "unknown";
+        if (!byVendor[vendorId]) byVendor[vendorId] = [];
+        byVendor[vendorId].push(item);
+      });
+
+      for (const [vendorId, items] of Object.entries(byVendor)) {
+        const vendorName = items[0].vendorName || "Vendor " + vendorId;
+        let vendorTotal = 0;
+
+        const vendorDiv = document.createElement("div");
+        vendorDiv.innerHTML = `
+          <div class="vendor-badge">${vendorName}</div>
+          <div style="margin: 15px 0;">
+        `;
+
+        items.forEach(item => {
+          const qty = item.qty || 1;
+          const price = parseInt(String(item.price).replace(/[^0-9]/g, ""), 10) || 0;
+          const subtotal = price * qty;
+          vendorTotal += subtotal;
+
+          vendorDiv.innerHTML += `
+            <div class="order-item-box">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                  <strong>${item.name}</strong>
+                  <div style="font-size: 12px; color: #999;">Rs${price} × ${qty}</div>
+                </div>
+                <strong style="color: #28a745;">Rs${subtotal}</strong>
+              </div>
+            </div>
+          `;
+        });
+
+        vendorDiv.innerHTML += `
+            <div style="border-top: 2px solid #ddd; padding-top: 10px; margin-top: 10px;">
+              <strong style="color: #28a745;">Vendor Total: Rs${vendorTotal}</strong>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(vendorDiv);
+      }
+    }
+
+    function displaySummary() {
+      const container = document.getElementById("summaryContainer");
+      let subtotal = 0;
+
+      cart.forEach(item => {
+        const qty = item.qty || 1;
+        const price = parseInt(String(item.price).replace(/[^0-9]/g, ""), 10) || 0;
+        subtotal += price * qty;
+      });
+
+      const gst = subtotal * 0.18;
+      const shippingCharge = 0; // Free shipping
+      const total = subtotal + gst + shippingCharge;
+
+      container.innerHTML = `
+        <div class="price-row">
+          <span>Subtotal:</span>
+          <span>Rs${subtotal.toLocaleString("en-IN")}</span>
+        </div>
+        <div class="price-row">
+          <span>GST (18%):</span>
+          <span>Rs${gst.toFixed(2)}</span>
+        </div>
+        <div class="price-row">
+          <span>Shipping:</span>
+          <span style="color: green;">FREE</span>
+        </div>
+        <div class="price-row important">
+          <span>Total Amount:</span>
+          <span>Rs${total.toFixed(2)}</span>
+        </div>
+        <div style="margin-top: 20px; padding: 12px; background: #f0f8f5; border-radius: 6px; font-size: 13px; color: #28a745;">
+          <i class="bi bi-shield-check"></i> <strong>Secure Payment</strong> - Your data is protected
+        </div>
+      `;
+    }
+
+    async function placeOrder() {
+      const fullName = document.getElementById("fullName").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const streetAddress = document.getElementById("streetAddress").value.trim();
+      const city = document.getElementById("city").value.trim();
+      const state = document.getElementById("state").value.trim();
+      const postalCode = document.getElementById("postalCode").value.trim();
+      const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value;
+
+      // Validation
+      if (!fullName || !phone || !streetAddress || !city || !state || !postalCode) {
+        alert("Please fill all address fields!");
+        return;
+      }
+
+      if (!/^\d{10}$/.test(phone)) {
+        alert("Phone number must be 10 digits!");
+        return;
+      }
+
+      const farmerId = localStorage.getItem("farmer_id");
+      const deliveryAddress = `${streetAddress}, ${city}, ${state} ${postalCode}`;
+
+      // Save address for future use
+      localStorage.setItem("savedAddress", JSON.stringify({
+        fullName, phone, streetAddress, city, state, postalCode
+      }));
+
+      // Prepare cart items for API
+      const cartItems = cart.map(item => ({
+        product_id: item.productId || item.id,
+        vendor_id: item.vendorId || 1,
+        quantity: item.qty || 1,
+        price: parseInt(String(item.price).replace(/[^0-9]/g, ""), 10)
+      }));
+
+      try {
+        document.getElementById("placeOrderBtn").disabled = true;
+        document.getElementById("placeOrderBtn").innerHTML = '<i class="bi bi-hourglass-split"></i> Processing...';
+
+        const response = await fetch(`${BASE_URL}/api/orders/place`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            farmerId: parseInt(farmerId),
+            deliveryAddress: deliveryAddress,
+            paymentMethod: paymentMethod,
+            cartItems: cartItems
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          // Clear cart
+          localStorage.removeItem("cart");
+
+          alert(`Order placed successfully!\n\nCreated ${data.ordersCount} order(s) from ${data.vendorCount} vendor(s)\n\nOrder IDs: ${data.orders.map(o => o.id).join(", ")}`);
+          
+          // Redirect to order tracking
+          window.location.href = "FarmerAccount.html";
+        } else {
+          alert("Order failed: " + data.error);
+          document.getElementById("placeOrderBtn").disabled = false;
+          document.getElementById("placeOrderBtn").innerHTML = '<i class="bi bi-check-circle"></i> Place Order';
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        alert("Server error. Please try again.");
+        document.getElementById("placeOrderBtn").disabled = false;
+        document.getElementById("placeOrderBtn").innerHTML = '<i class="bi bi-check-circle"></i> Place Order';
+      }
+    }
+  </script>
+</body>
+</html>

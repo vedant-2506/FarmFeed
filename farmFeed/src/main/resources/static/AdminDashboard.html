@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard | FarmFeed</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: linear-gradient(135deg, #55ec85 0%, #764ba2 100%); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; min-height: 100vh; }
+    
+    .navbar { background: white; box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
+    .navbar-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: #667eea !important; }
+    .navbar-brand img { height: 40px; width: auto; }
+    
+    .container-main { max-width: 1400px; margin: 30px auto; padding: 0 15px; }
+    
+    .card { border: none; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.1); overflow: hidden; background: white; }
+    .card-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; font-weight: 700; }
+    
+    .stat-card { background: white; border-radius: 12px; padding: 20px; text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.08); margin-bottom: 15px; }
+    .stat-card .stat-number { font-size: 32px; font-weight: 700; color: #667eea; }
+    .stat-card .stat-label { color: #999; font-size: 14px; font-weight: 600; margin-top: 8px; }
+    
+    .vendor-row { border-bottom: 1px solid #eee; padding: 15px; display: flex; justify-content: space-between; align-items: center; transition: background 0.3s; }
+    .vendor-row:hover { background: #f9f9f9; }
+    .vendor-row:last-child { border-bottom: none; }
+    
+    .vendor-info { flex: 1; }
+    .vendor-name { font-weight: 700; font-size: 16px; color: #333; }
+    .vendor-email { font-size: 14px; color: #999; margin-top: 4px; }
+    .vendor-stats { background: #f5f5f5; border-radius: 6px; padding: 8px 12px; font-size: 13px; color: #666; margin-top: 8px; }
+    
+    .btn-view { background: #667eea; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: background 0.3s; }
+    .btn-view:hover { background: #764ba2; color: white; text-decoration: none; }
+    
+    .search-box { background: white; border-radius: 8px; padding: 15px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+    .search-input { border: 2px solid #ddd; border-radius: 6px; padding: 10px 15px; font-size: 14px; }
+    .search-input:focus { border-color: #667eea; outline: none; }
+    
+    .filter-btn { background: white; border: 2px solid #ddd; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; color: #667eea; margin-right: 8px; margin-bottom: 8px; transition: all 0.3s; }
+    .filter-btn.active { background: #667eea; color: white; border-color: #667eea; }
+    .filter-btn:hover { border-color: #667eea; }
+    
+    .empty-state { text-align: center; padding: 60px 20px; color: #999; }
+    .empty-state i { font-size: 64px; margin-bottom: 20px; display: block; opacity: 0.5; }
+    
+    .loading { text-align: center; padding: 40px 20px; }
+    .spinner-border { width: 40px; height: 40px; }
+    
+    .inventory-details { background: white; border-radius: 8px; }
+    .inventory-header { background: #f5f5f5; padding: 15px; border-bottom: 1px solid #eee; font-weight: 700; }
+    .inventory-item { padding: 12px 15px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+    .inventory-item:last-child { border-bottom: none; }
+    .inventory-name { font-weight: 600; color: #333; flex: 1; }
+    .inventory-price { color: #667eea; font-weight: 600; }
+    .inventory-qty { background: #f0f0f0; padding: 4px 12px; border-radius: 4px; font-size: 13px; }
+    
+    .badge-status { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .badge-active { background: #d4edda; color: #155724; }
+    .badge-inactive { background: #f8d7da; color: #721c24; }
+    
+    .modal-backdrop { background: rgba(0,0,0,0.5); }
+    .modal-content { border-radius: 12px; border: none; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+    .modal-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; }
+    .modal-header .btn-close { filter: brightness(0) invert(1); }
+    
+    .close-btn { color: white; font-size: 24px; cursor: pointer; }
+  </style>
+</head>
+
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#" onclick="return false;">
+        <img src="logo.png" alt="FarmFeed Logo" onerror="this.style.display='none'">
+        <span>FarmFeed</span>
+      </a>
+      <span class="navbar-text fw-bold text-primary">
+        <i class="bi bi-shield-lock"></i> Admin Panel - <span id="adminUsername">Admin</span>
+      </span>
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a href="#" onclick="logout(); return false;" class="btn btn-outline-danger btn-sm">
+            <i class="bi bi-box-arrow-right"></i> Logout
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container-main">
+    <!-- Statistics Row -->
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-number" id="totalVendors">0</div>
+          <div class="stat-label">Total Vendors</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-number" id="totalProducts">0</div>
+          <div class="stat-label">Total Products in Inventory</div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="stat-card">
+          <div class="stat-number" id="totalValue">₹0</div>
+          <div class="stat-label">Total Inventory Value</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Vendors Section -->
+    <div class="card">
+      <div class="card-header">
+        <i class="bi bi-shop"></i> Vendor Management
+      </div>
+
+      <div class="search-box" style="margin: 0; border-radius: 0;">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <input 
+              type="text" 
+              id="searchVendor" 
+              class="search-input form-control" 
+              placeholder="Search by vendor name or email..."
+              style="width: 100%;"
+            >
+          </div>
+          <div class="col-md-6 text-end">
+            <button class="filter-btn active" onclick="filterStatus('all')">All</button>
+            <button class="filter-btn" onclick="filterStatus('active')">Active</button>
+            <button class="filter-btn" onclick="filterStatus('inactive')">Inactive</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="vendorList" class="card-body" style="padding: 0;">
+        <div class="loading">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-3">Loading vendors...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vendor Details Modal -->
+  <div id="vendorModal" class="modal fade" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">
+            <i class="bi bi-person-badge"></i> Vendor Details
+          </h5>
+          <span class="close-btn" onclick="closeVendorModal()">&times;</span>
+        </div>
+        <div class="modal-body">
+          <div id="vendorDetailsContent">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/config.js"></script>
+  
+  <script>
+    const BASE_URL = window.API_BASE_URL || window.location.origin;
+    const adminPassword = "admin123"; // Simple password check - should be more secure in production
+    let allVendors = [];
+    let filteredVendors = [];
+    let currentFilter = "all";
+    let vendorModal;
+
+    // Initialize
+    document.addEventListener("DOMContentLoaded", () => {
+      checkAdminAccess();
+      displayAdminUsername();
+      loadVendors();
+      setupEventListeners();
+      vendorModal = new bootstrap.Modal(document.getElementById("vendorModal"));
+    });
+
+    function displayAdminUsername() {
+      const adminSession = localStorage.getItem("admin_session");
+      if (adminSession) {
+        const session = JSON.parse(adminSession);
+        const displayName = session.fullName || session.username || "Admin";
+        document.getElementById("adminUsername").textContent = displayName;
+      } else {
+        document.getElementById("adminUsername").textContent = "Admin";
+      }
+    }
+
+    function checkAdminAccess() {
+      const adminSession = localStorage.getItem("admin_session");
+      const adminUsername = localStorage.getItem("admin_username");
+      
+      if (!adminSession || !adminUsername) {
+        // Redirect to login page
+        window.location.href = "AdminLogin.html";
+        return;
+      }
+
+      // Parse session
+      const session = JSON.parse(adminSession);
+      
+      // Check if session is still valid (24 hours)
+      const now = new Date().getTime();
+      const sessionAge = now - session.timestamp;
+      const maxSessionAge = 24 * 60 * 60 * 1000; // 24 hours
+
+      if (sessionAge > maxSessionAge) {
+        // Session expired
+        localStorage.removeItem("admin_session");
+        localStorage.removeItem("admin_username");
+        window.location.href = "AdminLogin.html";
+        return;
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem("admin_session");
+      localStorage.removeItem("admin_username");
+      window.location.href = "AdminLogin.html";
+    }
+
+    function setupEventListeners() {
+      document.getElementById("searchVendor").addEventListener("input", (e) => {
+        applyFilters(e.target.value);
+      });
+    }
+
+    async function loadVendors() {
+      try {
+        const res = await fetch(`${BASE_URL}/api/admin/vendors`);
+        const data = await res.json();
+        
+        if (data.success) {
+          allVendors = data.data || [];
+          filteredVendors = allVendors;
+          
+          // Calculate statistics
+          updateStatistics();
+          displayVendors();
+        } else {
+          console.error("Error loading vendors:", data.error);
+          document.getElementById("vendorList").innerHTML = `
+            <div class="empty-state">
+              <i class="bi bi-exclamation-triangle"></i>
+              <p>Error loading vendors: ${data.error}</p>
+            </div>
+          `;
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        document.getElementById("vendorList").innerHTML = `
+          <div class="empty-state">
+            <i class="bi bi-exclamation-triangle"></i>
+            <p>Error loading vendors. Make sure you're an admin.</p>
+          </div>
+        `;
+      }
+    }
+
+    function updateStatistics() {
+      let totalProducts = 0;
+      let totalValue = 0;
+
+      allVendors.forEach(vendor => {
+        if (vendor.inventoryCount) {
+          totalProducts += vendor.inventoryCount;
+        }
+        if (vendor.inventoryValue) {
+          totalValue += vendor.inventoryValue;
+        }
+      });
+
+      document.getElementById("totalVendors").textContent = allVendors.length;
+      document.getElementById("totalProducts").textContent = totalProducts;
+      document.getElementById("totalValue").textContent = "₹" + totalValue.toLocaleString('en-IN');
+    }
+
+    function displayVendors() {
+      const container = document.getElementById("vendorList");
+
+      if (!filteredVendors || filteredVendors.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="bi bi-search"></i>
+            <p>No vendors found</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filteredVendors.map(vendor => `
+        <div class="vendor-row">
+          <div class="vendor-info">
+            <div class="vendor-name">${vendor.shop_name}</div>
+            <div class="vendor-email">${vendor.email}</div>
+            <div class="vendor-stats">
+              <span>Owner: ${vendor.owner_name}</span> | 
+              <span>Products: ${vendor.inventoryCount || 0}</span> | 
+              <span>Value: ₹${vendor.inventoryValue || 0}</span>
+            </div>
+            <div style="margin-top: 8px;">
+              <span class="badge-status ${vendor.is_active ? 'badge-active' : 'badge-inactive'}">
+                ${vendor.is_active ? 'Active' : 'Inactive'}
+              </span>
+            </div>
+          </div>
+          <div>
+            <button class="btn-view" onclick="viewVendorDetails(${vendor.id})">
+              <i class="bi bi-eye"></i> View Inventory
+            </button>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    async function viewVendorDetails(vendorId) {
+      try {
+        const res = await fetch(`${BASE_URL}/api/admin/vendor/${vendorId}/inventory`);
+        const data = await res.json();
+
+        if (data.success) {
+          const vendor = allVendors.find(v => v.id === vendorId);
+          const inventory = data.data || [];
+
+          let inventoryHtml = "";
+          if (inventory.length === 0) {
+            inventoryHtml = '<p class="text-muted">No products in inventory</p>';
+          } else {
+            inventoryHtml = `
+              <div class="inventory-details">
+                <div class="inventory-header">
+                  <i class="bi bi-box"></i> Products in Inventory
+                </div>
+                ${inventory.map(item => `
+                  <div class="inventory-item">
+                    <div>
+                      <div class="inventory-name">${item.name}</div>
+                      <small style="color: #999;">Base: ₹${item.base_price} | Vendor: ₹${item.vendor_price}</small>
+                    </div>
+                    <div style="display: flex; gap: 15px; align-items: center;">
+                      <span class="inventory-qty">${item.quantity_in_stock} units</span>
+                      <span class="inventory-price">₹${(item.vendor_price * item.quantity_in_stock).toLocaleString('en-IN')}</span>
+                    </div>
+                  </div>
+                `).join("")}
+              </div>
+            `;
+          }
+
+          document.getElementById("vendorDetailsContent").innerHTML = `
+            <div>
+              <h6 style="color: #667eea; font-weight: 700; margin-bottom: 20px;">
+                <i class="bi bi-shop"></i> ${vendor.shop_name}
+              </h6>
+              <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 14px;">
+                  <div>
+                    <strong>Owner:</strong> ${vendor.owner_name}
+                  </div>
+                  <div>
+                    <strong>Email:</strong> ${vendor.email}
+                  </div>
+                  <div>
+                    <strong>Phone:</strong> ${vendor.phone || 'N/A'}
+                  </div>
+                  <div>
+                    <strong>Location:</strong> ${vendor.address || 'N/A'}
+                  </div>
+                  <div>
+                    <strong>Status:</strong> <span class="badge-status ${vendor.is_active ? 'badge-active' : 'badge-inactive'}">${vendor.is_active ? 'Active' : 'Inactive'}</span>
+                  </div>
+                  <div>
+                    <strong>Total Products:</strong> ${vendor.inventoryCount || 0}
+                  </div>
+                </div>
+              </div>
+              ${inventoryHtml}
+            </div>
+          `;
+
+          vendorModal.show();
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        alert("Error loading inventory details");
+      }
+    }
+
+    function closeVendorModal() {
+      vendorModal.hide();
+    }
+
+    function filterStatus(status) {
+      currentFilter = status;
+      
+      // Update button states
+      document.querySelectorAll(".filter-btn").forEach(btn => {
+        btn.classList.remove("active");
+      });
+      event.target.classList.add("active");
+
+      applyFilters();
+    }
+
+    function applyFilters(searchTerm = "") {
+      const term = searchTerm.toLowerCase();
+
+      filteredVendors = allVendors.filter(v => {
+        const matchesSearch = !term || 
+          v.shop_name.toLowerCase().includes(term) || 
+          v.email.toLowerCase().includes(term) ||
+          v.owner_name.toLowerCase().includes(term);
+
+        const matchesFilter = currentFilter === "all" || 
+          (currentFilter === "active" && v.is_active) ||
+          (currentFilter === "inactive" && !v.is_active);
+
+        return matchesSearch && matchesFilter;
+      });
+
+      displayVendors();
+    }
+  </script>
+</body>
+</html>

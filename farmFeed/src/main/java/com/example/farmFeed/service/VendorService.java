@@ -66,5 +66,14 @@ public class VendorService {
     public Optional<Vendor> getVendorById(Long id) {
         return repository.findById(id);
     }
+
+    /**
+     * Find vendor by ID (alias method)
+     */
+    @Transactional(readOnly = true)
+    public Optional<Vendor> findById(Long id) {
+        return repository.findById(id);
+    }
 }
+
 

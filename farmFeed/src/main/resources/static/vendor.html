@@ -50,25 +50,17 @@
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle d-flex align-items-center gap-1" data-bs-toggle="dropdown">
               <i class="bi bi-person-circle fs-5"></i>
-              <span id="vendorNameDisplay">Vendor</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-end shadow p-3" style="min-width:200px">
               <li class="mb-2">
-                <div class="vendor-profile-info text-center mb-2">
-                  <i class="bi bi-person-circle fs-1 text-success"></i>
-                  <p class="mb-0 fw-bold" id="vendorNameCard">Vendor</p>
-                  <small class="text-muted" id="vendorEmailCard">vendor@email.com</small>
-                </div>
-              </li>
-              <li class="mb-2">
-                <a href="#" class="btn btn-outline-success w-100">
-                  <i class="bi bi-person me-1"></i> Profile
+                <a href="VendorAccount.html" class="btn btn-outline-success w-100 btn-sm">
+                  <i class="bi bi-person me-1"></i> My Account
                 </a>
               </li>
               <li>
-                <a href="Login.html" class="btn btn-outline-danger w-100">
+                <button class="btn btn-outline-danger w-100 btn-sm" id="logoutBtn">
                   <i class="bi bi-box-arrow-right me-1"></i> Log Out
-                </a>
+                </button>
               </li>
             </ul>
           </li>
@@ -113,7 +105,7 @@
       <div class="col-6 col-md-3">
         <div class="stat-card shadow-sm">
           <i class="bi bi-cash-coin stat-icon"></i>
-          <h4 id="totalSales">₹0</h4>
+          <h4 id="totalSales">Rs0</h4>
           <p>Total Sales</p>
         </div>
       </div>
@@ -150,7 +142,7 @@
             <span class="badge bg-success mb-2">In Stock</span>
             <h5 class="card-title">Urea Fertilizer</h5>
             <p class="card-text text-muted small">High-nitrogen fertilizer for rapid crop growth.</p>
-            <p class="fw-bold text-success">₹600 / 50kg bag</p>
+            <p class="fw-bold text-success">Rs600 / 50kg bag</p>
             <div class="d-flex justify-content-between gap-2">
               <button class="btn btn-outline-success w-50">
                 <i class="bi bi-pencil me-1"></i>Edit
@@ -171,7 +163,7 @@
             <span class="badge bg-success mb-2">In Stock</span>
             <h5 class="card-title">DAP Fertilizer</h5>
             <p class="card-text text-muted small">Diammonium phosphate for strong root development.</p>
-            <p class="fw-bold text-success">₹1400 / 50kg bag</p>
+            <p class="fw-bold text-success">Rs1400 / 50kg bag</p>
             <div class="d-flex justify-content-between gap-2">
               <button class="btn btn-outline-success w-50">
                 <i class="bi bi-pencil me-1"></i>Edit
@@ -192,7 +184,7 @@
             <span class="badge bg-warning text-dark mb-2">Low Stock</span>
             <h5 class="card-title">NPK Fertilizer</h5>
             <p class="card-text text-muted small">100% natural compost for organic farming.</p>
-            <p class="fw-bold text-success">₹450 / 50kg bag</p>
+            <p class="fw-bold text-success">Rs450 / 50kg bag</p>
             <div class="d-flex justify-content-between gap-2">
               <button class="btn btn-outline-success w-50">
                 <i class="bi bi-pencil me-1"></i>Edit
@@ -231,7 +223,7 @@
             <td>Urea</td>
             <td>Ramesh Kumar</td>
             <td>5 Bags</td>
-            <td>₹3,000</td>
+            <td>Rs3,000</td>
             <td><span class="badge bg-warning text-dark">Pending</span></td>
             <td>
               <button class="btn btn-sm btn-success">Accept</button>
@@ -242,7 +234,7 @@
             <td>NPK</td>
             <td>Suresh Patil</td>
             <td>3 Bags</td>
-            <td>₹3,300</td>
+            <td>Rs3,300</td>
             <td><span class="badge bg-success">Delivered</span></td>
             <td>
               <button class="btn btn-sm btn-outline-secondary" disabled>Done</button>
@@ -253,7 +245,7 @@
             <td>DAP</td>
             <td>Vijay Shinde</td>
             <td>2 Bags</td>
-            <td>₹2,800</td>
+            <td>Rs2,800</td>
             <td><span class="badge bg-info text-dark">Shipped</span></td>
             <td>
               <button class="btn btn-sm btn-primary">Track</button>
@@ -273,6 +265,7 @@
     </div>
   </footer>
 
+  <script src="js/config.js"></script>
   <script src="js/vendor.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 

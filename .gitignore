@@ -1,0 +1,40 @@
+# Build output
+target/
+*.jar
+*.class
+
+# IDE
+.vscode/
+.idea/
+*.iml
+*.iws
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Maven
+.mvn/wrapper/maven-wrapper.jar
+
+# Logs
+*.log
+logs/
+
+# Temp files
+*.tmp
+*.swp
+*~
+
+# Node modules (if using frontend build tools)
+node_modules/
+dist/
+
+# Local database files
+*.db
+
+# Application properties with sensitive data
+application-dev.properties

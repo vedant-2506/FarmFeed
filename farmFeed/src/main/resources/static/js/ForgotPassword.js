@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const BASE_URL = "https://farmfeed-backend.onrender.com";
+  const BASE_URL = window.API_BASE_URL || window.location.origin;
 
   document.getElementById("farmerForgotForm").addEventListener("submit", async (e) => {
     e.preventDefault();

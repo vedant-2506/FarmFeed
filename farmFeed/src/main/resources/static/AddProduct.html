@@ -1,64 +1,546 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>FarmFeed | Vendor Panel</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manage Inventory | FarmFeed Vendor</title>
 
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="vendor.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #f5f5f5; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    
+    .navbar { background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    .navbar-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: #28a745 !important; }
+    .navbar-brand img { height: 40px; width: auto; }
+    .container-main { max-width: 1200px; margin: 30px auto; padding: 0 15px; }
+    
+    .card { border: none; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+    .card h5 { color: #28a745; font-weight: 700; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 2px solid #28a745; }
+    
+    .search-container { position: relative; margin-bottom: 20px; }
+    .search-input { border: 2px solid #ddd; border-radius: 8px; padding: 12px 15px; font-size: 16px; }
+    .search-input:focus { border-color: #28a745; outline: none; box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.1); }
+    
+    .autocomplete-dropdown { 
+      position: absolute; 
+      top: 50px; 
+      left: 0; 
+      right: 0; 
+      background: white; 
+      border: 1px solid #ddd; 
+      border-radius: 8px;
+      max-height: 300px;
+      overflow-y: auto;
+      display: none;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    
+    .autocomplete-dropdown.show { display: block; }
+    
+    .autocomplete-item { 
+      padding: 12px 15px; 
+      cursor: pointer; 
+      border-bottom: 1px solid #eee;
+      transition: background 0.2s;
+    }
+    
+    .autocomplete-item:hover { background: #f0f8f5; color: #28a745; }
+    
+    .fertilizer-card { 
+      border: 2px solid #ddd; 
+      border-radius: 8px; 
+      padding: 15px; 
+      margin-bottom: 15px;
+      background: white;
+      transition: all 0.3s;
+    }
+    
+    .fertilizer-card:hover { border-color: #28a745; box-shadow: 0 4px 12px rgba(40, 167, 69, 0.15); }
+    
+    .fertilizer-image { 
+      width: 80px; 
+      height: 80px; 
+      background: #f0f0f0; 
+      border-radius: 6px;
+      object-fit: cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .fert-name { font-weight: 700; font-size: 16px; color: #333; }
+    .fert-price { color: #28a745; font-weight: 600; font-size: 14px; }
+    
+    .btn-add-to-cart { background: #28a745; color: white; border: none; font-weight: 600; }
+    .btn-add-to-cart:hover { background: #218838; }
+    
+    .inventory-item { 
+      border: 2px solid #e8f5e9; 
+      border-left: 4px solid #28a745;
+      border-radius: 8px; 
+      padding: 15px; 
+      margin-bottom: 15px;
+      background: #f9fdf9;
+    }
+    
+    .inventory-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .inventory-name { font-weight: 700; font-size: 16px; color: #333; }
+    .inventory-actions button { margin-left: 8px; }
+    
+    .empty-state { text-align: center; padding: 40px 20px; color: #999; }
+    .empty-state i { font-size: 48px; margin-bottom: 15px; display: block; }
+    
+    .tab-section { margin-top: 30px; }
+    .tab-btn { padding: 10px 20px; margin-right: 10px; margin-bottom: 15px; border: 2px solid #ddd; background: white; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+    .tab-btn.active { border-color: #28a745; background: #28a745; color: white; }
+    
+    .loading { text-align: center; padding: 20px; }
+    .spinner-border { width: 30px; height: 30px; }
+  </style>
 </head>
 
 <body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg sticky-top">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#" onclick="return false;">
+        <img src="logo.png" alt="FarmFeed Logo" onerror="this.style.display='none'">
+        <span>FarmFeed</span>
+      </a>
+      <span class="navbar-text fw-bold text-success">Manage Inventory</span>
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+          <a href="VendorAccount.html" class="btn btn-outline-success btn-sm">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+          </a>
+        </li>
+      </ul>
+    </div>
+  </nav>
 
-<!-- Background Image -->
- 
-<div class="background"></div>
-
-<!-- Vendor Container -->
-<div class="vendor-container">
-  <div class="vendor-card">
-
-    <h3 class="text-center text-success mb-3">🌿 Shopkeeper Panel</h3>
-    <p class="text-center text-muted">Add fertilizers for farmers</p>
-
-    <form id="vendorForm">
-
-      <div class="mb-3">
-        <label class="form-label">Fertilizer Name</label>
-        <input type="text" class="form-control" placeholder="Enter fertilizer name" required>
+  <!-- Main Content -->
+  <div class="container-main">
+    <!-- Add Products Section -->
+    <div class="card p-4 mb-4">
+      <h5><i class="bi bi-plus-circle"></i> Add Fertilizers to Your Inventory</h5>
+      
+      <div class="search-container">
+        <input 
+          type="text" 
+          id="searchFertilizer" 
+          class="form-control search-input" 
+          placeholder="Type fertilizer name (e.g., Urea, NPK, DAP)"
+          autocomplete="off"
+        >
+        <div id="autocompleteSuggestions" class="autocomplete-dropdown"></div>
       </div>
 
-      <div class="mb-3">
-        <label class="form-label">Price (₹)</label>
-        <input type="number" class="form-control" placeholder="Enter price" required>
+      <!-- Selected Fertilizer Card -->
+      <div id="selectedCard" style="display: none;">
+        <div class="fertilizer-card">
+          <div class="row align-items-center">
+            <div class="col-md-2">
+              <img id="fertImage" src="" alt="Fertilizer" class="img-fluid fertilizer-image">
+            </div>
+            <div class="col-md-4">
+              <div class="fert-name" id="fertName">-</div>
+              <div class="fert-price">Base Price: Rs<span id="fertBasePrice">0</span></div>
+              <small style="color: #999;" id="fertDesc"></small>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Your Selling Price (Rs)</label>
+              <input type="number" id="vendorPrice" class="form-control mb-2" placeholder="Your price" min="0" step="0.01">
+              
+              <label class="form-label">How much you want to sell</label>
+              <input type="number" id="addQuantity" class="form-control mb-2" placeholder="Quantity" min="1" value="10">
+              
+              <button id="btnAddToInventory" class="btn btn-add-to-cart w-100">
+                <i class="bi bi-plus-circle"></i> Add to Inventory
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <div class="mb-3">
-        <label class="form-label">Quantity (kg)</label>
-        <input type="number" class="form-control" placeholder="Enter quantity" required>
-      </div>
-
-      <div class="mb-3">
-        <label class="form-label">Category</label>
-        <select class="form-select">
-          <option>Organic</option>
-          <option>Chemical</option>
-          <option>Bio Fertilizer</option>
-        </select>
-      </div>
-
-      <button type="submit" class="btn btn-success w-100">Add Fertilizer</button>
-
-    </form>
-
-    <div class="text-center mt-3">
-      <small>All products will be verified by Admin</small>
     </div>
 
-  </div>
-</div>
+    <!-- Tabs -->
+    <div class="tab-section">
+      <button class="tab-btn active" id="tabInventory">Your Inventory</button>
+      <button class="tab-btn" id="tabBrowse">Browse All</button>
+    </div>
 
-<script src="vendor.js"></script>
+    <!-- Your Inventory Section -->
+    <div id="inventorySection" class="card p-4">
+      <h5><i class="bi bi-box-seam"></i> Your Current Inventory</h5>
+      <div id="inventoryList" class="mt-3">
+        <div class="loading">
+          <div class="spinner-border text-success" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2">Loading your inventory...</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Browse All Section -->
+    <div id="browseSection" class="card p-4" style="display: none;">
+      <h5><i class="bi bi-collection"></i> All Available Fertilizers</h5>
+      <div id="browseList" class="mt-3">
+        <div class="loading">
+          <div class="spinner-border text-success" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+          <p class="mt-2">Loading fertilizers...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/config.js"></script>
+  
+  <script>
+    const BASE_URL = window.API_BASE_URL || window.location.origin;
+    const vendorId = localStorage.getItem("shop_id");
+    let allFertilizers = [];
+    let selectedFertilizer = null;
+
+    if (!vendorId) {
+      alert("Please login as vendor first!");
+      window.location.href = "Login.html";
+    }
+
+    // Initialize
+    document.addEventListener("DOMContentLoaded", () => {
+      loadAllFertilizers();
+      loadVendorInventory();
+      setupEventListeners();
+    });
+
+    function setupEventListeners() {
+      const searchInput = document.getElementById("searchFertilizer");
+      document.getElementById("btnAddToInventory").addEventListener("click", addToInventory);
+      document.getElementById("tabInventory").addEventListener("click", showInventory);
+      document.getElementById("tabBrowse").addEventListener("click", showBrowse);
+
+      searchInput.addEventListener("input", (e) => {
+        const value = e.target.value.toLowerCase().trim();
+        showSuggestions(value);
+      });
+
+      document.addEventListener("click", (e) => {
+        if (!e.target.closest(".search-container")) {
+          document.getElementById("autocompleteSuggestions").classList.remove("show");
+        }
+      });
+    }
+
+    async function loadAllFertilizers() {
+      try {
+        const res = await fetch(`${BASE_URL}/api/fertilizers`);
+        const data = await res.json();
+        allFertilizers = Array.isArray(data) ? data : (data.data || []);
+        populateBrowseList();
+      } catch (err) {
+        console.error("Error loading fertilizers:", err);
+      }
+    }
+
+    function showSuggestions(searchTerm) {
+      const dropdown = document.getElementById("autocompleteSuggestions");
+
+      if (!searchTerm) {
+        dropdown.classList.remove("show");
+        return;
+      }
+
+      const matches = allFertilizers.filter(f => 
+        f.name && f.name.toLowerCase().startsWith(searchTerm)
+      ).slice(0, 10);
+
+      if (matches.length === 0) {
+        dropdown.innerHTML = '<div class="autocomplete-item text-muted">No matches found</div>';
+        dropdown.classList.add("show");
+        return;
+      }
+
+      dropdown.innerHTML = matches.map(f => {
+        const id = f.fertilizer_id || f.id;
+        const index = allFertilizers.findIndex(fert => (fert.fertilizer_id || fert.id) === id);
+        return `
+        <div class="autocomplete-item" onclick="selectFertilizerByIndex(${index})" style="cursor: pointer;">
+          <strong>${f.name}</strong>
+          <br>
+          <small style="color: #999;">Rs ${f.price}</small>
+        </div>
+      `;
+      }).join("");
+
+      dropdown.classList.add("show");
+    }
+
+    function selectFertilizer(fertilizerId) {
+      const fert = allFertilizers.find(f => (f.fertilizer_id || f.id) === fertilizerId);
+      if (!fert) {
+        console.error("Fertilizer not found");
+        return;
+      }
+
+      selectedFertilizer = fert;
+
+      document.getElementById("searchFertilizer").value = fert.name;
+      document.getElementById("autocompleteSuggestions").classList.remove("show");
+
+      // Show selected card
+      document.getElementById("selectedCard").style.display = "block";
+      document.getElementById("fertName").textContent = fert.name;
+      document.getElementById("fertBasePrice").textContent = fert.price;
+      document.getElementById("fertDesc").textContent = fert.description || "";
+      document.getElementById("fertImage").src = fert.image ? `data:image/jpeg;base64,${fert.image}` : "https://via.placeholder.com/80";
+      document.getElementById("vendorPrice").value = fert.price;
+      document.getElementById("addQuantity").value = "10";
+      document.getElementById("vendorPrice").focus();
+    }
+
+    function selectFertilizerByIndex(index) {
+      if (index < 0 || index >= allFertilizers.length) {
+        console.error("Invalid fertilizer index:", index);
+        return;
+      }
+      
+      const fert = allFertilizers[index];
+      selectedFertilizer = fert;
+
+      document.getElementById("searchFertilizer").value = fert.name;
+      document.getElementById("autocompleteSuggestions").classList.remove("show");
+
+      // Show selected card
+      document.getElementById("selectedCard").style.display = "block";
+      document.getElementById("fertName").textContent = fert.name;
+      document.getElementById("fertBasePrice").textContent = fert.price;
+      document.getElementById("fertDesc").textContent = fert.description || "";
+      // Use image_url from API if available, otherwise use placeholder
+      document.getElementById("fertImage").src = fert.image_url || fert.image || "https://via.placeholder.com/80";
+      document.getElementById("vendorPrice").value = fert.price;
+      document.getElementById("addQuantity").value = "10";
+      document.getElementById("vendorPrice").focus();
+    }
+
+    async function addToInventory() {
+      if (!vendorId) {
+        alert("Vendor ID not found!");
+        window.location.href = "Login.html";
+        return;
+      }
+
+      if (!selectedFertilizer) {
+        alert("Please select a fertilizer first!");
+        return;
+      }
+
+      const price = parseFloat(document.getElementById("vendorPrice").value);
+      const qty = parseInt(document.getElementById("addQuantity").value);
+
+      if (isNaN(price) || price <= 0) {
+        alert("Enter a valid price!");
+        return;
+      }
+
+      if (isNaN(qty) || qty < 1) {
+        alert("Enter valid quantity!");
+        return;
+      }
+
+      const id = selectedFertilizer.fertilizer_id || selectedFertilizer.id;
+      if (!id) {
+        alert("Error: Fertilizer ID not found");
+        return;
+      }
+
+      try {
+        const btn = document.getElementById("btnAddToInventory");
+        btn.disabled = true;
+        btn.innerHTML = '<i class="bi bi-hourglass-split"></i> Adding...';
+
+        const payload = {
+          vendorId: parseInt(vendorId),
+          fertilizerId: id,
+          vendorPrice: price,
+          quantity: qty
+        };
+
+        const res = await fetch(`${BASE_URL}/api/vendor-inventory/add`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          alert("✅ Added to inventory successfully!");
+          document.getElementById("searchFertilizer").value = "";
+          document.getElementById("selectedCard").style.display = "none";
+          loadVendorInventory();
+          selectedFertilizer = null;
+        } else {
+          const msg = data.error || data.message || "Failed to add product";
+          alert("❌ Error: " + msg);
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-plus-circle"></i> Add to Inventory';
+      } catch (err) {
+        alert("❌ Server error: " + err.message);
+        const btn = document.getElementById("btnAddToInventory");
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-plus-circle"></i> Add to Inventory';
+      }
+    }
+
+    async function loadVendorInventory() {
+      try {
+        const res = await fetch(`${BASE_URL}/api/vendor-inventory/${vendorId}`);
+        const data = await res.json();
+
+        if (data.success) {
+          displayInventory(data.data || []);
+        }
+      } catch (err) {
+        // fail silently on load
+      }
+    }
+
+    function displayInventory(items) {
+      const container = document.getElementById("inventoryList");
+
+      if (!items || items.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <p>Your inventory is empty</p>
+            <small>Add fertilizers to get started!</small>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = items.map(item => {
+        const id = item.fertilizer_id || item.id;
+        return `
+          <div class="inventory-item">
+            <div class="inventory-header">
+              <div>
+                <div class="inventory-name">${item.name}</div>
+                <small style="color: #999;">Base: Rs${item.base_price} | Your Price: Rs${item.vendor_price}</small>
+              </div>
+              <div>
+                <button class="btn btn-sm btn-warning" onclick="editInventory(${id})">
+                  <i class="bi bi-pencil"></i> Edit
+                </button>
+                <button class="btn btn-sm btn-danger" onclick="removeInventory(${id})">
+                  <i class="bi bi-trash"></i> Remove
+                </button>
+              </div>
+            </div>
+            <div>
+              <small>Quantity: <strong>${item.quantity_in_stock}</strong> units</small>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function populateBrowseList() {
+      const container = document.getElementById("browseList");
+
+      if (!allFertilizers || allFertilizers.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <p>No fertilizers available</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = allFertilizers.map(f => {
+        const id = f.fertilizer_id || f.id;
+        return `
+          <div class="fertilizer-card">
+            <div class="row align-items-center">
+              <div class="col-md-2">
+                <img src="https://via.placeholder.com/80?text=${f.name.substring(0,3)}" alt="${f.name}" class="img-fluid fertilizer-image">
+              </div>
+              <div class="col-md-4">
+                <div class="fert-name">${f.name}</div>
+                <div class="fert-price">Rs${f.price}</div>
+              </div>
+              <div class="col-md-6 text-end">
+                <button class="btn btn-sm btn-add-to-cart" onclick="selectAndScroll('${id}')">
+                  <i class="bi bi-plus-circle"></i> Add to My Inventory
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function selectAndScroll(id) {
+      const fert = allFertilizers.find(f => (f.fertilizer_id || f.id) === id);
+      if (fert) {
+        selectFertilizer(id);
+        showInventory();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+
+    async function removeInventory(fertilizerId) {
+      if (!confirm("Remove this from inventory?")) return;
+
+      try {
+        const res = await fetch(`${BASE_URL}/api/vendor-inventory/${vendorId}/${fertilizerId}`, {
+          method: "DELETE"
+        });
+
+        if (res.ok) {
+          alert("Removed from inventory!");
+          loadVendorInventory();
+        } else {
+          alert("Failed to remove");
+        }
+      } catch (err) {
+        console.error("Error:", err);
+      }
+    }
+
+    function editInventory(fertilizerId) {
+      const fert = allFertilizers.find(f => (f.fertilizer_id || f.id) === fertilizerId);
+      if (fert) {
+        selectFertilizer(fertilizerId);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }
+
+    function showInventory() {
+      document.getElementById("inventorySection").style.display = "block";
+      document.getElementById("browseSection").style.display = "none";
+      document.getElementById("tabInventory").classList.add("active");
+      document.getElementById("tabBrowse").classList.remove("active");
+    }
+
+    function showBrowse() {
+      document.getElementById("inventorySection").style.display = "none";
+      document.getElementById("browseSection").style.display = "block";
+      document.getElementById("tabInventory").classList.remove("active");
+      document.getElementById("tabBrowse").classList.add("active");
+    }
+  </script>
 </body>
 </html>

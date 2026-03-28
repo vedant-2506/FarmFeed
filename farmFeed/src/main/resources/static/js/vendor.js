@@ -1,9 +1,27 @@
 // ============================================================
 // FarmFeed - vendor.js
 // ============================================================
-const BASE_URL = "https://farmfeed-backend.onrender.com";
+const BASE_URL = window.API_BASE_URL || window.location.origin;
 
 document.addEventListener("DOMContentLoaded", () => {
+  // ✅ Check if user is logged in as vendor
+  const shopId = localStorage.getItem("shop_id");
+  const shopName = localStorage.getItem("shop_name");
+  
+  if (!shopId || !shopName) {
+    alert("Please login as vendor first");
+    window.location.href = "Login.html";
+    return;
+  }
+
+  // ✅ Logout button
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      localStorage.clear();
+      window.location.href = "Login.html";
+    });
+  }
 
   loadVendorInfo();
   loadStats();
