@@ -3,6 +3,25 @@
 // ============================================================
 
 document.addEventListener("DOMContentLoaded", () => {
+  // ✅ Check if user is logged in
+  const farmerId = localStorage.getItem("farmer_id");
+  const vendorId = localStorage.getItem("shop_id");
+  
+  if (!farmerId && !vendorId) {
+    alert("Please login first");
+    window.location.href = "Login.html";
+    return;
+  }
+
+  // ✅ Logout button
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      localStorage.clear();
+      window.location.href = "Login.html";
+    });
+  }
+
   const cartContainer = document.getElementById("cart-items");
   const clearCartBtn  = document.getElementById("clear-cart");
 
@@ -60,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             <p class="text-muted mb-2">Subtotal: <strong>₹${subtotal}</strong></p>
             <button class="btn btn-outline-danger btn-sm remove-btn mt-auto" data-index="${index}">
-              🗑 Remove
+              Remove
             </button>
           </div>
         </div>`;
@@ -80,7 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
             <p class="mb-1">Subtotal: <strong>₹${grandTotal.toLocaleString("en-IN")}</strong></p>
             <p class="mb-1 text-muted">GST (18%): ₹${gst.toFixed(2)}</p>
             <p class="fs-5 fw-bold text-success">Grand Total: ₹${grandGst.toFixed(2)}</p>
-            <a href="#" class="btn btn-success px-5 mt-2">
+            <a href="Checkout.html" class="btn btn-success px-5 mt-2">
               Proceed to Checkout →
             </a>
           </div>

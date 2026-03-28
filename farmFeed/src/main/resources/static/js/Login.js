@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  const BASE_URL = "https://farmfeed-backend.onrender.com";
+  const BASE_URL = window.API_BASE_URL || window.location.origin;
 
   const farmerForm = document.getElementById("farmerLoginForm");
   farmerForm.addEventListener("submit", async (e) => {
@@ -18,8 +18,14 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       const data = await response.json();
       if (response.ok && data.success) {
+        // Store farmer info in localStorage
+        localStorage.setItem("farmer_id", data.id);
+        localStorage.setItem("farmer_name", data.fullName);
+        localStorage.setItem("user_name", data.fullName); // For dropdown display
+        localStorage.setItem("farmer_phone", data.phone);
+        localStorage.setItem("user_type", "farmer");
         alert("Farmer Login Successful!");
-        window.location.href = "Home.html";
+        window.location.href = "FarmerAccount.html";
       } else {
         alert(data.error || "Invalid Farmer Credentials");
       }
@@ -42,8 +48,14 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       const data = await response.json();
       if (response.ok && data.success) {
+        // Store vendor info in localStorage
+        localStorage.setItem("shop_id", data.id);
+        localStorage.setItem("shop_name", data.shopName);
+        localStorage.setItem("owner_name", data.ownerName);
+        localStorage.setItem("user_name", data.ownerName); // For dropdown display
+        localStorage.setItem("user_type", "vendor");
         alert("Vendor Login Successful!");
-        window.location.href = "vendor.html";
+        window.location.href = "VendorAccount.html";
       } else {
         alert(data.error || "Invalid Vendor Credentials");
       }

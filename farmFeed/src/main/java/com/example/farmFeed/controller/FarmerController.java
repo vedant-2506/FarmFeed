@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import com.example.farmFeed.entity.Farmer;
 import com.example.farmFeed.service.FarmerService;
 import java.util.Optional;
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -29,6 +28,14 @@ public class FarmerController {
     public ResponseEntity<?> SignUp(@RequestBody Farmer farmer) {
         try {
             logger.info("Sign up request received for phone: {}", farmer.getPhone());
+
+            if (farmer.getFullName() == null || farmer.getFullName().isBlank() ||
+                farmer.getAddress() == null || farmer.getAddress().isBlank() ||
+                farmer.getPhone() == null || farmer.getPhone().isBlank() ||
+                farmer.getPassword() == null || farmer.getPassword().isBlank()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "error", "Please fill all required farmer fields"));
+            }
             
             // Check if phone already exists
             Optional<Farmer> existing = service.findByPhone(farmer.getPhone());
@@ -36,6 +43,11 @@ public class FarmerController {
                 logger.warn("Phone already registered: {}", farmer.getPhone());
                 return ResponseEntity.badRequest()
                     .body(Map.of("success", false, "error", "Phone number already registered"));
+            }
+
+            // Farmer signup does not ask for email in UI. Keep a generated value for DB compatibility.
+            if (farmer.getEmail() == null || farmer.getEmail().isBlank()) {
+                farmer.setEmail(farmer.getPhone() + "@farmfeed.local");
             }
 
             logger.info("Saving new farmer: {} with phone: {}", farmer.getFullName(), farmer.getPhone());
@@ -95,6 +107,66 @@ public class FarmerController {
             logger.error("Login error: {}", e.getMessage(), e);
             return ResponseEntity.badRequest()
                 .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    /**
+     * POST /api/farmer/reset-password - Reset farmer password
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        try {
+            String phone = request.get("phone");
+            String newPassword = request.get("password");
+
+            if (phone == null || newPassword == null) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "error", "Phone and password required"));
+            }
+
+            Optional<Farmer> farmer = service.findByPhone(phone);
+            if (farmer.isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "error", "Farmer not found"));
+            }
+
+            Farmer f = farmer.get();
+            f.setPassword(newPassword);
+            service.save(f);
+
+            logger.info("Password reset successful for phone: {}", phone);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Password reset successful"));
+        } catch (Exception e) {
+            logger.error("Password reset error: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest()
+                .body(Map.of("success", false, "error", "Password reset failed: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * GET /api/farmer/{id} - Get farmer profile
+     */
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getFarmerProfile(@PathVariable Long id) {
+        try {
+            Optional<Farmer> farmer = service.findById(id);
+            if (farmer.isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "error", "Farmer not found"));
+            }
+
+            Farmer f = farmer.get();
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "farmer_id", f.getId(),
+                "fullName", f.getFullName(),
+                "phone", f.getPhone(),
+                "email", f.getEmail(),
+                "address", f.getAddress()
+            ));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("success", false, "error", "Failed to fetch profile"));
         }
     }
 }

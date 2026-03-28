@@ -21,41 +21,28 @@ public class VendorController {
     @Autowired
     private VendorService service;
 
-    /**
-     * POST /api/shopkeeper/register - Register a new vendor (shopkeeper)
-     */
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Vendor vendor) {
         try {
-            logger.info("Registration request received for vendor email: {}", vendor.getEmail());
-
-            // Check if email already exists
-            Optional<Vendor> existingEmail = service.findByEmail(vendor.getEmail());
-            if (existingEmail.isPresent()) {
-                logger.warn("Email already registered: {}", vendor.getEmail());
+            if (service.findByEmail(vendor.getEmail()).isPresent()) {
                 return ResponseEntity.badRequest()
                     .body(Map.of("success", false, "error", "Email already registered"));
             }
 
-            // Check if license number already exists
-            Optional<Vendor> existingLicense = service.findByLicenseNumber(vendor.getLicenseNumber());
-            if (existingLicense.isPresent()) {
-                logger.warn("License number already registered: {}", vendor.getLicenseNumber());
+            if (service.findByLicenseNumber(vendor.getLicenseNumber()).isPresent()) {
                 return ResponseEntity.badRequest()
                     .body(Map.of("success", false, "error", "License number already registered"));
             }
 
-            logger.info("Saving new vendor: {} with email: {}", vendor.getShopName(), vendor.getEmail());
-            Vendor savedVendor = service.register(vendor);
+            Vendor saved = service.register(vendor);
 
-            logger.info("Vendor registered successfully! ID: {}, Email: {}", savedVendor.getId(), savedVendor.getEmail());
             return ResponseEntity.ok(Map.of(
                 "success", true,
                 "message", "Registration successful",
-                "shop_id", savedVendor.getId(),
-                "email", savedVendor.getEmail(),
-                "shop_name", savedVendor.getShopName(),
-                "owner_name", savedVendor.getOwnerName()
+                "shop_id", saved.getId(),
+                "email", saved.getEmail(),
+                "shop_name", saved.getShopName(),
+                "owner_name", saved.getOwnerName()
             ));
         } catch (Exception e) {
             logger.error("Registration failed with error: {}", e.getMessage(), e);
@@ -130,6 +117,39 @@ public class VendorController {
             logger.error("Error fetching vendor: {}", e.getMessage(), e);
             return ResponseEntity.badRequest()
                 .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    /**
+     * POST /api/shopkeeper/reset-password - Reset vendor password
+     */
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody Map<String, String> request) {
+        try {
+            String email = request.get("email");
+            String newPassword = request.get("password");
+
+            if (email == null || newPassword == null) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "error", "Email and password required"));
+            }
+
+            Optional<Vendor> vendor = service.findByEmail(email);
+            if (vendor.isEmpty()) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "error", "Vendor not found"));
+            }
+
+            Vendor v = vendor.get();
+            v.setPassword(newPassword);
+            service.register(v);
+
+            logger.info("Password reset successful for vendor email: {}", email);
+            return ResponseEntity.ok(Map.of("success", true, "message", "Password reset successful"));
+        } catch (Exception e) {
+            logger.error("Password reset error: {}", e.getMessage(), e);
+            return ResponseEntity.badRequest()
+                .body(Map.of("success", false, "error", "Password reset failed: " + e.getMessage()));
         }
     }
 }

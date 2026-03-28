@@ -50,4 +50,20 @@ public class FarmerService {
     public Optional<Farmer> findByPhone(String phone) {
         return repository.findByPhone(phone);
     }
+
+    /**
+     * Find farmer by email
+     */
+    @Transactional(readOnly = true)
+    public Optional<Farmer> findByEmail(String email) {
+        return repository.findByEmail(email);
+    }
+
+    /**
+     * Find farmer by ID
+     */
+    @Transactional(readOnly = true)
+    public Optional<Farmer> findById(Long id) {
+        return repository.findById(id);
+    }
 }

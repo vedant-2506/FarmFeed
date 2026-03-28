@@ -1,4 +1,4 @@
-package com.example.farmFeed;
+ package com.example.farmFeed;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

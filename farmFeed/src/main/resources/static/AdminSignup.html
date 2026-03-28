@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Sign Up | FarmFeed</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .signup-container {
+      width: 100%;
+      max-width: 500px;
+      padding: 20px;
+    }
+
+    .signup-card {
+      background: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      padding: 50px 30px;
+      animation: slideUp 0.5s ease-out;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(40px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .signup-header {
+      text-align: center;
+      margin-bottom: 35px;
+    }
+
+    .logo-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 40px;
+      color: white;
+    }
+
+    .signup-header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .signup-header p {
+      color: #999;
+      font-size: 14px;
+    }
+
+    .form-group {
+      margin-bottom: 18px;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: all 0.3s;
+    }
+
+    .form-control:focus {
+      border-color: #667eea;
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .password-wrapper {
+      position: relative;
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #999;
+      font-size: 18px;
+      border: none;
+      background: none;
+      padding: 0;
+    }
+
+    .password-toggle:hover {
+      color: #667eea;
+    }
+
+    .btn-signup {
+      width: 100%;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-top: 10px;
+    }
+
+    .btn-signup:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-signup:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .error-message {
+      background: #fee;
+      color: #c33;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #c33;
+      display: none;
+      font-size: 14px;
+    }
+
+    .error-message.show {
+      display: block;
+      animation: slideDown 0.3s ease-out;
+    }
+
+    .success-message {
+      background: #efe;
+      color: #393;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border-left: 4px solid #393;
+      display: none;
+      font-size: 14px;
+    }
+
+    .success-message.show {
+      display: block;
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .form-text {
+      font-size: 12px;
+      color: #999;
+      margin-top: 4px;
+    }
+
+    .signup-footer {
+      text-align: center;
+      margin-top: 25px;
+      padding-top: 20px;
+      border-top: 1px solid #eee;
+    }
+
+    .signup-footer p {
+      margin: 0;
+      font-size: 14px;
+      color: #666;
+    }
+
+    .signup-footer a {
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .signup-footer a:hover {
+      text-decoration: underline;
+    }
+
+    .loader {
+      display: inline-block;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.6s linear infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .password-strength {
+      display: none;
+      margin-top: 8px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .password-strength.show {
+      display: block;
+    }
+
+    .password-strength.weak {
+      background: #fdd;
+      color: #c33;
+    }
+
+    .password-strength.medium {
+      background: #ffd;
+      color: #993;
+    }
+
+    .password-strength.strong {
+      background: #dfd;
+      color: #393;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="signup-container">
+    <div class="signup-card">
+      <!-- Header -->
+      <div class="signup-header">
+        <div class="logo-icon">
+          <i class="bi bi-person-plus"></i>
+        </div>
+        <h1>Create Admin Account</h1>
+        <p>Register a new administrator</p>
+      </div>
+
+      <!-- Messages -->
+      <div id="errorMessage" class="error-message"></div>
+      <div id="successMessage" class="success-message"></div>
+
+      <!-- Signup Form -->
+      <form id="signupForm" onsubmit="handleSignup(event)">
+        <!-- Full Name -->
+        <div class="form-group">
+          <label class="form-label" for="fullName">
+            <i class="bi bi-person"></i> Full Name
+          </label>
+          <input 
+            type="text" 
+            id="fullName" 
+            class="form-control" 
+            placeholder="Enter full name"
+            required
+            minlength="3"
+          />
+          <small class="form-text">At least 3 characters</small>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label class="form-label" for="email">
+            <i class="bi bi-envelope"></i> Email
+          </label>
+          <input 
+            type="email" 
+            id="email" 
+            class="form-control" 
+            placeholder="Enter email address"
+            required
+          />
+          <small class="form-text">We'll use this for communication</small>
+        </div>
+
+        <!-- Username -->
+        <div class="form-group">
+          <label class="form-label" for="username">
+            <i class="bi bi-person-badge"></i> Username
+          </label>
+          <input 
+            type="text" 
+            id="username" 
+            class="form-control" 
+            placeholder="Choose a username"
+            required
+            minlength="4"
+          />
+          <small class="form-text">4-20 characters, letters and numbers only</small>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label class="form-label" for="password">
+            <i class="bi bi-lock"></i> Password
+          </label>
+          <div class="password-wrapper">
+            <input 
+              type="password" 
+              id="password" 
+              class="form-control" 
+              placeholder="Create a strong password"
+              required
+              minlength="6"
+              onkeyup="checkPasswordStrength()"
+            />
+            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('password', 'toggleIcon1')">
+              <i class="bi bi-eye" id="toggleIcon1"></i>
+            </button>
+          </div>
+          <div id="passwordStrength" class="password-strength"></div>
+          <small class="form-text">At least 6 characters with numbers and symbols</small>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="form-group">
+          <label class="form-label" for="confirmPassword">
+            <i class="bi bi-lock-check"></i> Confirm Password
+          </label>
+          <div class="password-wrapper">
+            <input 
+              type="password" 
+              id="confirmPassword" 
+              class="form-control" 
+              placeholder="Re-enter password"
+              required
+            />
+            <button type="button" class="password-toggle" onclick="togglePasswordVisibility('confirmPassword', 'toggleIcon2')">
+              <i class="bi bi-eye" id="toggleIcon2"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Agree to Terms -->
+        <div class="form-group">
+          <div style="display: flex; align-items: flex-start; gap: 8px;">
+            <input type="checkbox" id="agreeTerms" required style="margin-top: 4px;" />
+            <label for="agreeTerms" style="margin: 0; font-size: 13px; color: #666;">
+              I agree to the terms and conditions
+            </label>
+          </div>
+        </div>
+
+        <!-- Signup Button -->
+        <button type="submit" class="btn-signup" id="signupBtn">
+          <i class="bi bi-person-plus"></i> Create Account
+        </button>
+      </form>
+
+      <!-- Footer -->
+      <div class="signup-footer">
+        <p>Already have an account? <a href="AdminLogin.html">Login here</a></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // Simulated admin accounts (in production, use a real database)
+    let admins = JSON.parse(localStorage.getItem("admins")) || [];
+
+    function togglePasswordVisibility(fieldId, iconId) {
+      const field = document.getElementById(fieldId);
+      const icon = document.getElementById(iconId);
+
+      if (field.type === "password") {
+        field.type = "text";
+        icon.classList.remove("bi-eye");
+        icon.classList.add("bi-eye-slash");
+      } else {
+        field.type = "password";
+        icon.classList.remove("bi-eye-slash");
+        icon.classList.add("bi-eye");
+      }
+    }
+
+    function checkPasswordStrength() {
+      const password = document.getElementById("password").value;
+      const strengthEl = document.getElementById("passwordStrength");
+
+      if (!password) {
+        strengthEl.classList.remove("show");
+        return;
+      }
+
+      let strength = 0;
+      
+      // Length check
+      if (password.length >= 6) strength++;
+      if (password.length >= 10) strength++;
+      
+      // Uppercase check
+      if (/[A-Z]/.test(password)) strength++;
+      
+      // Lowercase check
+      if (/[a-z]/.test(password)) strength++;
+      
+      // Number check
+      if (/[0-9]/.test(password)) strength++;
+      
+      // Symbol check
+      if (/[!@#$%^&*]/.test(password)) strength++;
+
+      strengthEl.classList.add("show");
+
+      if (strength <= 2) {
+        strengthEl.className = "password-strength show weak";
+        strengthEl.textContent = "⚠️ Weak password";
+      } else if (strength <= 4) {
+        strengthEl.className = "password-strength show medium";
+        strengthEl.textContent = "→ Medium strength";
+      } else {
+        strengthEl.className = "password-strength show strong";
+        strengthEl.textContent = "✓ Strong password";
+      }
+    }
+
+    function showMessage(message, type = "error") {
+      const messageEl = type === "error" 
+        ? document.getElementById("errorMessage")
+        : document.getElementById("successMessage");
+      
+      messageEl.textContent = message;
+      messageEl.classList.add("show");
+
+      setTimeout(() => {
+        messageEl.classList.remove("show");
+      }, 5000);
+    }
+
+    async function handleSignup(event) {
+      event.preventDefault();
+
+      const fullName = document.getElementById("fullName").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+      const confirmPassword = document.getElementById("confirmPassword").value;
+
+      // Validation
+      if (!/^[a-zA-Z\s]+$/.test(fullName)) {
+        showMessage("✗ Full name should contain only letters");
+        return;
+      }
+
+      if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        showMessage("✗ Username should contain only letters, numbers, and underscores");
+        return;
+      }
+
+      if (username.length < 4 || username.length > 20) {
+        showMessage("✗ Username must be 4-20 characters");
+        return;
+      }
+
+      if (admins.some(a => a.username === username)) {
+        showMessage("✗ Username already exists!");
+        return;
+      }
+
+      if (admins.some(a => a.email === email)) {
+        showMessage("✗ Email already registered!");
+        return;
+      }
+
+      if (password !== confirmPassword) {
+        showMessage("✗ Passwords do not match!");
+        return;
+      }
+
+      if (password.length < 6) {
+        showMessage("✗ Password must be at least 6 characters");
+        return;
+      }
+
+      const btn = document.getElementById("signupBtn");
+      btn.disabled = true;
+      const originalHTML = btn.innerHTML;
+      signupBtn.innerHTML = '<span class="loader"></span>Creating account...';
+
+      // Simulate API call
+      setTimeout(() => {
+        // Create new admin account
+        const newAdmin = {
+          id: Date.now(),
+          fullName: fullName,
+          email: email,
+          username: username,
+          password: password, // In production, hash this!
+          createdAt: new Date().toISOString(),
+          status: "active"
+        };
+
+        // Store in localStorage
+        admins.push(newAdmin);
+        localStorage.setItem("admins", JSON.stringify(admins));
+
+        showMessage("✓ Account created successfully! Redirecting to login...", "success");
+
+        setTimeout(() => {
+          window.location.href = "AdminLogin.html";
+        }, 1500);
+      }, 800);
+    }
+  </script>
+</body>
+</html>

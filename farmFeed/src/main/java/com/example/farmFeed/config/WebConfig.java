@@ -9,11 +9,6 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Serve static resources from classpath:/static/
-        registry.addResourceHandler("/**")
-                .addResourceLocations("classpath:/static/")
-                .setCachePeriod(3600);
-        
         // CSS resources
         registry.addResourceHandler("/css/**")
                 .addResourceLocations("classpath:/static/css/")
@@ -22,6 +17,11 @@ public class WebConfig implements WebMvcConfigurer {
         // JS resources
         registry.addResourceHandler("/js/**")
                 .addResourceLocations("classpath:/static/js/")
+                .setCachePeriod(3600);
+        
+        // HTML and other static files (but NOT /api/*)
+        registry.addResourceHandler("/*.html", "/*.png", "/*.jpg", "/*.jpeg", "/*.gif", "/*.css", "/*.js", "/favicon.ico")
+                .addResourceLocations("classpath:/static/")
                 .setCachePeriod(3600);
     }
 }
