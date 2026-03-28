@@ -20,6 +20,14 @@ Thumbs.db
 # Maven
 .mvn/wrapper/maven-wrapper.jar
 
+# Python/Virtual Environments
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+dist/
+
 # Logs
 *.log
 logs/
