@@ -8,8 +8,8 @@ A comprehensive Java Spring Boot platform connecting farmers directly with vendo
 - [Database Setup](#-database-setup)
 - [Running the Application](#-running-the-application)
 - [Sample Data](#-sample-data)
+- [Team Collaboration](#-team-collaboration-important)
 - [Troubleshooting](#-troubleshooting)
-- [Team Collaboration](#-team-collaboration)
 
 ---
 
@@ -337,6 +337,35 @@ After setup, verify:
 
 ---
 
-**Last Updated:** March 29, 2024  
+## 👥 Team Collaboration (IMPORTANT!)
+
+### ⚠️ Why Your Team Member Doesn't See Products?
+
+Your local database has 1000+ products, but they are **NOT** automatically shared with team members because:
+1. **Database data lives locally** in MySQL, not in git
+2. **Only the schema structure** is in the SQL file
+3. **Team members need to import your data** to see the same products
+
+### ✅ How to Share Your 1000+ Products with Team
+
+**See [TEAM_MEMBER_SETUP_GUIDE.md](TEAM_MEMBER_SETUP_GUIDE.md) for detailed instructions:**
+
+1. **You (Project Lead):**
+   - Export your database with `mysqldump`
+   - Push the updated SQL file to git
+   - Share the guide with team members
+
+2. **Team Members:**
+   - Pull the latest code from git
+   - Import the SQL file into their MySQL
+   - Run the application
+
+This ensures everyone has the **exact same data and products**!
+
+📖 **Read [TEAM_MEMBER_SETUP_GUIDE.md](TEAM_MEMBER_SETUP_GUIDE.md) now!**
+
+---
+
+**Last Updated:** March 30, 2024  
 **Version:** 1.0.0  
 **Repository:** https://github.com/vedant-2506/FarmFeed
