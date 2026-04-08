@@ -4,8 +4,6 @@ import com.example.farmFeed.entity.VendorInventory;
 import com.example.farmFeed.repository.VendorInventoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map;
@@ -14,8 +12,6 @@ import java.util.ArrayList;
 
 @Service
 public class VendorInventoryService {
-
-    private static final Logger logger = LoggerFactory.getLogger(VendorInventoryService.class);
 
     @Autowired
     private VendorInventoryRepository repository;

@@ -1,7 +1,6 @@
 package com.example.farmFeed.controller;
 
 import com.example.farmFeed.service.VendorInventoryService;
-import com.example.farmFeed.service.FertilizerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,9 +18,6 @@ public class VendorInventoryController {
 
     @Autowired
     private VendorInventoryService inventoryService;
-
-    @Autowired
-    private FertilizerService fertilizerService;
 
     private Integer parseFertilizerId(String id) {
         if (id.contains("_")) {

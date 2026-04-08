@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: farmfeed-backend
+    runtime: docker
+    region: oregon
+    plan: free
+    env:
+      # Database Configuration - Will be set from Aiven
+      - key: DB_URL
+        scope: build,runtime
+        value: jdbc:mysql://${DB_HOST}:${DB_PORT}/farmfeed_db?createDatabaseIfNotExist=true&useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      - key: DB_USER
+        scope: build,runtime
+        fromService:
+          name: aiven_mysql
+          property: username
+      - key: DB_PASS
+        scope: build,runtime
+        fromService:
+          name: aiven_mysql
+          property: password
+      - key: DB_HOST
+        scope: build,runtime
+        fromService:
+          name: aiven_mysql
+          property: host
+      - key: DB_PORT
+        scope: build,runtime
+        fromService:
+          name: aiven_mysql
+          property: port
+      - key: DB_DRIVER
+        value: com.mysql.cj.jdbc.Driver
+      - key: JPA_DIALECT
+        value: org.hibernate.dialect.MySQLDialect
+      - key: PORT
+        value: "8080"
+    healthCheckPath: /
+    dockerfilePath: ./farmFeed/Dockerfile
+    autoDeploy: true

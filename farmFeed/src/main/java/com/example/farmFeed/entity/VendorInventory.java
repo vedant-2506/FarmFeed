@@ -35,6 +35,7 @@ public class VendorInventory {
     private Integer quantityInStock;  // Vendor's stock
 
     @Column(name = "is_active", nullable = false)
+    @Builder.Default
     private Boolean isActive = true;
 
     @Column(name = "added_at", nullable = false, updatable = false)

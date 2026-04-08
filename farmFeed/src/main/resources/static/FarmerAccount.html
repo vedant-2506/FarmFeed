@@ -131,12 +131,6 @@
         return;
       }
 
-      // Logout button
-      document.getElementById("logoutBtn").addEventListener("click", () => {
-        localStorage.clear();
-        window.location.href = "Login.html";
-      });
-
       // Populate header
       document.getElementById("farmerName").textContent = farmerName;
       document.getElementById("farmerPhone").textContent = farmerPhone;
@@ -154,6 +148,52 @@
             }
           })
           .catch(err => console.log("Profile fetch error:", err));
+      }
+
+      // Load orders from backend
+      if (farmerId) {
+        fetch(`${BASE_URL}/api/orders/farmer/${farmerId}`)
+          .then(res => res.json())
+          .then(data => {
+            const ordersContainer = document.getElementById("ordersContainer");
+            if (data.success && data.data && data.data.length > 0) {
+              let ordersHTML = "";
+              data.data.forEach(order => {
+                const statusClass = order.status === 'completed' ? 'status-completed' : 
+                                   order.status === 'pending' ? 'status-pending' : 
+                                   order.status === 'cancelled' ? 'status-cancelled' : '';
+                
+                ordersHTML += `
+                  <div class="order-item">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                      <div>
+                        <strong>Order ID: #${order.id}</strong>
+                        <br />
+                        <small class="text-muted">${new Date(order.createdAt || order.created_at).toLocaleDateString()}</small>
+                      </div>
+                      <span class="order-status ${statusClass}">${order.status ? order.status.toUpperCase() : 'PENDING'}</span>
+                    </div>
+                    <div class="mt-2">
+                      <small><strong>Delivery Address:</strong> ${order.deliveryAddress || order.delivery_address || 'N/A'}</small>
+                    </div>
+                    <div class="mt-2">
+                      <small><strong>Total Amount:</strong> Rs${order.totalAmount || order.total_amount || 0}</small>
+                    </div>
+                    <div class="mt-2">
+                      <small><strong>Payment Method:</strong> ${order.paymentMethod || order.payment_method || 'N/A'}</small>
+                    </div>
+                  </div>
+                `;
+              });
+              ordersContainer.innerHTML = ordersHTML;
+            } else {
+              ordersContainer.innerHTML = '<p class="text-muted text-center">No orders yet. <a href="Home.html">Start Shopping!</a></p>';
+            }
+          })
+          .catch(err => {
+            console.log("Orders fetch error:", err);
+            document.getElementById("ordersContainer").innerHTML = '<p class="text-danger text-center">Error loading orders</p>';
+          });
       }
 
       // Load cart
@@ -186,11 +226,16 @@
 
       // Logout
       document.getElementById("logoutBtn").addEventListener("click", () => {
-        localStorage.removeItem("farmer_id");
-        localStorage.removeItem("farmer_name");
-        localStorage.removeItem("farmer_phone");
-        alert("Logged out successfully!");
-        window.location.href = "Login.html";
+        if (confirm("Are you sure you want to logout?")) {
+          localStorage.removeItem("farmer_id");
+          localStorage.removeItem("farmer_name");
+          localStorage.removeItem("farmer_phone");
+          localStorage.removeItem("user_type");
+          localStorage.removeItem("user_name");
+          localStorage.removeItem("cart");
+          alert("Logged out successfully!");
+          window.location.href = "Home.html";
+        }
       });
     });
   </script>

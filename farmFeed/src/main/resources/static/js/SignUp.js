@@ -66,12 +66,16 @@ document.addEventListener("DOMContentLoaded", function () {
     const shopName = document.getElementById("vendorShopName").value.trim();
     const licenseNumber = document.getElementById("vendorLicenseNumber").value.trim();
     const shopAddress = document.getElementById("vendorShopAddress").value.trim();
+    const phone = document.getElementById("vendorPhone").value.trim();
     const email = document.getElementById("vendorEmail").value.trim();
     const password = document.getElementById("vendorPassword").value.trim();
     const confirmPassword = document.getElementById("vendorConfirmPassword").value.trim();
 
-    if (!ownerName || !shopName || !licenseNumber || !shopAddress || !email || !password || !confirmPassword) {
+    if (!ownerName || !shopName || !licenseNumber || !shopAddress || !phone || !email || !password || !confirmPassword) {
       alert("Please fill all fields"); return;
+    }
+    if (!/^\d{10}$/.test(phone)) {
+      alert("Phone number must be exactly 10 digits"); return;
     }
     if (password !== confirmPassword) {
       alert("Passwords do not match"); return;
@@ -81,7 +85,7 @@ document.addEventListener("DOMContentLoaded", function () {
       const response = await fetch(`${BASE_URL}/api/shopkeeper/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ownerName, shopName, licenseNumber, shopAddress, email, password })
+        body: JSON.stringify({ ownerName, shopName, licenseNumber, shopAddress, phone, email, password })
       });
       const data = await response.json();
       if (response.ok && data.success) {

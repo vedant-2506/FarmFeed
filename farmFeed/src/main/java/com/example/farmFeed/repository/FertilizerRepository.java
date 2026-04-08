@@ -107,7 +107,6 @@ public class FertilizerRepository {
         
         if (tableExists("bighaat_products_raw")) {
             //Build bighaat IDs like "bighaat_1", "bighaat_10", etc. for the IN clause
-            StringBuilder inClause = new StringBuilder();
             List<String> bighaat = new ArrayList<>();
             for (Integer id : ids) {
                 bighaat.add("bighaat_" + id);

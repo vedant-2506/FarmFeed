@@ -379,9 +379,11 @@
             <i class="bi bi-bag-check"></i> Your Orders
           </div>
           <div class="content-subtitle">Track customer orders</div>
-          <div class="empty-state">
-            <i class="bi bi-inbox"></i>
-            <p>No orders yet</p>
+          <div id="ordersContainer" class="mt-4">
+            <div class="empty-state">
+              <i class="bi bi-inbox"></i>
+              <p>No orders yet</p>
+            </div>
           </div>
         </div>
       </div>
@@ -437,15 +439,21 @@
       try {
         const res = await fetch(`${BASE_URL}/api/shopkeeper/${shopId}`);
         const data = await res.json();
+        console.log("Vendor info response:", data);
 
-        if (data.success && data.data) {
-          const vendor = data.data;
-          document.getElementById("shopName").textContent = vendor.shop_name || "My Shop";
-          document.getElementById("ownerName").textContent = vendor.owner_name || "-";
-          document.getElementById("shopEmail").textContent = vendor.email || "-";
+        if (data.success && data) {
+          document.getElementById("shopName").textContent = data.shop_name || "My Shop";
+          document.getElementById("ownerName").textContent = data.owner_name || "-";
+          document.getElementById("shopEmail").textContent = data.email || "-";
+          console.log("Vendor info loaded successfully");
+        } else {
+          console.warn("Vendor info not available:", data);
         }
       } catch (err) {
         console.error("Error loading vendor info:", err);
+        document.getElementById("shopName").textContent = "My Shop";
+        document.getElementById("ownerName").textContent = "-";
+        document.getElementById("shopEmail").textContent = "-";
       }
     }
 
@@ -506,10 +514,16 @@
     function displayInventory(items) {
       const container = document.getElementById("inventoryList");
 
-      container.innerHTML = items.map(item => `
+      container.innerHTML = items.map(item => {
+        // Try to find image URL from various possible field names
+        const imageUrl = item.image_url || item.fertilizer_image_url || item.image || 
+                        item.fertilizer_image || 'https://via.placeholder.com/280x180?text=' + encodeURIComponent(item.name);
+        
+        return `
         <div class="product-card">
           <div class="product-image">
-            <img src="https://via.placeholder.com/280x180?text=${item.name}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/280x180?text=Fertilizer'">
+            <img src="${imageUrl}" alt="${item.name}" 
+                 onerror="this.src='https://via.placeholder.com/280x180?text=${encodeURIComponent(item.name)}'">
           </div>
           <div class="product-info">
             <div class="product-name">${item.name}</div>
@@ -541,7 +555,8 @@
             </div>
           </div>
         </div>
-      `).join("");
+      `;
+      }).join("");
     }
 
     function openEditModal(productId, price, quantity) {
@@ -616,16 +631,163 @@
         document.getElementById("inventorySection").style.display = 'block';
         loadInventory();
       }
-      if (section === 'orders') document.getElementById("ordersSection").style.display = 'block';
+      if (section === 'orders') {
+        document.getElementById("ordersSection").style.display = 'block';
+        loadVendorOrders();
+      }
 
       document.querySelectorAll(".sidebar-item").forEach(item => item.classList.remove("active"));
       event.target.closest(".sidebar-item").classList.add("active");
     }
 
+    async function loadVendorOrders() {
+      try {
+        const res = await fetch(`${BASE_URL}/api/orders/vendor/${shopId}`);
+        const data = await res.json();
+
+        const container = document.getElementById("ordersContainer");
+        
+        if (data.success && data.data && data.data.length > 0) {
+          let ordersHTML = "";
+          data.data.forEach(order => {
+            const statusClass = order.status === 'completed' ? 'status-completed' : 
+                               order.status === 'accepted' ? 'status-accepted' : 
+                               order.status === 'pending' ? 'status-pending' : 
+                               order.status === 'rejected' ? 'status-cancelled' : '';
+            
+            ordersHTML += `
+              <div style="border-left: 4px solid #28a745; padding: 15px; margin-bottom: 15px; background: #f9f9f9; border-radius: 5px;">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                  <div>
+                    <strong>Order #${order.id}</strong>
+                    <br />
+                    <small style="color: #999;">${new Date(order.createdAt || order.created_at).toLocaleDateString()}</small>
+                  </div>
+                  <span style="display: inline-block; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; background: #fff3cd; color: #856404;">
+                    ${order.status ? order.status.toUpperCase() : 'PENDING'}
+                  </span>
+                </div>
+                <div style="margin-top: 10px; font-size: 14px;">
+                  <strong>Customer:</strong> ${order.farmerName || order.farmer_name || 'N/A'}
+                </div>
+                <div style="margin-top: 8px; font-size: 14px;">
+                  <strong>Delivery Address:</strong> ${order.deliveryAddress || order.delivery_address || 'N/A'}
+                </div>
+                <div style="margin-top: 8px; font-size: 14px;">
+                  <strong>Total Amount:</strong> Rs${order.totalAmount || order.total_amount || 0}
+                </div>
+                <div style="margin-top: 8px; font-size: 14px;">
+                  <strong>Payment Method:</strong> ${order.paymentMethod || order.payment_method || 'N/A'}
+                </div>
+                <div style="margin-top: 12px; display: flex; gap: 8px;">
+                  ${order.status === 'pending' ? `
+                    <button class="btn btn-sm btn-success" onclick="acceptOrder(${order.id})">
+                      <i class="bi bi-check-circle"></i> Accept
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="rejectOrder(${order.id})">
+                      <i class="bi bi-x-circle"></i> Reject
+                    </button>
+                  ` : ''}
+                  ${order.status === 'accepted' ? `
+                    <button class="btn btn-sm btn-info" onclick="shipOrder(${order.id})">
+                      <i class="bi bi-box-seam"></i> Ship
+                    </button>
+                  ` : ''}
+                </div>
+              </div>
+            `;
+          });
+          container.innerHTML = ordersHTML;
+          document.getElementById("totalOrders").textContent = data.data.length;
+        } else {
+          container.innerHTML = `
+            <div class="empty-state">
+              <i class="bi bi-inbox"></i>
+              <p>No orders yet</p>
+            </div>
+          `;
+        }
+      } catch (err) {
+        console.error("Error loading vendor orders:", err);
+        document.getElementById("ordersContainer").innerHTML = '<p style="color: red;">Error loading orders</p>';
+      }
+    }
+
+    async function acceptOrder(orderId) {
+      if (!confirm("Accept this order?")) return;
+      
+      try {
+        const res = await fetch(`${BASE_URL}/api/orders/${orderId}/accept`, {
+          method: "POST"
+        });
+        
+        const data = await res.json();
+        if (data.success) {
+          alert("Order accepted!");
+          loadVendorOrders();
+        } else {
+          alert("Error: " + data.error);
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        alert("Server error!");
+      }
+    }
+
+    async function rejectOrder(orderId) {
+      if (!confirm("Reject this order?")) return;
+      
+      try {
+        const res = await fetch(`${BASE_URL}/api/orders/${orderId}/reject`, {
+          method: "POST"
+        });
+        
+        const data = await res.json();
+        if (data.success) {
+          alert("Order rejected!");
+          loadVendorOrders();
+        } else {
+          alert("Error: " + data.error);
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        alert("Server error!");
+      }
+    }
+
+    async function shipOrder(orderId) {
+      const trackingNumber = prompt("Enter tracking number:");
+      if (!trackingNumber) return;
+      
+      try {
+        const res = await fetch(`${BASE_URL}/api/orders/${orderId}/ship`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ trackingNumber: trackingNumber })
+        });
+        
+        const data = await res.json();
+        if (data.success) {
+          alert("Order shipped!");
+          loadVendorOrders();
+        } else {
+          alert("Error: " + data.error);
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        alert("Server error!");
+      }
+    }
+
     function logout() {
       if (confirm("Are you sure you want to logout?")) {
-        localStorage.clear();
-        window.location.href = "Login.html";
+        localStorage.removeItem("shop_id");
+        localStorage.removeItem("shop_name");
+        localStorage.removeItem("owner_name");
+        localStorage.removeItem("user_type");
+        localStorage.removeItem("user_name");
+        alert("Logged out successfully!");
+        window.location.href = "Home.html";
       }
     }
   </script>

@@ -10,7 +10,15 @@ document.addEventListener("DOMContentLoaded", () => {
   cartButtons.forEach((btn) => {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
-
+      // Check if user is logged in
+      const farmerId = localStorage.getItem("farmer_id");
+      const shopId = localStorage.getItem("shop_id");
+      
+      if (!farmerId && !shopId) {
+        alert("Please login first to add products to cart");
+        window.location.href = "Login.html";
+        return;
+      }
       const card = btn.closest(".card");
       const name = card.querySelector(".card-title").textContent;
       const price = card.querySelector("p strong").textContent;

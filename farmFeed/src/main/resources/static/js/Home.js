@@ -134,6 +134,16 @@ function setupAddToCartButtons() {
 }
 
 function handleAddToCart(button) {
+  // Check if user is logged in
+  const farmerId = localStorage.getItem("farmer_id");
+  const shopId = localStorage.getItem("shop_id");
+  
+  if (!farmerId && !shopId) {
+    alert("Please login first to add products to cart");
+    window.location.href = "Login.html";
+    return;
+  }
+
   const productId = button.dataset.id;
   const productName = button.dataset.name;
   const productPrice = button.dataset.price;

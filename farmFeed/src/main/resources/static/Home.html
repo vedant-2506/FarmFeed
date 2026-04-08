@@ -193,21 +193,26 @@
       sessionStorage.clear();
       clearSessionTimeout();
       
+      // Show logout message
       const alertDiv = document.createElement('div');
       alertDiv.className = 'alert alert-success alert-dismissible fade show';
+      alertDiv.setAttribute('role', 'alert');
+      alertDiv.style.position = 'fixed';
+      alertDiv.style.top = '80px';
+      alertDiv.style.right = '20px';
+      alertDiv.style.zIndex = '9999';
       alertDiv.innerHTML = `
-        Logged out! <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        ✅ Logged out successfully! <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       `;
-      document.body.insertBefore(alertDiv, document.body.firstChild);
+      document.body.appendChild(alertDiv);
+      
+      // Auto dismiss after 3 seconds
       setTimeout(() => {
         alertDiv.remove();
-        }, 3000);
-      }
+      }, 3000);
       
-      // Redirect to login
-      setTimeout(() => {
-        window.location.href = "Login.html";
-      }, 500);
+      // Update the dropdown to show login button (stay on page)
+      updateAccountDropdown();
     }
 
     function startSessionTimeout() {

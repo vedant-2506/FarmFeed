@@ -10,6 +10,7 @@ import com.example.farmFeed.entity.Vendor;
 import com.example.farmFeed.service.VendorService;
 import java.util.Optional;
 import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -42,7 +43,8 @@ public class VendorController {
                 "shop_id", saved.getId(),
                 "email", saved.getEmail(),
                 "shop_name", saved.getShopName(),
-                "owner_name", saved.getOwnerName()
+                "owner_name", saved.getOwnerName(),
+                "phone", saved.getPhone()
             ));
         } catch (Exception e) {
             logger.error("Registration failed with error: {}", e.getMessage(), e);
@@ -104,10 +106,17 @@ public class VendorController {
             Optional<Vendor> vendor = service.getVendorById(id);
             if (vendor.isPresent()) {
                 logger.info("Vendor fetched: {}", id);
-                return ResponseEntity.ok(Map.of(
-                    "success", true,
-                    "vendor", vendor.get()
-                ));
+                Vendor v = vendor.get();
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", true);
+                response.put("shop_id", v.getId());
+                response.put("shop_name", v.getShopName());
+                response.put("owner_name", v.getOwnerName());
+                response.put("email", v.getEmail());
+                response.put("phone", v.getPhone());
+                response.put("shop_address", v.getShopAddress());
+                response.put("license_number", v.getLicenseNumber());
+                return ResponseEntity.ok(response);
             } else {
                 logger.warn("Vendor not found: {}", id);
                 return ResponseEntity.badRequest()

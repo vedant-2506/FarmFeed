@@ -64,7 +64,17 @@ function updateCartCount() {
   if (badge) badge.textContent = String(total);
 }
 
-function addToCart(product) {
+function addToCart(product, showLoginModal) {
+  // Check if user is logged in
+  const farmerId = localStorage.getItem("farmer_id");
+  const shopId = localStorage.getItem("shop_id");
+  
+  if (!farmerId && !shopId) {
+    // Show login modal instead of redirecting
+    showLoginModal();
+    return;
+  }
+
   const cart = JSON.parse(localStorage.getItem("cart") || "[]");
   const existing = cart.find((item) => item.id === product.id);
 
@@ -122,6 +132,7 @@ function HomeCatalogApp() {
   const [error, setError] = React.useState("");
   const [selectedProduct, setSelectedProduct] = React.useState(null);
   const [isDetailOpen, setIsDetailOpen] = React.useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = React.useState(false);
 
   // Get unique primary categories (All, Seed, Crop Production, Crop Nutrition, Other)
   const primaryCategories = React.useMemo(() => {
@@ -308,7 +319,7 @@ function HomeCatalogApp() {
                   className: "product-card-button",
                   onClick: (event) => {
                     event.stopPropagation();
-                    addToCart(product);
+                    addToCart(product, () => setIsLoginModalOpen(true));
                   }
                 },
                 "Add to Cart"
@@ -319,6 +330,75 @@ function HomeCatalogApp() {
       );
     });
   }
+
+  // Login prompt modal
+  const LoginPromptModal = isLoginModalOpen && e(
+    "div",
+    {
+      className: "modal d-block",
+      style: { 
+        backgroundColor: "rgba(0,0,0,0.5)", 
+        display: "flex", 
+        justifyContent: "center", 
+        alignItems: "center",
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 9999
+      },
+      onClick: () => setIsLoginModalOpen(false)
+    },
+    e(
+      "div",
+      {
+        className: "modal-dialog",
+        style: { maxWidth: "400px" },
+        onClick: (event) => event.stopPropagation()
+      },
+      e(
+        "div",
+        { className: "modal-content" },
+        e(
+          "div",
+          { className: "modal-header bg-warning text-dark" },
+          e("h5", { className: "modal-title" }, "⚠️ Login Required"),
+          e(
+            "button",
+            { 
+              type: "button", 
+              className: "btn-close", 
+              onClick: () => setIsLoginModalOpen(false)
+            }
+          )
+        ),
+        e(
+          "div",
+          { className: "modal-body" },
+          e(
+            "p",
+            { className: "text-center text-dark fw-bold mb-3", style: { fontSize: "16px" } },
+            "Please login first to add products to cart"
+          ),
+          e(
+            "p",
+            { className: "text-center text-muted small" },
+            "👤 Click the login button in the top right corner to get started"
+          )
+        ),
+        e(
+          "div",
+          { className: "modal-footer" },
+          e(
+            "button",
+            { type: "button", className: "btn btn-success w-100", onClick: () => setIsLoginModalOpen(false) },
+            "OK, Got it!"
+          )
+        )
+      )
+    )
+  );
 
   // Product detail modal
   const DetailModal = isDetailOpen && selectedProduct && e(
@@ -425,7 +505,7 @@ function HomeCatalogApp() {
               type: "button",
               className: "btn btn-success",
               onClick: () => {
-                addToCart(selectedProduct);
+                addToCart(selectedProduct, () => setIsLoginModalOpen(true));
                 setIsDetailOpen(false);
               }
             },
@@ -442,6 +522,7 @@ function HomeCatalogApp() {
       className: "container-fluid",
       style: { padding: "20px", backgroundColor: "#ffffff", minHeight: "100vh" }
     },
+    LoginPromptModal,
     DetailModal,
 
     // Primary category filter bar (below navbar)
