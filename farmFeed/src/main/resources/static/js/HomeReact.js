@@ -58,41 +58,59 @@ function normalizeProducts(items) {
 }
 
 function updateCartCount() {
-  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-  const total = cart.reduce((sum, item) => sum + (item.qty || item.quantity || 1), 0);
-  const badge = document.getElementById("cart-count");
-  if (badge) badge.textContent = String(total);
+  const farmerId = localStorage.getItem("farmer_id");
+  if (!farmerId) {
+    const badge = document.getElementById("cart-count");
+    if (badge) badge.textContent = "0";
+    return;
+  }
+
+  fetch(`${API_BASE_URL}/api/cart/farmer/${farmerId}/count`)
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const badge = document.getElementById("cart-count");
+        if (badge) badge.textContent = String(data.itemCount || 0);
+      }
+    })
+    .catch(e => console.error("error fetching cart count:", e));
 }
 
 function addToCart(product, showLoginModal) {
-  // Check if user is logged in
   const farmerId = localStorage.getItem("farmer_id");
   const shopId = localStorage.getItem("shop_id");
   
   if (!farmerId && !shopId) {
-    // Show login modal instead of redirecting
     showLoginModal();
     return;
   }
 
-  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-  const existing = cart.find((item) => item.id === product.id);
+  const vendorId = shopId || 1;
+  const payload = {
+    farmerId: parseInt(farmerId),
+    productId: parseInt(product.id),
+    vendorId: parseInt(vendorId),
+    quantity: 1
+  };
 
-  if (existing) {
-    existing.qty = (existing.qty || 1) + 1;
-  } else {
-    cart.push({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      img: product.image,
-      qty: 1
-    });
-  }
-
-  localStorage.setItem("cart", JSON.stringify(cart));
-  updateCartCount();
-  alert(`${product.name} added`);
+  fetch(`${API_BASE_URL}/api/cart/add`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      updateCartCount();
+      alert(`${product.name} added`);
+    } else {
+      alert("error adding item");
+    }
+  })
+  .catch(e => {
+    alert("error. try again");
+    console.error(e);
+  });
 }
 
 function saveCache(products) {
@@ -363,7 +381,7 @@ function HomeCatalogApp() {
         e(
           "div",
           { className: "modal-header bg-warning text-dark" },
-          e("h5", { className: "modal-title" }, "⚠️ Login Required"),
+          e("h5", { className: "modal-title" }, "Login Required"),
           e(
             "button",
             { 
@@ -384,7 +402,7 @@ function HomeCatalogApp() {
           e(
             "p",
             { className: "text-center text-muted small" },
-            "👤 Click the login button in the top right corner to get started"
+            "Click the login button in the top right corner to get started"
           )
         ),
         e(

@@ -69,7 +69,7 @@ addToCartButtons.forEach(button => {
     cartCountElement.textContent = cartCount;
 
     // Optional: show feedback
-    button.textContent = "Added ✓";
+    button.textContent = "Added";
     button.disabled = true;
     button.classList.remove('btn-success');
     button.classList.add('btn-secondary');

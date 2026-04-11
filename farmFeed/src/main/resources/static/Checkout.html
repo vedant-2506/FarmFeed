@@ -346,20 +346,38 @@
     const BASE_URL = window.API_BASE_URL || window.location.origin;
     let cart = [];
 
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
       const farmerId = localStorage.getItem("farmer_id");
       
       if (!farmerId) {
-        alert("Please login first!");
+        alert("login first");
         window.location.href = "Login.html";
         return;
       }
 
-      // Load cart data
-      cart = JSON.parse(localStorage.getItem("cart")) || [];
+      // Load cart from database
+      try {
+        const response = await fetch(`${BASE_URL}/api/cart/farmer/${farmerId}/details`);
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+          // convert to format used by checkout
+          cart = data.data.map(item => ({
+            id: item.product.id,
+            name: item.product.name,
+            price: item.product.price,
+            qty: item.quantity,
+            vendorId: item.product.vendor_id || 1,
+            vendorName: item.product.vendor_name || "vendor",
+            cartId: item.cartId
+          }));
+        }
+      } catch (e) {
+        console.error("error loading cart:", e);
+      }
       
       if (cart.length === 0) {
-        alert("Your cart is empty!");
+        alert("cart is empty");
         window.location.href = "Cart.html";
         return;
       }
@@ -488,12 +506,12 @@
 
       // Validation
       if (!fullName || !phone || !streetAddress || !city || !state || !postalCode) {
-        alert("Please fill all address fields!");
+        alert("fill all address fields");
         return;
       }
 
       if (!/^\d{10}$/.test(phone)) {
-        alert("Phone number must be 10 digits!");
+        alert("phone needs to be 10 digits");
         return;
       }
 
@@ -507,15 +525,15 @@
 
       // Prepare cart items for API
       const cartItems = cart.map(item => ({
-        product_id: item.productId || item.id,
+        product_id: item.id,
         vendor_id: item.vendorId || 1,
         quantity: item.qty || 1,
-        price: parseInt(String(item.price).replace(/[^0-9]/g, ""), 10)
+        price: typeof item.price === 'string' ? parseInt(item.price.replace(/[^0-9]/g, ""), 10) : item.price
       }));
 
       try {
         document.getElementById("placeOrderBtn").disabled = true;
-        document.getElementById("placeOrderBtn").innerHTML = '<i class="bi bi-hourglass-split"></i> Processing...';
+        document.getElementById("placeOrderBtn").innerHTML = 'processing...';
 
         const response = await fetch(`${BASE_URL}/api/orders/place`, {
           method: "POST",
@@ -531,23 +549,28 @@
         const data = await response.json();
 
         if (data.success) {
-          // Clear cart
-          localStorage.removeItem("cart");
+          // Clear cart from database
+          try {
+            await fetch(`${BASE_URL}/api/cart/farmer/${farmerId}/clear`, {
+              method: "DELETE"
+            });
+          } catch (e) {
+            console.error("error clearing cart from db:", e);
+          }
 
-          alert(`Order placed successfully!\n\nCreated ${data.ordersCount} order(s) from ${data.vendorCount} vendor(s)\n\nOrder IDs: ${data.orders.map(o => o.id).join(", ")}`);
+          alert(`order placed\n\n${data.ordersCount} order(s) from ${data.vendorCount} vendor(s)\n\norder ids: ${data.orders.map(o => o.id).join(", ")}`);
           
-          // Redirect to order tracking
           window.location.href = "FarmerAccount.html";
         } else {
-          alert("Order failed: " + data.error);
+          alert("order failed: " + data.error);
           document.getElementById("placeOrderBtn").disabled = false;
-          document.getElementById("placeOrderBtn").innerHTML = '<i class="bi bi-check-circle"></i> Place Order';
+          document.getElementById("placeOrderBtn").innerHTML = 'place order';
         }
       } catch (error) {
-        console.error("Error:", error);
-        alert("Server error. Please try again.");
+        console.error("error:", error);
+        alert("server error. try again");
         document.getElementById("placeOrderBtn").disabled = false;
-        document.getElementById("placeOrderBtn").innerHTML = '<i class="bi bi-check-circle"></i> Place Order';
+        document.getElementById("placeOrderBtn").innerHTML = 'place order';
       }
     }
   </script>

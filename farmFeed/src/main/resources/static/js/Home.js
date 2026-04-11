@@ -134,7 +134,6 @@ function setupAddToCartButtons() {
 }
 
 function handleAddToCart(button) {
-  // Check if user is logged in
   const farmerId = localStorage.getItem("farmer_id");
   const shopId = localStorage.getItem("shop_id");
   
@@ -148,28 +147,42 @@ function handleAddToCart(button) {
   const productName = button.dataset.name;
   const productPrice = button.dataset.price;
   const productImg = button.dataset.img;
+  const vendorId = shopId || 1;
 
-  let cart = JSON.parse(localStorage.getItem("cart")) || [];
-  const existing = cart.find(item => item.name === productName);
+  // save to database
+  const payload = {
+    farmerId: parseInt(farmerId),
+    productId: parseInt(productId),
+    vendorId: parseInt(vendorId),
+    quantity: 1
+  };
 
-  if (existing) {
-    existing.qty = (existing.qty || 1) + 1;
-  } else {
-    cart.push({ id: productId, name: productName, price: productPrice, img: productImg, qty: 1 });
-  }
-
-  localStorage.setItem("cart", JSON.stringify(cart));
-  updateCartCount();
-
-  const original = button.textContent;
-  button.textContent = "Added";
-  button.disabled = true;
-  button.classList.replace("btn-success", "btn-secondary");
-  setTimeout(() => {
-    button.textContent = original;
-    button.disabled = false;
-    button.classList.replace("btn-secondary", "btn-success");
-  }, 1200);
+  fetch(`${API_BASE_URL}/api/cart/add`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.success) {
+      updateCartCount();
+      const original = button.textContent;
+      button.textContent = "Added";
+      button.disabled = true;
+      button.classList.replace("btn-success", "btn-secondary");
+      setTimeout(() => {
+        button.textContent = original;
+        button.disabled = false;
+        button.classList.replace("btn-secondary", "btn-success");
+      }, 1200);
+    } else {
+      alert("error adding item");
+    }
+  })
+  .catch(e => {
+    alert("error. try again");
+    console.error(e);
+  });
 }
 
 function updateCartCount() {

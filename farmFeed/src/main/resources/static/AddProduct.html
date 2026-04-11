@@ -383,20 +383,20 @@
         const data = await res.json();
 
         if (res.ok && data.success) {
-          alert("✅ Added to inventory successfully!");
+          alert("added to inventory successfully!");
           document.getElementById("searchFertilizer").value = "";
           document.getElementById("selectedCard").style.display = "none";
           loadVendorInventory();
           selectedFertilizer = null;
         } else {
           const msg = data.error || data.message || "Failed to add product";
-          alert("❌ Error: " + msg);
+          alert("Error: " + msg);
         }
 
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-plus-circle"></i> Add to Inventory';
       } catch (err) {
-        alert("❌ Server error: " + err.message);
+        alert("Server error: " + err.message);
         const btn = document.getElementById("btnAddToInventory");
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-plus-circle"></i> Add to Inventory';

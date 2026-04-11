@@ -1,6 +1,7 @@
 
+const API_BASE_URL = window.API_BASE_URL || window.location.origin;
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
   const farmerId = localStorage.getItem("farmer_id");
   const vendorId = localStorage.getItem("shop_id");
   
@@ -10,7 +11,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return;
   }
 
-  // logout btn
   const logoutBtn = document.getElementById("logoutBtn");
   if (logoutBtn) {
     logoutBtn.addEventListener("click", () => {
@@ -22,68 +22,128 @@ document.addEventListener("DOMContentLoaded", () => {
   const cartContainer = document.getElementById("cart-items");
   const clearCartBtn  = document.getElementById("clear-cart");
 
-  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  let cartItems = [];
+  
+  await loadCart();
 
-  renderCart();
-
-  clearCartBtn.addEventListener("click", () => {
-    if (confirm("Are you sure you want to clear the cart?")) {
-      localStorage.removeItem("cart");
-      cart = [];
-      renderCart();
+  clearCartBtn.addEventListener("click", async () => {
+    if (confirm("clear cart?")) {
+      await clearCartFromDB();
     }
   });
 
+  async function loadCart() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/cart/farmer/${farmerId}/details`);
+      const data = await response.json();
+      
+      if (data.success && data.data) {
+        cartItems = data.data;
+      }
+    } catch (e) {
+      console.error("error loading cart:", e);
+    }
+    
+    renderCart();
+  }
+
+  async function clearCartFromDB() {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/cart/farmer/${farmerId}/clear`, {
+        method: "DELETE"
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        alert("cart cleared");
+        await loadCart();
+      }
+    } catch (e) {
+      alert("error clearing cart");
+      console.error(e);
+    }
+  }
+
+  async function removeCartItem(cartId) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/cart/${cartId}`, {
+        method: "DELETE"
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        await loadCart();
+      }
+    } catch (e) {
+      alert("error removing item");
+      console.error(e);
+    }
+  }
+
+  async function updateQuantityDB(cartId, newQty) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/cart/${cartId}/quantity`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quantity: newQty })
+      });
+      const data = await response.json();
+      
+      if (data.success) {
+        await loadCart();
+      }
+    } catch (e) {
+      alert("error updating quantity");
+      console.error(e);
+    }
+  }
+
   function renderCart() {
-    // ✅ Always reload from localStorage (fresh data)
-    cart = JSON.parse(localStorage.getItem("cart")) || [];
     cartContainer.innerHTML = "";
 
-    if (cart.length === 0) {
+    if (!cartItems || cartItems.length === 0) {
       cartContainer.innerHTML = `
         <div class="col-12 text-center my-5">
           <i class="bi bi-cart-x" style="font-size:4rem; color:#ccc;"></i>
-          <h5 class="text-muted mt-3">Your cart is empty!</h5>
-          <a href="Home.html" class="btn btn-success mt-3">Browse Products</a>
+          <h5 class="text-muted mt-3">cart is empty</h5>
+          <a href="Home.html" class="btn btn-success mt-3">browse</a>
         </div>`;
       return;
     }
 
     let grandTotal = 0;
 
-    cart.forEach((item, index) => {
-      // ✅ Support both "qty" and "quantity" for compatibility
-      const qty      = item.qty || item.quantity || 1;
-      const price    = parseInt(String(item.price).replace(/[^0-9]/g, ""), 10) || 0;
+    cartItems.forEach((item, index) => {
+      const qty = item.quantity || 1;
+      const price = item.subtotal ? (item.subtotal / qty) : 0;
       const subtotal = price * qty;
-      grandTotal    += subtotal;
+      grandTotal += subtotal;
 
       const col = document.createElement("div");
       col.classList.add("col-md-4");
       col.innerHTML = `
         <div class="card shadow-sm h-100">
-          <img src="${item.img}" class="card-img-top" alt="${item.name}">
+          <img src="${item.product.image_url || 'https://via.placeholder.com/300'}" class="card-img-top" alt="${item.product.name}" style="height: 200px; object-fit: cover;">
           <div class="card-body text-center d-flex flex-column">
-            <h5 class="card-title">${item.name}</h5>
-            <p class="card-text mb-1 text-success fw-bold">₹${price} / bag</p>
+            <h5 class="card-title">${item.product.name}</h5>
+            <p class="card-text mb-1 text-success fw-bold">Rs${price.toFixed(2)}</p>
 
             <div class="d-flex align-items-center justify-content-center gap-2 my-2">
-              <button class="btn btn-outline-success btn-sm dec-btn" data-index="${index}">−</button>
+              <button class="btn btn-outline-success btn-sm dec-btn" data-cart-id="${item.cartId}">-</button>
               <span class="fw-bold px-2">${qty}</span>
-              <button class="btn btn-outline-success btn-sm inc-btn" data-index="${index}">+</button>
+              <button class="btn btn-outline-success btn-sm inc-btn" data-cart-id="${item.cartId}">+</button>
             </div>
 
-            <p class="text-muted mb-2">Subtotal: <strong>₹${subtotal}</strong></p>
-            <button class="btn btn-outline-danger btn-sm remove-btn mt-auto" data-index="${index}">
-              Remove
+            <p class="text-muted mb-2">subtotal: Rs${subtotal.toFixed(2)}</p>
+            <button class="btn btn-outline-danger btn-sm remove-btn" data-cart-id="${item.cartId}">
+              remove
             </button>
           </div>
         </div>`;
       cartContainer.appendChild(col);
     });
 
-    // Totals row
-    const gst      = grandTotal * 0.18;
+    const gst = grandTotal * 0.18;
     const grandGst = grandTotal + gst;
 
     const totalsDiv = document.createElement("div");
@@ -92,46 +152,42 @@ document.addEventListener("DOMContentLoaded", () => {
       <div class="border-top pt-4">
         <div class="d-flex justify-content-end">
           <div class="text-end">
-            <p class="mb-1">Subtotal: <strong>₹${grandTotal.toLocaleString("en-IN")}</strong></p>
-            <p class="mb-1 text-muted">GST (18%): ₹${gst.toFixed(2)}</p>
-            <p class="fs-5 fw-bold text-success">Grand Total: ₹${grandGst.toFixed(2)}</p>
+            <p class="mb-1">subtotal: <strong>Rs${grandTotal.toFixed(2)}</strong></p>
+            <p class="mb-1 text-muted">gst (18%): Rs${gst.toFixed(2)}</p>
+            <p class="fs-5 fw-bold text-success">total: Rs${grandGst.toFixed(2)}</p>
             <a href="Checkout.html" class="btn btn-success px-5 mt-2">
-              Proceed to Checkout →
+              checkout
             </a>
           </div>
         </div>
       </div>`;
     cartContainer.appendChild(totalsDiv);
 
-    // Wire buttons
     cartContainer.querySelectorAll(".inc-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const i = parseInt(btn.dataset.index, 10);
-        cart[i].qty = (cart[i].qty || cart[i].quantity || 1) + 1;
-        save();
+      btn.addEventListener("click", async () => {
+        const cartId = btn.dataset.cartId;
+        const item = cartItems.find(c => c.cartId == cartId);
+        if (item) {
+          await updateQuantityDB(cartId, item.quantity + 1);
+        }
       });
     });
 
     cartContainer.querySelectorAll(".dec-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const i = parseInt(btn.dataset.index, 10);
-        cart[i].qty = (cart[i].qty || cart[i].quantity || 1) - 1;
-        if (cart[i].qty < 1) cart.splice(i, 1);
-        save();
+      btn.addEventListener("click", async () => {
+        const cartId = btn.dataset.cartId;
+        const item = cartItems.find(c => c.cartId == cartId);
+        if (item && item.quantity > 1) {
+          await updateQuantityDB(cartId, item.quantity - 1);
+        }
       });
     });
 
     cartContainer.querySelectorAll(".remove-btn").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const i = parseInt(btn.dataset.index, 10);
-        cart.splice(i, 1);
-        save();
+      btn.addEventListener("click", async () => {
+        const cartId = btn.dataset.cartId;
+        await removeCartItem(cartId);
       });
     });
-  }
-
-  function save() {
-    localStorage.setItem("cart", JSON.stringify(cart));
-    renderCart();
   }
 });

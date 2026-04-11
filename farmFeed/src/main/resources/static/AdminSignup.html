@@ -445,13 +445,13 @@
 
       if (strength <= 2) {
         strengthEl.className = "password-strength show weak";
-        strengthEl.textContent = "⚠️ Weak password";
+        strengthEl.textContent = "Weak password";
       } else if (strength <= 4) {
         strengthEl.className = "password-strength show medium";
         strengthEl.textContent = "→ Medium strength";
       } else {
         strengthEl.className = "password-strength show strong";
-        strengthEl.textContent = "✓ Strong password";
+        strengthEl.textContent = "Strong password";
       }
     }
 
@@ -535,7 +535,7 @@
         admins.push(newAdmin);
         localStorage.setItem("admins", JSON.stringify(admins));
 
-        showMessage("✓ Account created successfully! Redirecting to login...", "success");
+        showMessage("Account created successfully! Redirecting to login...", "success");
 
         setTimeout(() => {
           window.location.href = "AdminLogin.html";
