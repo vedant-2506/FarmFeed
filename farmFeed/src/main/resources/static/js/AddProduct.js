@@ -5,8 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
   console.log("AddProduct.js loading. vendorId:", vendorId);
   
   if (!vendorId) {
-    console.warn("No shop_id found in localStorage");
-    alert("You must be logged in as a vendor");
+    alert("login as vendor");
     window.location.href = "Login.html";
     return;
   }
@@ -53,14 +52,14 @@ function setupEventListeners() {
       }
     } catch (error) {
       console.error("Error searching fertilizers:", error);
-      alert("Error loading fertilizer suggestions");
+      alert("can't load suggestions");
     }
   });
 
   // Add to inventory button
   btnAddToInventory.addEventListener("click", async () => {
     if (!currentFertilizer) {
-      alert("Please select a fertilizer first");
+      alert("pick a fertilizer first");
       return;
     }
 
@@ -68,12 +67,12 @@ function setupEventListeners() {
     const quantity = parseInt(document.getElementById("addQuantity").value);
 
     if (!vendorPrice || vendorPrice <= 0) {
-      alert("Please enter a valid selling price");
+      alert("enter valid price");
       return;
     }
 
     if (!quantity || quantity <= 0) {
-      alert("Please enter a valid quantity");
+      alert("enter valid quantity");
       return;
     }
 
@@ -117,7 +116,7 @@ async function addToInventory(fertilizerId, vendorPrice, quantity) {
     console.log("Adding to inventory:", { vendorId, fertilizerId, vendorPrice, quantity });
     
     if (!vendorId) {
-      alert("Error: Vendor ID not found. Please login again.");
+      alert("vendor not found. login again");
       window.location.href = "Login.html";
       return;
     }

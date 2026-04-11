@@ -7,8 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const phone = document.getElementById("farmerPhone").value.trim();
     const password = document.getElementById("farmerPassword").value.trim();
 
-    if (!phone || !password) { alert("Please fill all fields"); return; }
-    if (!/^\d{10}$/.test(phone)) { alert("Phone number must be exactly 10 digits"); return; }
+    if (!phone || !password) { alert("fill all fields"); return; }
+    if (!/^\d{10}$/.test(phone)) { alert("phone needs to be 10 digits"); return; }
 
     try {
       const response = await fetch(`${BASE_URL}/api/farmer/Login`, {
@@ -21,15 +21,15 @@ document.addEventListener("DOMContentLoaded", () => {
         // Store farmer info in localStorage
         localStorage.setItem("farmer_id", data.farmer_id);
         localStorage.setItem("farmer_name", data.fullName);
-        localStorage.setItem("user_name", data.fullName); // For dropdown display
+        localStorage.setItem("user_name", data.fullName);
         localStorage.setItem("farmer_phone", data.phone);
         localStorage.setItem("user_type", "farmer");
-        alert("Farmer Login Successful!");
+        alert("logged in!");
         window.location.href = "FarmerAccount.html";
       } else {
         alert(data.error || "Invalid Farmer Credentials");
       }
-    } catch (error) { alert("Server error! Backend may be waking up, try again in 30s."); }
+    } catch (error) { alert("error connecting. try again"); }
   });
 
   const vendorForm = document.getElementById("vendorLoginForm");
@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const email = document.getElementById("vendorEmail").value.trim();
     const password = document.getElementById("vendorPassword").value.trim();
 
-    if (!email || !password) { alert("Please fill all fields"); return; }
+    if (!email || !password) { alert("need email and password"); return; }
 
     try {
       const response = await fetch(`${BASE_URL}/api/shopkeeper/login`, {

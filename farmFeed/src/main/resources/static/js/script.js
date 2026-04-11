@@ -112,13 +112,11 @@ document.addEventListener("DOMContentLoaded", () => {
       // Update count
       updateCartCount();
 
-      // Feedback
-      btn.textContent = "Added ✓";
+      btn.textContent = "added";
       btn.disabled = true;
       btn.classList.remove("btn-success");
       btn.classList.add("btn-secondary");
 
-      // Reset button text after 2 seconds
       setTimeout(() => {
         btn.textContent = "Add to Cart";
         btn.disabled = false;
@@ -142,9 +140,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const query = searchForm.querySelector("input[type='search']").value.trim();
 
       if (!query) {
-        alert("Please enter a search term.");
+        alert("enter a search term");
       } else {
-        alert(`Searching for "${query}"...`);
+        // search for this
       }
     });
   }

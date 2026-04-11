@@ -1,19 +1,16 @@
-// ============================================================
-// farmFeed — Cart.js
-// ============================================================
+
 
 document.addEventListener("DOMContentLoaded", () => {
-  // ✅ Check if user is logged in
   const farmerId = localStorage.getItem("farmer_id");
   const vendorId = localStorage.getItem("shop_id");
   
   if (!farmerId && !vendorId) {
-    alert("Please login first");
+    alert("login first");
     window.location.href = "Login.html";
     return;
   }
 
-  // ✅ Logout button
+  // logout btn
   const logoutBtn = document.getElementById("logoutBtn");
   if (logoutBtn) {
     logoutBtn.addEventListener("click", () => {
@@ -25,7 +22,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const cartContainer = document.getElementById("cart-items");
   const clearCartBtn  = document.getElementById("clear-cart");
 
-  // ✅ Fix: load cart fresh each render
   let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
   renderCart();

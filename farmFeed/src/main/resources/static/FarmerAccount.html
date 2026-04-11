@@ -124,7 +124,7 @@
       const farmerName = localStorage.getItem("farmer_name") || "Farmer";
       const farmerPhone = localStorage.getItem("farmer_phone") || "N/A";
 
-      // Check if user is logged in as farmer
+      // Check if logged in as farmer
       if (!farmerId || !farmerName) {
         alert("Please login as farmer first");
         window.location.href = "Login.html";
@@ -233,7 +233,7 @@
           localStorage.removeItem("user_type");
           localStorage.removeItem("user_name");
           localStorage.removeItem("cart");
-          alert("Logged out successfully!");
+          alert("logged out");
           window.location.href = "Home.html";
         }
       });

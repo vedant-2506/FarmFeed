@@ -18,42 +18,30 @@ public class FarmerService {
     @Autowired
     private FarmerRepository repository;
 
-    /**
-     * Sign up a new farmer
-     */
     @Transactional
     public Farmer save(Farmer farmer) {
         try {
-            logger.info("Saving farmer with phone: {}", farmer.getPhone());
+            logger.info("saving farmer: {}", farmer.getPhone());
             Farmer savedFarmer = repository.save(farmer);
-            logger.info("Farmer saved successfully with ID: {}", savedFarmer.getId());
+            logger.info("farmer saved with id: {}", savedFarmer.getId());
             return savedFarmer;
         } catch (Exception e) {
-            logger.error("Error saving farmer: {}", e.getMessage(), e);
+            logger.error("error saving farmer: {}", e.getMessage(), e);
             throw e;
         }
     }
 
-    /**
-     * Login farmer with phone and password
-     */
     @Transactional(readOnly = true)
     public Optional<Farmer> login(String phone, String password) {
-        logger.info("Attempting login for phone: {}", phone);
+        logger.info("login attempt: {}", phone);
         return repository.findByPhoneAndPassword(phone, password);
     }
 
-    /**
-     * Find farmer by phone
-     */
     @Transactional(readOnly = true)
     public Optional<Farmer> findByPhone(String phone) {
         return repository.findByPhone(phone);
     }
 
-    /**
-     * Find farmer by email
-     */
     @Transactional(readOnly = true)
     public Optional<Farmer> findByEmail(String email) {
         return repository.findByEmail(email);

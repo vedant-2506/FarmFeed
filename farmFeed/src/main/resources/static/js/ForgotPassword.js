@@ -8,13 +8,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const confirmPassword = document.getElementById("farmerConfirmPassword").value.trim();
 
     if (!phone || !newPassword || !confirmPassword) {
-      alert("Please fill all fields"); return;
+      alert("fill in everything"); return;
     }
     if (!/^\d{10}$/.test(phone)) {
-      alert("Phone number must be exactly 10 digits"); return;
+      alert("phone needs 10 digits"); return;
     }
     if (newPassword !== confirmPassword) {
-      alert("Passwords do not match"); return;
+      alert("passwords don't match"); return;
     }
 
     try {

@@ -92,7 +92,7 @@ function addToCart(product, showLoginModal) {
 
   localStorage.setItem("cart", JSON.stringify(cart));
   updateCartCount();
-  alert(`${product.name} added to cart!`);
+  alert(`${product.name} added`);
 }
 
 function saveCache(products) {

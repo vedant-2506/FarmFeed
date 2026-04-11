@@ -50,7 +50,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
       const data = await response.json();
       if (response.ok && data.success) {
-        alert("Farmer Registration Successful! Please login.");
+      alert("signed up! login now");
         window.location.href = "Login.html";
       } else {
         alert(data.error || `Registration failed (${response.status})`);
@@ -89,7 +89,7 @@ document.addEventListener("DOMContentLoaded", function () {
       });
       const data = await response.json();
       if (response.ok && data.success) {
-        alert("Vendor Registration Successful! Please login.");
+      alert("vendor signup done! login now");
         window.location.href = "Login.html";
       } else {
         alert(data.error || `Registration failed (${response.status})`);

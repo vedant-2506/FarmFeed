@@ -1,20 +1,15 @@
-// ============================================================
-// FarmFeed - vendor.js
-// ============================================================
 const BASE_URL = window.API_BASE_URL || window.location.origin;
 
 document.addEventListener("DOMContentLoaded", () => {
-  // ✅ Check if user is logged in as vendor
   const shopId = localStorage.getItem("shop_id");
   const shopName = localStorage.getItem("shop_name");
   
   if (!shopId || !shopName) {
-    alert("Please login as vendor first");
+    alert("login as vendor first");
     window.location.href = "Login.html";
     return;
   }
 
-  // ✅ Logout button
   const logoutBtn = document.getElementById("logoutBtn");
   if (logoutBtn) {
     logoutBtn.addEventListener("click", () => {
@@ -28,7 +23,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-// ===== Load vendor name from localStorage =====
 function loadVendorInfo() {
   const vendorName = localStorage.getItem("vendorName") || "Vendor";
   const vendorEmail = localStorage.getItem("vendorEmail") || "";
@@ -44,17 +38,13 @@ function loadVendorInfo() {
   if (bannerName) bannerName.textContent = vendorName;
 }
 
-// ===== Load Stats (placeholders — connect to API later) =====
 function loadStats() {
-  // These will come from backend API once order system is built
-  // For now showing sample data
   animateCount("totalProducts", 12);
   animateCount("totalOrders", 28);
   animateSales("totalSales", 98500);
   animateCount("totalCustomers", 15);
 }
 
-// ===== Animate numbers counting up =====
 function animateCount(elementId, target) {
   const el = document.getElementById(elementId);
   if (!el) return;
@@ -87,7 +77,6 @@ function animateSales(elementId, target) {
   }, 30);
 }
 
-// ===== Logout =====
 function logout() {
   localStorage.removeItem("vendorName");
   localStorage.removeItem("vendorEmail");
