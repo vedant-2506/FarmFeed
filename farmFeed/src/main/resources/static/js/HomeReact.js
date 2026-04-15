@@ -397,12 +397,12 @@ function HomeCatalogApp() {
           e(
             "p",
             { className: "text-center text-dark fw-bold mb-3", style: { fontSize: "16px" } },
-            "Please login first to add products to cart"
+            "login first to add items"
           ),
           e(
             "p",
             { className: "text-center text-muted small" },
-            "Click the login button in the top right corner to get started"
+            "click login button in top right corner"
           )
         ),
         e(

@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const shopId = localStorage.getItem("shop_id");
       
       if (!farmerId && !shopId) {
-        alert("Please login first to add products to cart");
+        alert("login first");
         window.location.href = "Login.html";
         return;
       }

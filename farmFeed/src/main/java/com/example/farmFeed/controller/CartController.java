@@ -28,21 +28,54 @@ public class CartController {
     public ResponseEntity<?> addToCart(@RequestBody Map<String, Object> request) {
         try {
             logger.info("Adding item to cart");
+            logger.info("Request payload: {}", request);
+            
+            // Validate request parameters
+            if (request.get("farmerId") == null) {
+                logger.warn("farmerId is missing from request");
+                return ResponseEntity.badRequest()
+                        .body(Map.of("success", false, "error", "farmerId is required"));
+            }
+            if (request.get("productId") == null) {
+                logger.warn("productId is missing from request");
+                return ResponseEntity.badRequest()
+                        .body(Map.of("success", false, "error", "productId is required"));
+            }
+            if (request.get("vendorId") == null) {
+                logger.warn("vendorId is missing from request");
+                return ResponseEntity.badRequest()
+                        .body(Map.of("success", false, "error", "vendorId is required"));
+            }
+            if (request.get("quantity") == null) {
+                logger.warn("quantity is missing from request");
+                return ResponseEntity.badRequest()
+                        .body(Map.of("success", false, "error", "quantity is required"));
+            }
             
             Long farmerId = ((Number) request.get("farmerId")).longValue();
             Long productId = ((Number) request.get("productId")).longValue();
             Long vendorId = ((Number) request.get("vendorId")).longValue();
             Integer quantity = ((Number) request.get("quantity")).intValue();
             
+            logger.info("Parsed values: farmerId={}, productId={}, vendorId={}, quantity={}", 
+                    farmerId, productId, vendorId, quantity);
+            
             Cart cartItem = cartService.addToCart(farmerId, productId, vendorId, quantity);
+            
+            logger.info("Item added to cart successfully. CartId: {}", cartItem.getId());
             
             return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                     "success", true,
                     "message", "Item added to cart",
                     "cartId", cartItem.getId()
             ));
+        } catch (NumberFormatException e) {
+            logger.error("Invalid number format: {}", e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body(Map.of("success", false, "error", "Invalid number format in request"));
         } catch (Exception e) {
-            logger.error("Error adding to cart: {}", e.getMessage());
+            logger.error("Error adding to cart: {} - Cause: {}", e.getMessage(), e.getCause(), e);
+            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("success", false, "error", e.getMessage()));
         }
