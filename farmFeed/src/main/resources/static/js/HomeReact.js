@@ -1,8 +1,8 @@
 const API_BASE_URL = window.API_BASE_URL || window.location.origin;
 const FERTILIZER_API = `${API_BASE_URL}/api/fertilizers`;
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1592982537447-6f2a6a0b2d8f?w=800&q=80";
-const CACHE_KEY = "farmfeed_products_cache_v2";
-const CACHE_TTL_MS = 5 * 60 * 1000;
+const CACHE_KEY = "farmfeed_products_cache_v3"; // Bumped version to override old cache
+const CACHE_TTL_MS = 2 * 60 * 1000; // 2 minutes for quicker testing
 
 const e = React.createElement;
 
@@ -33,7 +33,16 @@ function detectSubcategory(name, description, subcategory) {
 }
 
 function normalizeProducts(items) {
-  if (!Array.isArray(items)) return [];
+  if (!Array.isArray(items)) {
+    console.error("items is not an array:", items);
+    return [];
+  }
+
+  console.log("Raw API response - Total items:", items.length);
+  if (items.length > 0) {
+    console.log("First item raw:", JSON.stringify(items[0]));
+    console.log("First item keys:", Object.keys(items[0]));
+  }
 
   return items
     .filter((item) => item && (item.name || item.product_name))
@@ -43,8 +52,14 @@ function normalizeProducts(items) {
       const primaryCat = mapPrimaryCategory(item.primary_category);
       const subcat = detectSubcategory(name, description, item.subcategory);
 
+      const productId = item.fertilizer_id || item.id || index + 1;
+      
+      if (index < 3) {
+        console.log(`Product ${index}: fertilizer_id=${item.fertilizer_id}, id=${item.id}, finalId=${productId}`);
+      }
+
       return {
-        id: item.fertilizer_id || item.id || index + 1,
+        id: productId,
         name: name,
         description: description,
         price: Number(item.price || item.price_inr || 0),
@@ -80,31 +95,66 @@ function addToCart(product, showLoginModal) {
   const farmerId = localStorage.getItem("farmer_id");
   const shopId = localStorage.getItem("shop_id");
   
-  if (!farmerId && !shopId) {
+  if (!farmerId) {
     showLoginModal();
     return;
   }
 
+  // Validate product has an ID
+  if (!product || !product.id) {
+    console.error("Product object with missing id:", product);
+    alert("Error: Product ID is missing");
+    return;
+  }
+
   const vendorId = shopId || 1;
+  
+  // Extract numeric ID from product.id (handles both numeric IDs and "bighaat_123" format)
+  let numericProductId;
+  if (typeof product.id === 'string' && product.id.startsWith('bighaat_')) {
+    numericProductId = parseInt(product.id.split('_')[1]);
+  } else {
+    numericProductId = parseInt(product.id);
+  }
+  
+  const parsedFarmerId = parseInt(farmerId);
+  const parsedVendorId = parseInt(vendorId);
+
+  // Validate all values are valid numbers
+  if (isNaN(numericProductId) || isNaN(parsedFarmerId) || isNaN(parsedVendorId)) {
+    console.error("Invalid IDs - product.id:", product.id, "extracted:", numericProductId, "farmerId:", parsedFarmerId, "vendorId:", parsedVendorId);
+    alert("Error: Invalid ID values");
+    return;
+  }
+
   const payload = {
-    farmerId: parseInt(farmerId),
-    productId: parseInt(product.id),
-    vendorId: parseInt(vendorId),
+    farmerId: parsedFarmerId,
+    productId: numericProductId,
+    vendorId: parsedVendorId,
     quantity: 1
   };
 
+  console.log("Product full object:", product);
+  console.log("Payload being sent:", JSON.stringify(payload));
+  
   fetch(`${API_BASE_URL}/api/cart/add`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   })
-  .then(res => res.json())
-  .then(data => {
+  .then(res => {
+    console.log("Response status:", res.status);
+    return res.json().then(data => ({ status: res.status, data }));
+  })
+  .then(({ status, data }) => {
+    console.log("Response data:", data);
     if (data.success) {
       updateCartCount();
       alert(`${product.name} added`);
     } else {
-      alert("error adding item");
+      const errorMsg = data.error || "error adding item";
+      console.error("Backend error:", errorMsg);
+      alert(errorMsg);
     }
   })
   .catch(e => {
@@ -151,6 +201,30 @@ function HomeCatalogApp() {
   const [selectedProduct, setSelectedProduct] = React.useState(null);
   const [isDetailOpen, setIsDetailOpen] = React.useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = React.useState(false);
+
+  // New Filters
+  const [activeSubcategory, setActiveSubcategory] = React.useState("all"); // all, Organic, Chemical
+  const [showOnlyInStock, setShowOnlyInStock] = React.useState(false);
+  const [priceSort, setPriceSort] = React.useState("none"); // none, low-to-high, high-to-low
+  const [minRating, setMinRating] = React.useState(0);
+  // priceRange options: "all", "under500", "500-1000", "over1000"
+  const [priceRange, setPriceRange] = React.useState("all");
+
+  // Helper to reliably close the Bootstrap dropdown upon selection
+  const handlePriceSelect = (sort, range) => {
+    setPriceSort(sort);
+    setPriceRange(range);
+    
+    // Use Bootstrap's API to close the dropdown cleanly without scrolling
+    const dropdownToggleEl = document.getElementById('priceDropdownBtn');
+    if (dropdownToggleEl && window.bootstrap) {
+      const bsDropdown = window.bootstrap.Dropdown.getInstance(dropdownToggleEl);
+      if (bsDropdown) bsDropdown.hide();
+    } else {
+      // Fallback
+      document.body.click();
+    }
+  };
 
   // Get unique primary categories (All, Seed, Crop Production, Crop Nutrition, Other)
   const primaryCategories = React.useMemo(() => {
@@ -211,7 +285,7 @@ function HomeCatalogApp() {
   }, []);
 
   const filteredProducts = React.useMemo(() => {
-    return products.filter((product) => {
+    let result = products.filter((product) => {
       // Handle "Other" category - products not in the main categories
       let primaryOk = false;
       if (activePrimaryCategory === "all") {
@@ -225,13 +299,47 @@ function HomeCatalogApp() {
 
       if (!primaryOk) return false;
 
+      // Subcategory filter (Organic/Chemical)
+      if (activeSubcategory !== "all" && product.subcategory !== activeSubcategory) {
+        return false;
+      }
+
+      // Stock filter
+      if (showOnlyInStock && product.stock <= 0) {
+        return false;
+      }
+
+      // Rating filter
+      if (minRating > 0 && parseFloat(product.rating) < minRating) {
+        return false;
+      }
+
+      // Price Range filter
+      if (priceRange !== "all") {
+        const price = product.price;
+        if (priceRange === "under500" && price >= 500) return false;
+        if (priceRange === "500-1000" && (price < 500 || price > 1000)) return false;
+        if (priceRange === "over1000" && price <= 1000) return false;
+      }
+
       if (!searchQuery) return true;
 
       const name = (product.name || "").toLowerCase();
       const description = (product.description || "").toLowerCase();
       return name.includes(searchQuery) || description.includes(searchQuery);
     });
-  }, [products, activePrimaryCategory, searchQuery]);
+
+    // Sorting
+    if (priceSort === "low-to-high") {
+      result.sort((a, b) => a.price - b.price);
+    } else if (priceSort === "high-to-low") {
+      result.sort((a, b) => b.price - a.price);
+    } else if (priceSort === "top-rated") {
+      result.sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating));
+    }
+
+    return result;
+  }, [products, activePrimaryCategory, activeSubcategory, showOnlyInStock, priceSort, minRating, priceRange, searchQuery]);
 
   const content = [];
 
@@ -543,37 +651,109 @@ function HomeCatalogApp() {
     LoginPromptModal,
     DetailModal,
 
-    // Primary category filter bar (below navbar)
+    // Unified Filter Bar
     e(
       "div",
       { 
-        className: "mb-4",
+        className: "mb-4 d-flex align-items-center flex-wrap gap-2",
         style: {
-          display: "flex",
-          gap: "10px",
-          flexWrap: "wrap",
-          paddingBottom: "12px",
-          borderBottom: "1px solid #e0e0e0"
+          padding: "15px 0",
+          borderBottom: "1px solid #f0f0f0"
         }
       },
+      // Categories (All, Seed, etc.)
       primaryCategories.map((cat) =>
         e(
           "button",
           {
             key: `cat-${cat}`,
-            className: `btn btn-sm ${activePrimaryCategory === cat.toLowerCase() ? "btn-success" : "btn-outline-success"}`,
-            style: {
-              padding: "8px 16px",
-              fontSize: "13px",
-              fontWeight: "600",
-              borderRadius: "20px"
-            },
-            onClick: () => {
-              setActivePrimaryCategory(cat === "All" ? "all" : cat);
-            }
+            className: `btn btn-sm ${activePrimaryCategory === (cat === "All" ? "all" : cat) ? "btn-success" : "btn-outline-success"}`,
+            style: { padding: "6px 14px", fontSize: "12px", fontWeight: "600", borderRadius: "20px" },
+            onClick: () => setActivePrimaryCategory(cat === "All" ? "all" : cat)
           },
           cat
         )
+      ),
+
+      // Vertical Divider
+      e("div", { style: { width: "1px", height: "24px", backgroundColor: "#ddd", margin: "0 10px" } }),
+
+      // Organic / Chemical Filter
+      ["Organic", "Chemical"].map(type => 
+        e("button", {
+          key: type,
+          className: `btn btn-sm ${activeSubcategory === type ? "btn-success" : "btn-outline-success"}`,
+          style: { padding: "6px 14px", fontSize: "12px", fontWeight: "600", borderRadius: "20px" },
+          onClick: () => setActiveSubcategory(activeSubcategory === type ? "all" : type)
+        }, type)
+      ),
+
+      // Unified Price & Sort Dropdown
+      e(
+        "div",
+        { className: "dropdown" },
+        e(
+          "button",
+          {
+            id: "priceDropdownBtn",
+            className: `btn btn-sm ${(priceRange !== "all" || priceSort !== "none") ? "btn-success" : "btn-outline-success"} dropdown-toggle`,
+            style: { padding: "6px 14px", fontSize: "12px", fontWeight: "600", borderRadius: "20px" },
+            "data-bs-toggle": "dropdown",
+            "aria-expanded": "false"
+          },
+          e("i", { className: "bi bi-currency-rupee me-1" }),
+          (priceRange === "all" && priceSort === "none") ? "Price" : 
+          (priceSort === "low-to-high" ? "Price: Low to High" : 
+           priceSort === "high-to-low" ? "Price: High to Low" : 
+           priceSort === "top-rated" ? "Top Rated" :
+           priceRange === "under500" ? "Price: Under ₹500" : 
+           priceRange === "500-1000" ? "Price: ₹500 - ₹1000" : "Price: Over ₹1000")
+        ),
+        e(
+          "ul",
+          { className: "dropdown-menu shadow-sm" },
+          // Sorting Options
+          e("li", {}, e("h6", { className: "dropdown-header" }, "Sort By")),
+          e("li", {}, e("button", { className: "dropdown-item", type: "button", onClick: () => handlePriceSelect("low-to-high", "all") }, "Price: Low to High")),
+          e("li", {}, e("button", { className: "dropdown-item", type: "button", onClick: () => handlePriceSelect("high-to-low", "all") }, "Price: High to Low")),
+          e("li", {}, e("button", { className: "dropdown-item", type: "button", onClick: () => handlePriceSelect("top-rated", "all") }, "Top Rated First")),
+          e("li", {}, e("hr", { className: "dropdown-divider" })),
+          // Filter Options
+          e("li", {}, e("h6", { className: "dropdown-header" }, "Filter By Range")),
+          e("li", {}, e("button", { className: "dropdown-item", type: "button", onClick: () => handlePriceSelect("none", "all") }, "All Prices")),
+          e("li", {}, e("button", { className: "dropdown-item", type: "button", onClick: () => handlePriceSelect("none", "under500") }, "Under ₹500")),
+          e("li", {}, e("button", { className: "dropdown-item", type: "button", onClick: () => handlePriceSelect("none", "500-1000") }, "₹500 - ₹1000")),
+          e("li", {}, e("button", { className: "dropdown-item", type: "button", onClick: () => handlePriceSelect("none", "over1000") }, "Over ₹1000"))
+        )
+      ),
+
+      // Stock Filter (Active/All)
+      e(
+        "button",
+        {
+          className: `btn btn-sm ${showOnlyInStock ? "btn-success" : "btn-outline-success"}`,
+          style: { padding: "6px 14px", fontSize: "12px", fontWeight: "600", borderRadius: "20px" },
+          onClick: () => setShowOnlyInStock(!showOnlyInStock)
+        },
+        e("i", { className: `bi ${showOnlyInStock ? "bi-check-circle-fill" : "bi-circle"} me-1` }),
+        "In Stock"
+      ),
+
+      // Clear button (if any filter is active)
+      (activePrimaryCategory !== "all" || activeSubcategory !== "all" || showOnlyInStock || priceSort !== "none" || minRating !== 0 || priceRange !== "all") && e(
+        "button",
+        {
+          className: "btn btn-sm btn-link text-danger text-decoration-none p-0 ms-auto",
+          onClick: () => {
+            setActivePrimaryCategory("all");
+            setActiveSubcategory("all");
+            setShowOnlyInStock(false);
+            setPriceSort("none");
+            setMinRating(0);
+            setPriceRange("all");
+          }
+        },
+        "Clear All"
       )
     ),
 

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +10,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <!-- NO script tags here in head -->
 </head>
+
 <body>
 
   <!-- Nav-Bar -->
@@ -26,14 +28,16 @@
       <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <li class="nav-item"><a class="nav-link active" href="Home.html">Home</a></li>
-          <li class="nav-item"><a class="nav-link active" href="#products">Shop</a></li>
+          <li class="nav-item"><a class="nav-link" href="AboutUs.html">About Us</a></li>
+          <li class="nav-item"><a class="nav-link" href="Contact.html">Contact</a></li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">More</a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="#">Help</a></li>
-              <li><a class="dropdown-item" href="#">About Us</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="#">Contact</a></li>
+              <li><a class="dropdown-item" href="Help.html">Help</a></li>
+              <li>
+                <hr class="dropdown-divider">
+              </li>
+              <li><a class="dropdown-item" href="PrivacyPolicy.html">Privacy Policy</a></li>
             </ul>
           </li>
         </ul>
@@ -51,7 +55,8 @@
           <li class="nav-item">
             <a href="Cart.html" class="btn btn-outline-success position-relative">
               <i class="bi bi-cart3 fs-5"></i>
-              <span id="cart-count" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
+              <span id="cart-count"
+                class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0</span>
             </a>
           </li>
         </ul>
@@ -75,7 +80,7 @@
   </nav>
 
   <!-- React Component Root - Replaces all filters and products -->
-  <div id="home-react-root"></div>
+  <div id="home-react-root" class="mt-4"></div>
 
   <!-- Footer -->
   <footer class="bg-light text-dark pt-5 pb-4 mt-5 border-top">
@@ -83,21 +88,19 @@
       <div class="row text-md-left">
         <div class="col-md-3 col-lg-3 col-xl-3 mx-auto mt-3">
           <h5 class="mb-4 fw-bold text-uppercase text-success">farmFeed</h5>
-          <p>farmFeed connects farmers with trusted fertilizer suppliers. Our mission is to empower agriculture with quality products and reliable service.</p>
+          <p>farmFeed connects farmers with trusted fertilizer suppliers. Our mission is to empower agriculture with
+            quality products and reliable service.</p>
         </div>
         <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mt-3">
           <h5 class="mb-4 fw-bold text-uppercase text-success">Quick Links</h5>
           <p><a href="Home.html" class="text-dark text-decoration-none">Home</a></p>
-          <p><a href="#products" class="text-dark text-decoration-none">Shop</a></p>
-          <p><a href="#" class="text-dark text-decoration-none">About Us</a></p>
-          <p><a href="#" class="text-dark text-decoration-none">Contact</a></p>
+          <p><a href="AboutUs.html" class="text-dark text-decoration-none">About Us</a></p>
+          <p><a href="Contact.html" class="text-dark text-decoration-none">Contact</a></p>
         </div>
         <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mt-3">
           <h5 class="mb-4 fw-bold text-uppercase text-success">Support</h5>
-          <p><a href="#" class="text-dark text-decoration-none">FAQ</a></p>
-          <p><a href="#" class="text-dark text-decoration-none">Shipping</a></p>
-          <p><a href="#" class="text-dark text-decoration-none">Returns</a></p>
-          <p><a href="#" class="text-dark text-decoration-none">Privacy Policy</a></p>
+          <p><a href="Help.html" class="text-dark text-decoration-none">FAQ & Help</a></p>
+          <p><a href="PrivacyPolicy.html" class="text-dark text-decoration-none">Privacy Policy</a></p>
         </div>
         <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mt-3">
           <h5 class="mb-4 fw-bold text-uppercase text-success">Contact</h5>
@@ -126,7 +129,7 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <script src="js/config.js"></script>
-  
+
   <!-- Update Account Dropdown Based on Login Status with Session Timeout -->
   <script>
     // Configuration
@@ -140,7 +143,7 @@
       const farmerId = localStorage.getItem("farmer_id");
       const shopId = localStorage.getItem("shop_id");
       const userName = localStorage.getItem("user_name") || "User";
-      
+
       if ((userType === "farmer" && farmerId) || (userType === "vendor" && shopId)) {
         accountDropdown.innerHTML = `
           <div class="d-flex align-items-center mb-3">
@@ -166,15 +169,15 @@
             </button>
           </li>
         `;
-        
+
         const logoutBtn = document.getElementById("logoutBtn");
         const settingsBtn = document.getElementById("settingsBtn");
-        
+
         logoutBtn?.addEventListener("click", performLogout);
         settingsBtn?.addEventListener("click", () => {
           alert("Coming soon");
         });
-        
+
         startSessionTimeout();
       } else {
         accountDropdown.innerHTML = `
@@ -189,10 +192,20 @@
     }
 
     function performLogout() {
+      // DO NOT clear cart from database - it should persist across sessions
+      // Just clear local session storage
+      const farmerId = localStorage.getItem("farmer_id");
+
       localStorage.clear();
       sessionStorage.clear();
       clearSessionTimeout();
-      
+
+      // Reset cart count to 0 in UI
+      const cartCountEl = document.getElementById("cart-count");
+      if (cartCountEl) {
+        cartCountEl.textContent = "0";
+      }
+
       // Show logout message
       const alertDiv = document.createElement('div');
       alertDiv.className = 'alert alert-success alert-dismissible fade show';
@@ -205,12 +218,12 @@
         Logged out successfully <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
       `;
       document.body.appendChild(alertDiv);
-      
+
       // Auto dismiss after 3 seconds
       setTimeout(() => {
         alertDiv.remove();
       }, 3000);
-      
+
       // Update the dropdown to show login button (stay on page)
       updateAccountDropdown();
     }
@@ -218,7 +231,7 @@
     function startSessionTimeout() {
       // Clear existing timeout if any
       clearSessionTimeout();
-      
+
       // Set new timeout
       sessionTimeoutId = setTimeout(() => {
         console.log("Session timeout due to inactivity");
@@ -237,7 +250,7 @@
       const userType = localStorage.getItem("user_type");
       const farmerId = localStorage.getItem("farmer_id");
       const shopId = localStorage.getItem("shop_id");
-      
+
       // Only reset if user is logged in
       if ((userType === "farmer" && farmerId) || (userType === "vendor" && shopId)) {
         lastActivityTime = Date.now();
@@ -258,8 +271,9 @@
       return div.innerHTML;
     }
   </script>
-  
-  <script src="js/HomeReact.js"></script>
+
+  <script src="js/HomeReact.js?v=2"></script>
 
 </body>
+
 </html>

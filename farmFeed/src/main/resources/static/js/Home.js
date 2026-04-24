@@ -26,22 +26,27 @@ async function loadProductsFromApi() {
 
     const fertilizers = await response.json();
     if (!Array.isArray(fertilizers) || fertilizers.length === 0) {
+      console.warn("No fertilizers found from API");
       return;
     }
 
+    console.log("Loaded fertilizers:", fertilizers.length, fertilizers[0]);
+
     allProducts = fertilizers.map(item => ({
-      id: item.fertilizer_id,
+      id: item.fertilizer_id || item.id,
       name: item.name,
       description: item.description || "Quality fertilizer for healthier crop growth.",
-      price: item.price,
-      stock: item.stock,
+      price: item.price || 0,
+      stock: item.stock || 0,
       image: item.image_url || FALLBACK_IMAGE,
       category: normalizeCategory(item.category, item.name, item.description)
     }));
 
+    console.log("Processed products:", allProducts.length, allProducts[0]);
     applyFilters();
   } catch (error) {
     console.error("Unable to load products from API:", error);
+    alert("Unable to load products. Please refresh the page.");
   }
 }
 
@@ -135,10 +140,11 @@ function setupAddToCartButtons() {
 
 function handleAddToCart(button) {
   const farmerId = localStorage.getItem("farmer_id");
-  const shopId = localStorage.getItem("shop_id");
+  const userType = localStorage.getItem("user_type");
   
-  if (!farmerId && !shopId) {
-    alert("login first");
+  // Only farmers can add to cart
+  if (!farmerId || userType !== "farmer") {
+    alert("Please login as a farmer to add items to cart");
     window.location.href = "Login.html";
     return;
   }
@@ -147,7 +153,7 @@ function handleAddToCart(button) {
   const productName = button.dataset.name;
   const productPrice = button.dataset.price;
   const productImg = button.dataset.img;
-  const vendorId = shopId || 1;
+  const vendorId = 1; // Default vendor ID
 
   // save to database
   const payload = {
@@ -157,6 +163,8 @@ function handleAddToCart(button) {
     quantity: 1
   };
 
+  console.log("Adding to cart with payload:", payload);
+
   fetch(`${API_BASE_URL}/api/cart/add`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -164,10 +172,11 @@ function handleAddToCart(button) {
   })
   .then(res => res.json())
   .then(data => {
+    console.log("Cart response:", data);
     if (data.success) {
       updateCartCount();
       const original = button.textContent;
-      button.textContent = "Added";
+      button.textContent = "✓ Added";
       button.disabled = true;
       button.classList.replace("btn-success", "btn-secondary");
       setTimeout(() => {
@@ -176,20 +185,44 @@ function handleAddToCart(button) {
         button.classList.replace("btn-secondary", "btn-success");
       }, 1200);
     } else {
-      alert("error adding item");
+      alert("Error: " + (data.error || "Failed to add to cart"));
+      console.error("Error response:", data);
     }
   })
   .catch(e => {
-    alert("error. try again");
-    console.error(e);
+    alert("Connection error. Please try again");
+    console.error("Cart error:", e);
   });
 }
 
 function updateCartCount() {
-  const cart = JSON.parse(localStorage.getItem("cart")) || [];
-  const total = cart.reduce((sum, item) => sum + (item.qty || item.quantity || 1), 0);
-  const el = document.getElementById("cart-count");
-  if (el) el.textContent = total;
+  const farmerId = localStorage.getItem("farmer_id");
+  const vendorId = localStorage.getItem("shop_id");
+  
+  // Only fetch from database if farmer is logged in
+  if (farmerId && !vendorId) {
+    fetch(`${API_BASE_URL}/api/cart/farmer/${farmerId}/count`)
+      .then(res => res.json())
+      .then(data => {
+        const el = document.getElementById("cart-count");
+        if (el) {
+          el.textContent = data.count || 0;
+        }
+      })
+      .catch(e => {
+        console.error("Error fetching cart count:", e);
+        // Fallback to localStorage count
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const el = document.getElementById("cart-count");
+        if (el) el.textContent = cart.length;
+      });
+  } else {
+    // Fallback for non-logged-in users
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const total = cart.reduce((sum, item) => sum + (item.qty || item.quantity || 1), 0);
+    const el = document.getElementById("cart-count");
+    if (el) el.textContent = total;
+  }
 }
 
 function escapeHtml(value) {

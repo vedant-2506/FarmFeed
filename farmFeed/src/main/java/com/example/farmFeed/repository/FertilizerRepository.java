@@ -51,12 +51,12 @@ public class FertilizerRepository {
 
         String sql = """
             SELECT
-                fertilizer_id,
+                id AS fertilizer_id,
                 name,
                 price,
                 stock,
                 description,
-                NULL AS image_url,
+                image_url,
                 CASE
                     WHEN LOWER(CONCAT(IFNULL(name, ''), ' ', IFNULL(description, ''))) LIKE '%organic%' THEN 'Organic'
                     WHEN LOWER(CONCAT(IFNULL(name, ''), ' ', IFNULL(description, ''))) LIKE '%chemical%'
@@ -79,7 +79,7 @@ public class FertilizerRepository {
         if (!tableExists("fertilizers")) {
             return List.of();
         }
-        String sql = "SELECT fertilizer_id, name, price, stock, description, NULL AS image_url, 'Other' AS category FROM fertilizers WHERE LOWER(name) LIKE ?";
+        String sql = "SELECT id AS fertilizer_id, name, price, stock, description, image_url, 'Other' AS category FROM fertilizers WHERE LOWER(name) LIKE ?";
         String param = "%" + (name == null ? "" : name.toLowerCase()) + "%";
         return jdbcTemplate.queryForList(sql, param);
     }
@@ -91,7 +91,7 @@ public class FertilizerRepository {
         if (!tableExists("fertilizers")) {
             return null;
         }
-        String sql = "SELECT fertilizer_id, name, price, stock, description, NULL AS image_url, 'Other' AS category FROM fertilizers WHERE fertilizer_id = ?";
+        String sql = "SELECT id AS fertilizer_id, name, price, stock, description, image_url, 'Other' AS category FROM fertilizers WHERE id = ?";
         List<Map<String, Object>> results = jdbcTemplate.queryForList(sql, id);
         return results.isEmpty() ? null : results.get(0);
     }
@@ -121,8 +121,32 @@ public class FertilizerRepository {
         }
 
         String placeholders = String.join(",", ids.stream().map(id -> "?").toList());
-        String sql = "SELECT fertilizer_id, name, price, stock, description, NULL AS image_url, 'Other' AS category FROM fertilizers WHERE fertilizer_id IN (" + placeholders + ")";
+        String sql = "SELECT id AS fertilizer_id, name, price, stock, description, image_url, 'Other' AS category FROM fertilizers WHERE id IN (" + placeholders + ")";
         return jdbcTemplate.queryForList(sql, ids.toArray());
+    }
+
+    /**
+     * Find image URL by product name (fallback for products without LOB images)
+     */
+    public String findImageByProductName(String productName) {
+        if (productName == null) return null;
+        
+        try {
+            if (tableExists("bighaat_products_raw")) {
+                String sql = "SELECT image_link FROM bighaat_products_raw WHERE product_name = ? LIMIT 1";
+                List<String> results = jdbcTemplate.queryForList(sql, String.class, productName);
+                if (!results.isEmpty()) return results.get(0);
+            }
+            
+            if (tableExists("fertilizers")) {
+                String sql = "SELECT image_url FROM fertilizers WHERE name = ? LIMIT 1";
+                List<String> results = jdbcTemplate.queryForList(sql, String.class, productName);
+                if (!results.isEmpty()) return results.get(0);
+            }
+        } catch (Exception e) {
+            // Log error but return null
+        }
+        return null;
     }
 
     private boolean tableExists(String tableName) {

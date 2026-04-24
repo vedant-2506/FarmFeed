@@ -89,15 +89,35 @@
     .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
 
     .stat-card {
-      background: linear-gradient(135deg, #e8f5e9 0%, #f0fdf4 100%);
-      border: 2px solid #c8e6c9;
-      border-radius: 12px;
-      padding: 20px;
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 16px;
+      padding: 24px 20px;
       text-align: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      position: relative;
+      overflow: hidden;
     }
 
-    .stat-number { font-size: 28px; font-weight: 700; color: #28a745; }
-    .stat-label { font-size: 13px; color: #999; margin-top: 5px; }
+    .stat-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: #28a745;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 24px rgba(40, 167, 69, 0.12);
+      border-color: #28a745;
+    }
+
+    .stat-number { font-size: 32px; font-weight: 800; color: #1a1a1a; letter-spacing: -0.5px; }
+    .stat-label { font-size: 14px; color: #666; margin-top: 4px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
 
     /* Inventory Grid */
     .inventory-grid {
@@ -268,6 +288,51 @@
     .list-left { display: flex; gap: 15px; align-items: center; flex: 1; }
     .list-image { width: 80px; height: 80px; background: #f5f5f5; border-radius: 8px; overflow: hidden; }
     .list-actions { display: flex; gap: 10px; }
+
+    /* Analytics Styles */
+    .analytics-section {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .analytics-box {
+      background: linear-gradient(135deg, #f0fdf4 0%, #e8f5e9 100%);
+      border: 2px solid #c8e6c9;
+      border-radius: 10px;
+      padding: 18px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .analytics-box:hover {
+      border-color: #28a745;
+      box-shadow: 0 2px 8px rgba(40, 167, 69, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .analytics-label {
+      font-size: 13px;
+      color: #666;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .analytics-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #28a745;
+      word-break: break-word;
+    }
   </style>
 </head>
 
@@ -310,6 +375,9 @@
           <div class="sidebar-item" onclick="showSection('inventory')">
             <i class="bi bi-box-seam"></i> My Inventory
           </div>
+          <div class="sidebar-item" onclick="showSection('analytics')">
+            <i class="bi bi-graph-up"></i> Business Analytics
+          </div>
           <div class="sidebar-item" onclick="showSection('orders')">
             <i class="bi bi-bag-check"></i> Orders
           </div>
@@ -340,7 +408,15 @@
           <div class="stats-container">
             <div class="stat-card">
               <div class="stat-number" id="inventoryCount">0</div>
-              <div class="stat-label">Products in Inventory</div>
+              <div class="stat-label">Total Products</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="availableCountOverview">0</div>
+              <div class="stat-label">Available Items</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="outOfStockCountOverview">0</div>
+              <div class="stat-label">Out of Stock</div>
             </div>
             <div class="stat-card">
               <div class="stat-number" id="totalOrders">0</div>
@@ -364,12 +440,28 @@
             <i class="bi bi-plus-circle"></i> Add New Products
           </button>
 
-          <div id="inventoryList" class="inventory-grid">
-            <div class="loading-spinner">
-              <div class="spinner-border text-success" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-            </div>
+          <div class="table-responsive mt-4 shadow-sm rounded">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-success">
+                <tr>
+                  <th>Product Name</th>
+                  <th>Base Price</th>
+                  <th>Your Price</th>
+                  <th>Stock</th>
+                  <th>Status</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryList">
+                <tr>
+                  <td colspan="6" class="text-center py-4">
+                    <div class="spinner-border text-success" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -383,6 +475,99 @@
             <div class="empty-state">
               <i class="bi bi-inbox"></i>
               <p>No orders yet</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div id="analyticsSection" class="content-area" style="display: none;">
+          <div class="content-title">
+            <i class="bi bi-bar-chart-line"></i> Business Analytics
+          </div>
+          <div class="content-subtitle">Key metrics and business performance</div>
+
+          <div class="stats-container">
+            <div class="stat-card">
+              <div class="stat-number" id="totalProductsAnalytics">0</div>
+              <div class="stat-label">Total Products Listed</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="totalOrdersAnalytics">0</div>
+              <div class="stat-label">Total Orders Received</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="completedOrdersAnalytics">0</div>
+              <div class="stat-label">Completed Orders</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="pendingOrdersAnalytics">0</div>
+              <div class="stat-label">Pending Orders</div>
+            </div>
+          </div>
+
+          <div class="analytics-section mt-4">
+            <h5 class="mb-3"><i class="bi bi-cash-coin"></i> Revenue Metrics</h5>
+            <div class="analytics-grid">
+              <div class="analytics-box">
+                <div class="analytics-label">Total Revenue</div>
+                <div class="analytics-value" id="totalRevenue">₹0</div>
+              </div>
+              <div class="analytics-box">
+                <div class="analytics-label">Average Order Value</div>
+                <div class="analytics-value" id="avgOrderValue">₹0</div>
+              </div>
+              <div class="analytics-box">
+                <div class="analytics-label">Best Selling Product</div>
+                <div class="analytics-value" id="bestProduct">N/A</div>
+              </div>
+              <div class="analytics-box">
+                <div class="analytics-label">Total Revenue This Month</div>
+                <div class="analytics-value" id="monthlyRevenue">₹0</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="analytics-section mt-4">
+            <h5 class="mb-3"><i class="bi bi-bar-chart"></i> Inventory Metrics</h5>
+            <div class="analytics-grid">
+              <div class="analytics-box">
+                <div class="analytics-label">Total Stock Value</div>
+                <div class="analytics-value" id="stockValue">₹0</div>
+              </div>
+              <div class="analytics-box">
+                <div class="analytics-label">Low Stock Products</div>
+                <div class="analytics-value" id="lowStockCount">0</div>
+              </div>
+              <div class="analytics-box">
+                <div class="analytics-label">Out of Stock</div>
+                <div class="analytics-value" id="outOfStock">0</div>
+              </div>
+              <div class="analytics-box">
+                <div class="analytics-label">Average Product Price</div>
+                <div class="analytics-value" id="avgPrice">₹0</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="analytics-section mt-4">
+            <h5 class="mb-3"><i class="bi bi-people"></i> Customer Metrics</h5>
+            <div class="analytics-grid">
+              <div class="analytics-box">
+                <div class="analytics-label">Unique Customers</div>
+                <div class="analytics-value" id="uniqueCustomers">0</div>
+              </div>
+              <div class="analytics-box">
+                <div class="analytics-label">Repeat Customers</div>
+                <div class="analytics-value" id="repeatCustomers">0</div>
+              </div>
+              <div class="analytics-box">
+                <div class="analytics-label">Orders Per Customer</div>
+                <div class="analytics-value" id="ordersPerCustomer">0</div>
+              </div>
+              <div class="analytics-box">
+                <div class="analytics-label">Customer Satisfaction Rate</div>
+                <div class="analytics-value" id="satisfactionRate">N/A</div>
+              </div>
             </div>
           </div>
         </div>
@@ -477,8 +662,18 @@
 
         if (data.success) {
           const items = data.data || [];
-          console.log("Items count:", items.length);
           document.getElementById("inventoryCount").textContent = items.length;
+          
+          // Calculate stats for overview
+          const available = items.filter(i => i.quantity_in_stock > 0).length;
+          const outOfStock = items.filter(i => i.quantity_in_stock === 0).length;
+          
+          if (document.getElementById("availableCountOverview")) {
+            document.getElementById("availableCountOverview").textContent = available;
+          }
+          if (document.getElementById("outOfStockCountOverview")) {
+            document.getElementById("outOfStockCountOverview").textContent = outOfStock;
+          }
 
           if (items.length === 0) {
             console.log("No items found, showing empty state");
@@ -512,51 +707,47 @@
     }
 
     function displayInventory(items) {
-      const container = document.getElementById("inventoryList");
+      const tbody = document.getElementById("inventoryList");
+      tbody.innerHTML = "";
 
-      container.innerHTML = items.map(item => {
-        // Try to find image URL from various possible field names
-        const imageUrl = item.image_url || item.fertilizer_image_url || item.image || 
-                        item.fertilizer_image || 'https://via.placeholder.com/280x180?text=' + encodeURIComponent(item.name);
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-muted">No products in inventory</td></tr>`;
+        return;
+      }
+
+      items.forEach(item => {
+        const stock = item.quantity_in_stock || 0;
+        const stockStatus = stock > 50 ? 'In Stock' : stock > 10 ? 'Low Stock' : 'Critical';
+        const stockColor = stock > 50 ? 'success' : stock > 10 ? 'warning' : 'danger';
         
-        return `
-        <div class="product-card">
-          <div class="product-image">
-            <img src="${imageUrl}" alt="${item.name}" 
-                 onerror="this.src='https://via.placeholder.com/280x180?text=${encodeURIComponent(item.name)}'">
-          </div>
-          <div class="product-info">
-            <div class="product-name">${item.name}</div>
-            <div class="product-details">
-              <div class="detail-item">
-                <div class="detail-label">Base Price</div>
-                <div class="detail-value">Rs${item.base_price}</div>
-              </div>
-              <div class="detail-item">
-                <div class="detail-label">Your Price</div>
-                <div class="detail-value">Rs${item.vendor_price}</div>
-              </div>
-              <div class="detail-item">
-                <div class="detail-label">In Stock</div>
-                <div class="detail-value">${item.quantity_in_stock}</div>
-              </div>
-              <div class="detail-item">
-                <div class="detail-label">Rating</div>
-                <div class="detail-value">${item.rating_review || "4.5"}</div>
-              </div>
-            </div>
-            <div class="product-actions">
-              <button class="btn-edit" onclick="openEditModal(${item.fertilizer_id || item.id}, ${item.vendor_price}, ${item.quantity_in_stock})">
-                <i class="bi bi-pencil"></i> Edit
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>
+            <div class="fw-bold">${item.name}</div>
+            <small class="text-muted">ID: #${item.fertilizer_id}</small>
+          </td>
+          <td class="text-muted">₹${(item.base_price || 0).toLocaleString('en-IN')}</td>
+          <td class="fw-bold text-success">₹${(item.vendor_price || 0).toLocaleString('en-IN')}</td>
+          <td>
+            <span class="fw-bold">${stock}</span>
+            <small class="text-muted"> units</small>
+          </td>
+          <td>
+            <span class="badge bg-${stockColor}">${stockStatus}</span>
+          </td>
+          <td class="text-center">
+            <div class="btn-group">
+              <button onclick="openEditModal(${item.fertilizer_id}, ${item.vendor_price}, ${stock})" class="btn btn-sm btn-outline-success">
+                <i class="bi bi-pencil"></i>
               </button>
-              <button class="btn-delete" onclick="deleteProduct(${item.fertilizer_id || item.id})">
-                <i class="bi bi-trash"></i> Delete
+              <button onclick="deleteProduct(${item.fertilizer_id})" class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-trash"></i>
               </button>
             </div>
-          </div>
-        </div>
-      `;
-      }).join("");
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
     }
 
     function openEditModal(productId, price, quantity) {
@@ -623,13 +814,17 @@
     }
 
     function showSection(section) {
-      const sections = ['overviewSection', 'inventorySection', 'ordersSection'];
+      const sections = ['overviewSection', 'inventorySection', 'ordersSection', 'analyticsSection'];
       sections.forEach(s => document.getElementById(s).style.display = 'none');
 
       if (section === 'overview') document.getElementById("overviewSection").style.display = 'block';
       if (section === 'inventory') {
         document.getElementById("inventorySection").style.display = 'block';
         loadInventory();
+      }
+      if (section === 'analytics') {
+        document.getElementById("analyticsSection").style.display = 'block';
+        loadAnalytics();
       }
       if (section === 'orders') {
         document.getElementById("ordersSection").style.display = 'block';
@@ -776,6 +971,133 @@
       } catch (err) {
         console.error("Error:", err);
         alert("Server error!");
+      }
+    }
+
+    async function loadAnalytics() {
+      try {
+        // Load inventory data
+        const inventoryRes = await fetch(`${BASE_URL}/api/vendor-inventory/${shopId}`);
+        const inventoryData = await inventoryRes.json();
+        const products = inventoryData.data || [];
+
+        // Load orders data
+        const ordersRes = await fetch(`${BASE_URL}/api/orders/vendor/${shopId}`);
+        const ordersData = await ordersRes.json();
+        const orders = ordersData.data || [];
+
+        // Calculate analytics
+        document.getElementById("totalProductsAnalytics").textContent = products.length;
+        document.getElementById("totalOrdersAnalytics").textContent = orders.length;
+
+        const completedOrders = orders.filter(o => o.status === 'completed').length;
+        const pendingOrders = orders.filter(o => o.status === 'pending').length;
+        
+        document.getElementById("completedOrdersAnalytics").textContent = completedOrders;
+        document.getElementById("pendingOrdersAnalytics").textContent = pendingOrders;
+
+        // Revenue calculation
+        let totalRevenue = 0;
+        let totalCompleted = 0;
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        let monthlyRevenue = 0;
+
+        orders.forEach(order => {
+          if (order.status === 'completed') {
+            const amount = order.totalAmount || order.total_amount || 0;
+            totalRevenue += amount;
+            totalCompleted += 1;
+            
+            const orderDate = new Date(order.createdAt || order.created_at);
+            if (orderDate.getMonth() === currentMonth && orderDate.getFullYear() === currentYear) {
+              monthlyRevenue += amount;
+            }
+          }
+        });
+
+        document.getElementById("totalRevenue").textContent = "₹" + totalRevenue.toLocaleString("en-IN");
+        document.getElementById("monthlyRevenue").textContent = "₹" + monthlyRevenue.toLocaleString("en-IN");
+        
+        const avgOrderValue = totalCompleted > 0 ? (totalRevenue / totalCompleted).toFixed(0) : 0;
+        document.getElementById("avgOrderValue").textContent = "₹" + parseFloat(avgOrderValue).toLocaleString("en-IN");
+
+        // Best selling product
+        const productSales = {};
+        orders.forEach(order => {
+          const productId = order.productId || order.product_id;
+          if (productId) {
+            productSales[productId] = (productSales[productId] || 0) + (order.quantity || 1);
+          }
+        });
+
+        let bestProduct = "N/A";
+        let maxSales = 0;
+        Object.entries(productSales).forEach(([productId, sales]) => {
+          if (sales > maxSales) {
+            maxSales = sales;
+            const product = products.find(p => p.id == productId);
+            bestProduct = product ? product.name : "Product #" + productId;
+          }
+        });
+        document.getElementById("bestProduct").textContent = bestProduct;
+
+        // Inventory metrics
+        let totalStockValue = 0;
+        let lowStockCount = 0;
+        let outOfStockCount = 0;
+        let avgPrice = 0;
+
+        products.forEach(product => {
+          const price = product.price || 0;
+          const quantity = product.quantity_in_stock || 0;
+          totalStockValue += price * quantity;
+          avgPrice += price;
+
+          if (quantity === 0) {
+            outOfStockCount += 1;
+          } else if (quantity < 10) {
+            lowStockCount += 1;
+          }
+        });
+
+        document.getElementById("stockValue").textContent = "₹" + totalStockValue.toLocaleString("en-IN");
+        document.getElementById("lowStockCount").textContent = lowStockCount;
+        document.getElementById("outOfStock").textContent = outOfStockCount;
+        
+        const avgPriceValue = products.length > 0 ? (avgPrice / products.length).toFixed(0) : 0;
+        document.getElementById("avgPrice").textContent = "₹" + parseFloat(avgPriceValue).toLocaleString("en-IN");
+
+        // Customer metrics
+        const customerSet = new Set();
+        const customerOrderCount = {};
+
+        orders.forEach(order => {
+          const customerId = order.farmerId || order.farmer_id;
+          if (customerId) {
+            customerSet.add(customerId);
+            customerOrderCount[customerId] = (customerOrderCount[customerId] || 0) + 1;
+          }
+        });
+
+        const uniqueCustomers = customerSet.size;
+        let repeatCustomers = 0;
+        Object.values(customerOrderCount).forEach(count => {
+          if (count > 1) repeatCustomers += 1;
+        });
+
+        document.getElementById("uniqueCustomers").textContent = uniqueCustomers;
+        document.getElementById("repeatCustomers").textContent = repeatCustomers;
+        
+        const ordersPerCustomer = uniqueCustomers > 0 ? (orders.length / uniqueCustomers).toFixed(1) : 0;
+        document.getElementById("ordersPerCustomer").textContent = ordersPerCustomer;
+
+        // Customer satisfaction (based on completed orders percentage)
+        const satisfactionRate = totalCompleted > 0 ? ((totalCompleted / orders.length) * 100).toFixed(1) : 0;
+        document.getElementById("satisfactionRate").textContent = satisfactionRate + "%";
+
+      } catch (err) {
+        console.error("Error loading analytics:", err);
       }
     }
 

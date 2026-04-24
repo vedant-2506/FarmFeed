@@ -225,8 +225,10 @@
       }
 
       // Logout
-      document.getElementById("logoutBtn").addEventListener("click", () => {
+      document.getElementById("logoutBtn").addEventListener("click", async () => {
         if (confirm("Are you sure you want to logout?")) {
+          // Cart persists across sessions - do NOT clear it on logout
+          
           localStorage.removeItem("farmer_id");
           localStorage.removeItem("farmer_name");
           localStorage.removeItem("farmer_phone");

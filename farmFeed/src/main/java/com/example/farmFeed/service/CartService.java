@@ -4,11 +4,13 @@ import com.example.farmFeed.entity.Cart;
 import com.example.farmFeed.entity.Product;
 import com.example.farmFeed.repository.CartRepository;
 import com.example.farmFeed.repository.ProductRepository;
+import com.example.farmFeed.repository.FertilizerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import java.util.Base64;
 
 import java.util.*;
 
@@ -22,6 +24,9 @@ public class CartService {
 
     @Autowired
     private ProductRepository productRepository;
+
+    @Autowired
+    private FertilizerRepository fertilizerRepository;
 
     /**
      * Add item to cart
@@ -70,11 +75,36 @@ public class CartService {
         for (Cart item : cartItems) {
             Optional<Product> product = productRepository.findById(item.getProductId());
             if (product.isPresent()) {
+                Product p = product.get();
                 Map<String, Object> cartDetail = new HashMap<>();
                 cartDetail.put("cartId", item.getId());
-                cartDetail.put("product", product.get());
+                
+                // Create a product map with base64 encoded image or URL
+                Map<String, Object> productMap = new HashMap<>();
+                productMap.put("id", p.getId());
+                productMap.put("name", p.getName());
+                productMap.put("description", p.getDescription());
+                productMap.put("category", p.getCategory());
+                productMap.put("price", p.getPrice());
+                productMap.put("manufacturer", p.getManufacturer());
+                productMap.put("vendor_id", p.getVendorId());
+                productMap.put("stock", p.getStock());
+                productMap.put("rating", p.getRating());
+                productMap.put("total_reviews", p.getTotalReviews());
+                
+                // Convert image byte array to base64
+                if (p.getImage() != null && p.getImage().length > 0) {
+                    String base64Image = Base64.getEncoder().encodeToString(p.getImage());
+                    productMap.put("image", "data:image/jpeg;base64," + base64Image);
+                } else {
+                    // Try to get image from catalog (FertilizerRepository) by name - much more reliable
+                    String imageUrl = fertilizerRepository.findImageByProductName(p.getName());
+                    productMap.put("image", imageUrl);
+                }
+                
+                cartDetail.put("product", productMap);
                 cartDetail.put("quantity", item.getQuantity());
-                cartDetail.put("subtotal", product.get().getPrice() * item.getQuantity());
+                cartDetail.put("subtotal", p.getPrice() * item.getQuantity());
                 cartDetails.add(cartDetail);
             }
         }

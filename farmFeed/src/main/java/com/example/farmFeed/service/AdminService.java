@@ -135,6 +135,7 @@ public class AdminService {
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalFarmers", farmerRepository.count());
         stats.put("totalVendors", vendorRepository.count());
+        stats.put("totalAdmins", adminRepository.count());
         stats.put("activeFarmers", (long) farmerRepository.findByIsActive(true).size());
         stats.put("activeVendors", (long) vendorRepository.findByIsActive(true).size());
         stats.put("totalPendingOrders", orderService.getAllUndeliveredOrders().size());
@@ -214,12 +215,6 @@ public class AdminService {
         logger.info("Reporting issue: {}", issue);
         
         return createNotification(adminId, "SYSTEM_ISSUE", issue, description, null, null, null);
-    }
-
-    @Transactional(readOnly = true)
-    public List<Admin> getSuperAdmins() {
-        logger.info("fetching super admins");
-        return adminRepository.getSuperAdmins();
     }
 
     /**

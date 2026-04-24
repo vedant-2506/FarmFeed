@@ -13,8 +13,11 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const logoutBtn = document.getElementById("logoutBtn");
   if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
+    logoutBtn.addEventListener("click", async () => {
+      // Cart persists across sessions - do NOT clear it on logout
+      // Just clear localStorage and redirect
       localStorage.clear();
+      sessionStorage.clear();
       window.location.href = "Login.html";
     });
   }
@@ -115,29 +118,41 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     cartItems.forEach((item, index) => {
       const qty = item.quantity || 1;
-      const price = item.subtotal ? (item.subtotal / qty) : 0;
+      const price = item.subtotal ? (item.subtotal / qty) : (item.product?.price || 0);
       const subtotal = price * qty;
       grandTotal += subtotal;
 
       const col = document.createElement("div");
       col.classList.add("col-md-4");
+      const productName = item.product?.name || "Product";
+      
+      // Create image HTML
+      const fallbackImage = "https://images.unsplash.com/photo-1592982537447-6f2a6a0b2d8f?w=800&q=80";
+      const productImage = item.product?.image || fallbackImage;
+      
+      imageHtml = `<img src="${productImage}" alt="${productName}" style="width: 100%; height: 100%; object-fit: cover;">`;
+      
       col.innerHTML = `
-        <div class="card shadow-sm h-100">
-          <img src="${item.product.image_url || 'https://via.placeholder.com/300'}" class="card-img-top" alt="${item.product.name}" style="height: 200px; object-fit: cover;">
-          <div class="card-body text-center d-flex flex-column">
-            <h5 class="card-title">${item.product.name}</h5>
-            <p class="card-text mb-1 text-success fw-bold">Rs${price.toFixed(2)}</p>
-
-            <div class="d-flex align-items-center justify-content-center gap-2 my-2">
+        <div class="product-card h-100">
+          <div class="product-card-image">
+            <img src="${productImage}" alt="${productName}" loading="lazy">
+          </div>
+          <div class="product-card-body">
+            <h6 class="product-card-title">${productName}</h6>
+            <div class="product-card-price">₹${price.toLocaleString("en-IN")}</div>
+            
+            <div class="d-flex align-items-center gap-2 my-2">
               <button class="btn btn-outline-success btn-sm dec-btn" data-cart-id="${item.cartId}">-</button>
               <span class="fw-bold px-2">${qty}</span>
               <button class="btn btn-outline-success btn-sm inc-btn" data-cart-id="${item.cartId}">+</button>
             </div>
 
-            <p class="text-muted mb-2">subtotal: Rs${subtotal.toFixed(2)}</p>
-            <button class="btn btn-outline-danger btn-sm remove-btn" data-cart-id="${item.cartId}">
-              remove
-            </button>
+            <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top">
+              <span class="text-muted small">Subtotal: ₹${subtotal.toLocaleString("en-IN")}</span>
+              <button class="btn btn-sm btn-danger remove-btn" data-cart-id="${item.cartId}">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
           </div>
         </div>`;
       cartContainer.appendChild(col);
@@ -152,9 +167,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       <div class="border-top pt-4">
         <div class="d-flex justify-content-end">
           <div class="text-end">
-            <p class="mb-1">subtotal: <strong>Rs${grandTotal.toFixed(2)}</strong></p>
-            <p class="mb-1 text-muted">gst (18%): Rs${gst.toFixed(2)}</p>
-            <p class="fs-5 fw-bold text-success">total: Rs${grandGst.toFixed(2)}</p>
+            <p class="mb-1">subtotal: <strong>₹${grandTotal.toLocaleString("en-IN", {minimumFractionDigits: 2, maximumFractionDigits: 2})}</strong></p>
+            <p class="mb-1 text-muted">gst (18%): ₹${gst.toLocaleString("en-IN", {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
+            <p class="fs-5 fw-bold text-success">total: ₹${grandGst.toLocaleString("en-IN", {minimumFractionDigits: 2, maximumFractionDigits: 2})}</p>
             <a href="Checkout.html" class="btn btn-success px-5 mt-2">
               checkout
             </a>

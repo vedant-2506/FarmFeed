@@ -22,7 +22,4 @@ public interface AdminRepository extends JpaRepository<Admin, Long> {
 
     @Query("SELECT a FROM Admin a WHERE a.isActive = true ORDER BY a.createdAt DESC")
     List<Admin> getActiveAdmins();
-
-    @Query("SELECT a FROM Admin a WHERE a.role = 'SUPER_ADMIN'")
-    List<Admin> getSuperAdmins();
 }

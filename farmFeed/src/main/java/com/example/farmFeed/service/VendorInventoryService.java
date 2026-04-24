@@ -88,6 +88,7 @@ public class VendorInventoryService {
                 if (data != null) {
                     Map<String, Object> inv = new HashMap<>(data);
                     inv.put("inventory_id", item.getId());
+                    inv.put("fertilizer_id", item.getFertilizerId());
                     inv.put("vendor_price", item.getVendorPrice());
                     inv.put("quantity_in_stock", item.getQuantityInStock());
                     inv.put("base_price", data.get("price"));

@@ -19,62 +19,104 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   loadVendorInfo();
+  loadInventory();
   loadStats();
-
 });
 
+async function loadInventory() {
+  const shopId = localStorage.getItem("shop_id");
+  const tableBody = document.getElementById("inventoryTableBody");
+  if (!tableBody) return;
+
+  try {
+    const response = await fetch(`${BASE_URL}/api/products/vendor/${shopId}`);
+    const products = await response.json();
+
+    if (products && products.length > 0) {
+      tableBody.innerHTML = "";
+      let availableCount = 0;
+      let outOfStockCount = 0;
+
+      products.forEach(product => {
+        const isOutOfStock = product.stock <= 0;
+        if (isOutOfStock) outOfStockCount++; else availableCount++;
+
+        const row = document.createElement("tr");
+        const statusBadge = isOutOfStock 
+          ? '<span class="badge bg-danger">Out of Stock</span>' 
+          : '<span class="badge bg-success">Available</span>';
+        
+        let imageHtml = "";
+        if (product.image) {
+          imageHtml = `<img src="data:image/jpeg;base64,${product.image}" class="rounded" style="width: 50px; height: 50px; object-fit: cover;">`;
+        } else {
+          imageHtml = `<div class="rounded bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;"><i class="bi bi-image text-muted"></i></div>`;
+        }
+
+        row.innerHTML = `
+          <td>${imageHtml}</td>
+          <td><strong>${product.name}</strong></td>
+          <td><span class="badge bg-light text-dark border">${product.category}</span></td>
+          <td>₹${product.price.toLocaleString("en-IN")}</td>
+          <td>${product.stock} units</td>
+          <td>${statusBadge}</td>
+          <td class="text-center">
+            <div class="btn-group">
+              <button class="btn btn-sm btn-outline-primary" onclick="editProduct(${product.id})"><i class="bi bi-pencil"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct(${product.id})"><i class="bi bi-trash"></i></button>
+            </div>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+
+      document.getElementById("totalProducts").textContent = products.length;
+      document.getElementById("availableProducts").textContent = availableCount;
+      document.getElementById("outOfStockProducts").textContent = outOfStockCount;
+    } else {
+      tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-muted">No products found in your inventory.</td></tr>';
+    }
+  } catch (error) {
+    console.error("Error loading inventory:", error);
+    tableBody.innerHTML = '<tr><td colspan="7" class="text-center py-4 text-danger">Error loading inventory. Please try again.</td></tr>';
+  }
+}
+
+async function loadStats() {
+  const shopId = localStorage.getItem("shop_id");
+  try {
+    const response = await fetch(`${BASE_URL}/api/orders/vendor/${shopId}/count`);
+    const data = await response.json();
+    if (data.success) {
+      document.getElementById("totalOrders").textContent = data.orderCount || 0;
+    }
+  } catch (error) {
+    console.error("Error loading stats:", error);
+  }
+}
+
 function loadVendorInfo() {
-  const vendorName = localStorage.getItem("vendorName") || "Vendor";
-  const vendorEmail = localStorage.getItem("vendorEmail") || "";
-
-  const nameDisplay = document.getElementById("vendorNameDisplay");
-  const nameCard = document.getElementById("vendorNameCard");
-  const emailCard = document.getElementById("vendorEmailCard");
+  const vendorName = localStorage.getItem("user_name") || "Vendor";
   const bannerName = document.getElementById("bannerVendorName");
-
-  if (nameDisplay) nameDisplay.textContent = vendorName;
-  if (nameCard) nameCard.textContent = vendorName;
-  if (emailCard) emailCard.textContent = vendorEmail;
   if (bannerName) bannerName.textContent = vendorName;
 }
 
-function loadStats() {
-  animateCount("totalProducts", 12);
-  animateCount("totalOrders", 28);
-  animateSales("totalSales", 98500);
-  animateCount("totalCustomers", 15);
+function editProduct(id) {
+  alert("Edit functionality coming soon for ID: " + id);
 }
 
-function animateCount(elementId, target) {
-  const el = document.getElementById(elementId);
-  if (!el) return;
-
-  let current = 0;
-  const step = Math.ceil(target / 40);
-  const timer = setInterval(() => {
-    current += step;
-    if (current >= target) {
-      current = target;
-      clearInterval(timer);
+async function deleteProduct(id) {
+  if (confirm("Are you sure you want to delete this product?")) {
+    try {
+      const response = await fetch(`${BASE_URL}/api/products/${id}`, { method: "DELETE" });
+      if (response.ok) {
+        alert("Product deleted successfully");
+        loadInventory();
+      }
+    } catch (error) {
+      alert("Error deleting product");
     }
-    el.textContent = current;
-  }, 30);
-}
-
-function animateSales(elementId, target) {
-  const el = document.getElementById(elementId);
-  if (!el) return;
-
-  let current = 0;
-  const step = Math.ceil(target / 40);
-  const timer = setInterval(() => {
-    current += step;
-    if (current >= target) {
-      current = target;
-      clearInterval(timer);
-    }
-    el.textContent = "₹" + current.toLocaleString("en-IN");
-  }, 30);
+  }
 }
 
 function logout() {

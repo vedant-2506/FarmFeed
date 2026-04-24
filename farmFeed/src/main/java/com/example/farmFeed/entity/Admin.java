@@ -33,7 +33,7 @@ public class Admin {
     private String phone;
 
     @Column(name = "role", nullable = false)
-    private String role; // SUPER_ADMIN, ADMIN, MODERATOR
+    private String role; // ADMIN
 
     @Column(name = "is_active", columnDefinition = "BOOLEAN DEFAULT true")
     private Boolean isActive;
