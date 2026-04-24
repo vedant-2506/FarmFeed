@@ -1,16 +1,13 @@
-FROM eclipse-temurin:17-jdk
-
+# Stage 1: Build the application
+FROM maven:3.9.4-eclipse-temurin-21 AS build
 WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-# Copy the farmFeed subfolder (where pom.xml and mvnw are)
-COPY farmFeed/ .
-
-# Make Maven wrapper executable
-RUN chmod +x mvnw
-
-# Build the jar
-RUN ./mvnw clean package -DskipTests
-
+# Stage 2: Run the application
+FROM eclipse-temurin:21-jre
+WORKDIR /app
+COPY --from=build /app/target/farmfeed-1.0.0.jar app.jar
 EXPOSE 8080
-
-CMD ["java", "-jar", "target/farmfeed-1.0.0.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
