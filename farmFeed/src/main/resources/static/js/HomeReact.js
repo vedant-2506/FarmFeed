@@ -249,11 +249,19 @@ function HomeCatalogApp() {
     }
 
     const searchBox = document.getElementById("searchBox");
+    const searchForm = document.getElementById("searchForm");
+    
     const onSearchInput = () => {
       setSearchQuery((searchBox ? searchBox.value : "").trim().toLowerCase());
     };
 
+    const onSearchSubmit = (e) => {
+      e.preventDefault();
+      onSearchInput();
+    };
+
     if (searchBox) searchBox.addEventListener("input", onSearchInput);
+    if (searchForm) searchForm.addEventListener("submit", onSearchSubmit);
 
     const controller = new AbortController();
 
