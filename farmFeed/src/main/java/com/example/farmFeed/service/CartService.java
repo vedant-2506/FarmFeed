@@ -32,7 +32,7 @@ public class CartService {
      * Add item to cart
      */
     @Transactional
-    public Cart addToCart(Long farmerId, Long productId, Long vendorId, Integer quantity) {
+    public Cart addToCart(Long farmerId, String productId, Long vendorId, Integer quantity) {
         logger.info("Adding product {} to cart for farmer {}", productId, farmerId);
         
         Optional<Cart> existingCart = cartRepository.findByFarmerIdAndProductIdAndVendorId(farmerId, productId, vendorId);
@@ -92,10 +92,9 @@ public class CartService {
                 productMap.put("rating", p.getRating());
                 productMap.put("total_reviews", p.getTotalReviews());
                 
-                // Convert image byte array to base64
-                if (p.getImage() != null && p.getImage().length > 0) {
-                    String base64Image = Base64.getEncoder().encodeToString(p.getImage());
-                    productMap.put("image", "data:image/jpeg;base64," + base64Image);
+                // Use imageLink directly
+                if (p.getImageLink() != null && !p.getImageLink().isEmpty()) {
+                    productMap.put("image", p.getImageLink());
                 } else {
                     // Try to get image from catalog (FertilizerRepository) by name - much more reliable
                     String imageUrl = fertilizerRepository.findImageByProductName(p.getName());
@@ -142,7 +141,7 @@ public class CartService {
      * Remove product from cart
      */
     @Transactional
-    public void removeProductFromCart(Long farmerId, Long productId) {
+    public void removeProductFromCart(Long farmerId, String productId) {
         logger.info("Removing product {} from farmer {}'s cart", productId, farmerId);
         cartRepository.deleteByFarmerIdAndProductId(farmerId, productId);
     }

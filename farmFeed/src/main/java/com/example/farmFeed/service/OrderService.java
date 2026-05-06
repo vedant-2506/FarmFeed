@@ -1,8 +1,10 @@
 package com.example.farmFeed.service;
 
 import com.example.farmFeed.entity.Order;
+import com.example.farmFeed.entity.Farmer;
 import com.example.farmFeed.entity.Product;
 import com.example.farmFeed.repository.OrderRepository;
+import com.example.farmFeed.repository.FarmerRepository;
 import com.example.farmFeed.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +27,9 @@ public class OrderService {
     @Autowired
     private ProductRepository productRepository;
 
+    @Autowired
+    private FarmerRepository farmerRepository;
+
     /**
      * Create new order
      */
@@ -32,6 +37,8 @@ public class OrderService {
     public Order createOrder(Order order) {
         logger.info("Creating order for farmer: {}", order.getFarmerId());
         
+        populateOrderDisplayFields(order);
+
         Optional<Product> product = productRepository.findById(order.getProductId());
         if (product.isPresent()) {
             // Update product stock
@@ -76,7 +83,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public List<Order> getPendingOrdersForVendor(Long vendorId) {
         logger.info("Fetching pending orders for vendor: {}", vendorId);
-        return orderRepository.getPendingOrdersByVendor(vendorId);
+        return orderRepository.getPendingOrdersForVendor(vendorId);
     }
 
     /**
@@ -98,7 +105,7 @@ public class OrderService {
         Optional<Order> order = orderRepository.findById(orderId);
         if (order.isPresent()) {
             Order o = order.get();
-            o.setStatus(status);
+            o.setStatus(normalizeOrderStatus(status));
             
             if (status.equalsIgnoreCase("delivered")) {
                 o.setDeliveryDate(LocalDateTime.now());
@@ -148,63 +155,49 @@ public class OrderService {
         return orderRepository.getPendingOrderCount(vendorId);
     }
 
-    /**
-     * Create multiple orders from cart items (one order per vendor)
-     */
     @Transactional
     public Map<String, Object> createOrdersFromCart(Long farmerId, String deliveryAddress, String paymentMethod, List<Map<String, Object>> cartItems) {
         logger.info("Creating orders from cart for farmer: {} at address: {}", farmerId, deliveryAddress);
         
         Map<String, Object> result = new HashMap<>();
         List<Order> createdOrders = new ArrayList<>();
-        Map<Long, List<Map<String, Object>>> ordersByVendor = new HashMap<>();
         
-        // Group cart items by vendor
-        for (Map<String, Object> cartItem : cartItems) {
-            Long vendorId = ((Number) cartItem.get("vendor_id")).longValue();
-            ordersByVendor.computeIfAbsent(vendorId, k -> new ArrayList<>()).add(cartItem);
-        }
-        
-        // Create one order per vendor
-        for (Map.Entry<Long, List<Map<String, Object>>> entry : ordersByVendor.entrySet()) {
-            Long vendorId = entry.getKey();
-            List<Map<String, Object>> vendorItems = entry.getValue();
+        // Create one order per product, unassigned to any vendor
+        for (Map<String, Object> item : cartItems) {
+            String productId = item.get("product_id").toString();
+            Integer quantity = ((Number) item.get("quantity")).intValue();
+            Double price = ((Number) item.get("price")).doubleValue();
             
-            for (Map<String, Object> item : vendorItems) {
-                Long productId = ((Number) item.get("product_id")).longValue();
-                Integer quantity = ((Number) item.get("quantity")).intValue();
-                Double price = ((Number) item.get("price")).doubleValue();
-                
-                Order order = new Order();
-                order.setFarmerId(farmerId);
-                order.setVendorId(vendorId);
-                order.setProductId(productId);
-                order.setQuantity(quantity);
-                order.setTotalPrice(price * quantity);
-                order.setStatus("pending");
-                order.setDeliveryAddress(deliveryAddress);
-                order.setPaymentMethod(paymentMethod);
-                order.setIsPaid(false);
-                
-                // Update stock
-                Optional<Product> product = productRepository.findById(productId);
-                if (product.isPresent()) {
-                    Product p = product.get();
-                    p.setStock(p.getStock() - quantity);
-                    productRepository.save(p);
-                }
-                
-                Order savedOrder = orderRepository.save(order);
-                createdOrders.add(savedOrder);
+            Order order = new Order();
+            order.setFarmerId(farmerId);
+            order.setVendorId(null); // Null vendorId means all vendors can see it
+            order.setProductId(productId);
+            order.setQuantity(quantity);
+            order.setTotalPrice(price * quantity);
+            order.setStatus("pending");
+            order.setDeliveryAddress(deliveryAddress);
+            order.setPaymentMethod(paymentMethod);
+            order.setIsPaid(false);
+
+            populateOrderDisplayFields(order);
+            
+            // Update stock
+            Optional<Product> product = productRepository.findById(productId);
+            if (product.isPresent()) {
+                Product p = product.get();
+                p.setStock(p.getStock() - quantity);
+                productRepository.save(p);
             }
+            
+            Order savedOrder = orderRepository.save(order);
+            createdOrders.add(savedOrder);
         }
         
         result.put("success", true);
         result.put("ordersCount", createdOrders.size());
-        result.put("vendorCount", ordersByVendor.size());
         result.put("orders", createdOrders);
         
-        logger.info("Successfully created {} orders for {} vendors", createdOrders.size(), ordersByVendor.size());
+        logger.info("Successfully created {} unassigned orders", createdOrders.size());
         return result;
     }
 
@@ -254,7 +247,7 @@ public class OrderService {
         if (order.isPresent()) {
             Order o = order.get();
             o.setTrackingNumber(trackingNumber);
-            o.setStatus("shipped");
+            o.setStatus("shifting");
             return orderRepository.save(o);
         }
         
@@ -276,5 +269,121 @@ public class OrderService {
         }
         
         return null;
+    }
+
+    /**
+     * Get shifting orders for vendor
+     */
+    @Transactional(readOnly = true)
+    public List<Order> getShiftingOrdersForVendor(Long vendorId) {
+        logger.info("Fetching shifting orders for vendor: {}", vendorId);
+        return orderRepository.getShiftingOrdersByVendor(vendorId);
+    }
+
+    /**
+     * Vendor accepts order (claims it and updates status to shifting)
+     */
+    @Transactional
+    public Order acceptOrderByVendor(Long orderId, Long vendorId) {
+        logger.info("Vendor {} accepting order: {}", vendorId, orderId);
+        
+        Optional<Order> order = orderRepository.findById(orderId);
+        if (order.isPresent()) {
+            Order o = order.get();
+            o.setVendorId(vendorId);
+            o.setStatus("shifting");  // Out for Delivery
+            return orderRepository.save(o);
+        }
+        
+        return null;
+    }
+
+    private String normalizeOrderStatus(String status) {
+        if (status == null || status.isBlank()) {
+            return "pending";
+        }
+
+        String normalized = status.toLowerCase(Locale.ROOT);
+        if ("accepted".equals(normalized) || "shipped".equals(normalized)) {
+            return "shifting";
+        }
+
+        return normalized;
+    }
+
+    private void populateOrderDisplayFields(Order order) {
+        Optional<Product> productOpt = productRepository.findById(order.getProductId());
+        if (productOpt.isPresent()) {
+            Product p = productOpt.get();
+            if (order.getProductName() == null || order.getProductName().isBlank()) {
+                order.setProductName(p.getName());
+            }
+            if (order.getProductQuantity() == null) {
+                order.setProductQuantity(order.getQuantity());
+            }
+        }
+
+        Optional<Farmer> farmerOpt = farmerRepository.findById(order.getFarmerId());
+        if (farmerOpt.isPresent()) {
+            Farmer f = farmerOpt.get();
+            if (order.getFarmerName() == null || order.getFarmerName().isBlank()) {
+                order.setFarmerName(f.getFullName());
+            }
+            if (order.getFarmerPhone() == null || order.getFarmerPhone().isBlank()) {
+                order.setFarmerPhone(f.getPhone());
+            }
+            if (order.getFarmerAddress() == null || order.getFarmerAddress().isBlank()) {
+                order.setFarmerAddress(f.getAddress());
+            }
+        }
+    }
+
+    /**
+     * Get all orders
+     */
+    @Transactional(readOnly = true)
+    public List<Order> getAllOrders() {
+        logger.info("Fetching all orders");
+        return orderRepository.findAll();
+    }
+
+    /**
+     * Get orders by status
+     */
+    @Transactional(readOnly = true)
+    public List<Order> getOrdersByStatus(String status) {
+        logger.info("Fetching orders with status: {}", status);
+        return orderRepository.findByStatus(status);
+    }
+
+    /**
+     * Get order statistics
+     */
+    @Transactional(readOnly = true)
+    public Map<String, Object> getOrderStatistics() {
+        logger.info("Calculating order statistics");
+        
+        Map<String, Object> stats = new HashMap<>();
+        List<Order> allOrders = orderRepository.findAll();
+        
+        long totalOrders = allOrders.size();
+        long pendingOrders = allOrders.stream().filter(o -> "pending".equals(o.getStatus())).count();
+        long shiftingOrders = allOrders.stream().filter(o -> "shifting".equals(o.getStatus())).count();
+        long deliveredOrders = allOrders.stream().filter(o -> "delivered".equals(o.getStatus())).count();
+        long cancelledOrders = allOrders.stream().filter(o -> "cancelled".equals(o.getStatus())).count();
+        
+        double totalRevenue = allOrders.stream()
+                .filter(o -> "delivered".equals(o.getStatus()))
+                .mapToDouble(Order::getTotalPrice)
+                .sum();
+        
+        stats.put("totalOrders", totalOrders);
+        stats.put("pendingOrders", pendingOrders);
+        stats.put("shiftingOrders", shiftingOrders);
+        stats.put("deliveredOrders", deliveredOrders);
+        stats.put("cancelledOrders", cancelledOrders);
+        stats.put("totalRevenue", totalRevenue);
+        
+        return stats;
     }
 }

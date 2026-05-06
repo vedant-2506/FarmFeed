@@ -18,7 +18,7 @@ public class Rating {
     private Long id;
 
     @Column(name = "product_id", nullable = false)
-    private Long productId;
+    private String productId;
 
     @Column(name = "farmer_id", nullable = false)
     private Long farmerId;

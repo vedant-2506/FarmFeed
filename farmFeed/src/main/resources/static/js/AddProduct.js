@@ -211,12 +211,7 @@ async function loadAllFertilizers() {
       browseList.innerHTML = data.map(fert => `
         <div class="fertilizer-card">
           <div class="row align-items-center">
-            <div class="col-md-2">
-              <img src="${fert.image_url || 'https://via.placeholder.com/80'}" 
-                   alt="${fert.name}" 
-                   class="img-fluid fertilizer-image">
-            </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
               <div class="fert-name">${fert.name}</div>
               <div class="fert-price">Rs${fert.price}</div>
               <small style="color: #999;">${fert.description || ''}</small>

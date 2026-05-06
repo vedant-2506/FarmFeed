@@ -124,7 +124,7 @@
           </div>
           <div class="col-12">
             <label class="form-label fw-semibold">Password</label>
-            <input type="password" id="password" class="form-control" placeholder="••••••••" required>
+            <input type="password" id="password" class="form-control" placeholder="••••••••" data-toggle="password" required>
           </div>
           <input type="hidden" id="role" value="ADMIN">
         </div>
@@ -140,6 +140,7 @@
   </div>
 
   <script src="js/config.js"></script>
+  <script src="js/password-toggle.js"></script>
   <script>
     const API_URL = window.API_BASE_URL || window.location.origin;
     const adminId = localStorage.getItem("admin_id");

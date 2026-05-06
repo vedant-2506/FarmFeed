@@ -382,11 +382,23 @@ public class OrderController {
      * Updates status from PENDING to ACCEPTED
      */
     @PostMapping("/{id}/accept")
-    public ResponseEntity<?> acceptOrder(@PathVariable Long id) {
+    public ResponseEntity<?> acceptOrder(
+            @PathVariable Long id,
+            @RequestBody(required = false) Map<String, Object> request) {
         try {
             logger.info("Vendor accepting order: {}", id);
-            
-            Order acceptedOrder = orderService.updateOrderStatus(id, "accepted");
+
+            Long vendorId = null;
+            if (request != null && request.get("vendorId") instanceof Number number) {
+                vendorId = number.longValue();
+            }
+
+            Order acceptedOrder;
+            if (vendorId != null) {
+                acceptedOrder = orderService.acceptOrderByVendor(id, vendorId);
+            } else {
+                acceptedOrder = orderService.updateOrderStatus(id, "shifting");
+            }
             
             if (acceptedOrder == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -494,6 +506,114 @@ public class OrderController {
             ));
         } catch (Exception e) {
             logger.error("Error marking order as delivered: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    /**
+     * GET /api/orders/vendor/{vendorId}/shifting - Get shifting orders for vendor
+     * Status = SHIFTING (Out for Delivery)
+     */
+    @GetMapping("/vendor/{vendorId}/shifting")
+    public ResponseEntity<?> getShiftingOrders(@PathVariable Long vendorId) {
+        try {
+            logger.info("Fetching shifting orders for vendor: {}", vendorId);
+            List<Order> orders = orderService.getShiftingOrdersForVendor(vendorId);
+            
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "count", orders.size(),
+                    "data", orders
+            ));
+        } catch (Exception e) {
+            logger.error("Error fetching shifting orders: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    /**
+     * POST /api/orders/{id}/accept - Vendor accepts order and claims it
+     * Updates vendorId and status to SHIFTING
+     */
+    @PostMapping("/{id}/accept-vendor")
+    public ResponseEntity<?> acceptOrderByVendor(
+            @PathVariable Long id,
+            @RequestBody Map<String, Object> request) {
+        try {
+            logger.info("Vendor accepting order: {}", id);
+            
+            Long vendorId = ((Number) request.get("vendorId")).longValue();
+            
+            if (vendorId == null) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("success", false, "error", "Vendor ID is required"));
+            }
+            
+            Order acceptedOrder = orderService.acceptOrderByVendor(id, vendorId);
+            
+            if (acceptedOrder == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("success", false, "error", "Order not found"));
+            }
+            
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "message", "Order accepted successfully",
+                    "data", acceptedOrder
+            ));
+        } catch (Exception e) {
+            logger.error("Error accepting order: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    /**
+     * GET /api/orders/admin/all - Get all orders for admin dashboard
+     */
+    @GetMapping("/admin/all")
+    public ResponseEntity<?> getAllOrdersForAdmin(
+            @RequestParam(required = false) String status) {
+        try {
+            logger.info("Fetching all orders for admin dashboard");
+            
+            List<Order> orders;
+            if (status != null && !status.isEmpty()) {
+                orders = orderService.getOrdersByStatus(status);
+            } else {
+                orders = orderService.getAllOrders();
+            }
+            
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "count", orders.size(),
+                    "data", orders
+            ));
+        } catch (Exception e) {
+            logger.error("Error fetching orders: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    /**
+     * GET /api/orders/admin/stats - Get order statistics for admin
+     */
+    @GetMapping("/admin/stats")
+    public ResponseEntity<?> getOrderStats() {
+        try {
+            logger.info("Fetching order statistics");
+            
+            Map<String, Object> stats = orderService.getOrderStatistics();
+            
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "data", stats
+            ));
+        } catch (Exception e) {
+            logger.error("Error fetching order stats: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("success", false, "error", e.getMessage()));
         }

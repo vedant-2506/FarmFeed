@@ -9,6 +9,7 @@ import com.example.farmFeed.repository.FarmerRepository;
 import com.example.farmFeed.repository.VendorRepository;
 import com.example.farmFeed.repository.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
@@ -16,11 +17,13 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.regex.Pattern;
 
 @Service
 public class AdminService {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminService.class);
+    private static final Pattern BCRYPT_PATTERN = Pattern.compile("^\\$2[aby]\\$\\d{2}\\$.{53}$");
 
     @Autowired
     private AdminRepository adminRepository;
@@ -37,16 +40,36 @@ public class AdminService {
     @Autowired
     private OrderService orderService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Transactional
     public Admin registerAdmin(Admin admin) {
         logger.info("registering admin: {}", admin.getUsername());
+        // Encrypt password before saving
+        admin.setPassword(passwordEncoder.encode(admin.getPassword()));
         return adminRepository.save(admin);
     }
 
     @Transactional(readOnly = true)
     public Optional<Admin> login(String username, String password) {
         logger.info("admin login: {}", username);
-        return adminRepository.findByUsernameAndPassword(username, password);
+        Optional<Admin> admin = adminRepository.findByUsername(username);
+        if (admin.isEmpty()) {
+            admin = adminRepository.findByEmail(username);
+        }
+
+        if (admin.isPresent()
+                && Boolean.TRUE.equals(admin.get().getIsActive())
+                && isBcryptHash(admin.get().getPassword())
+                && passwordEncoder.matches(password, admin.get().getPassword())) {
+            return admin;
+        }
+        return Optional.empty();
+    }
+
+    private boolean isBcryptHash(String password) {
+        return password != null && BCRYPT_PATTERN.matcher(password).matches();
     }
 
     @Transactional(readOnly = true)
@@ -148,7 +171,7 @@ public class AdminService {
      */
     @Transactional
     public Notification createNotification(Long adminId, String type, String title, String message, 
-                                          Long orderId, Long productId, Long vendorId) {
+                                          Long orderId, String productId, Long vendorId) {
         logger.info("Creating notification of type: {}", type);
         
         Notification notification = Notification.builder()

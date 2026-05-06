@@ -1,5 +1,5 @@
 const API_BASE_URL = window.API_BASE_URL || window.location.origin;
-const FERTILIZER_API = `${API_BASE_URL}/api/fertilizers`;
+const PRODUCTS_API = `${API_BASE_URL}/api/products`;
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1592982537447-6f2a6a0b2d8f?w=800&q=80";
 
 let allProducts = [];
@@ -19,27 +19,28 @@ async function loadProductsFromApi() {
   if (!container) return;
 
   try {
-    const response = await fetch(FERTILIZER_API);
+    const response = await fetch(PRODUCTS_API);
     if (!response.ok) {
       throw new Error(`Failed with status ${response.status}`);
     }
 
-    const fertilizers = await response.json();
+    const responseBody = await response.json();
+    const fertilizers = Array.isArray(responseBody) ? responseBody : (responseBody.data || []);
     if (!Array.isArray(fertilizers) || fertilizers.length === 0) {
-      console.warn("No fertilizers found from API");
+      console.warn("No products found from API");
       return;
     }
 
-    console.log("Loaded fertilizers:", fertilizers.length, fertilizers[0]);
+    console.log("Loaded products:", fertilizers.length, fertilizers[0]);
 
     allProducts = fertilizers.map(item => ({
-      id: item.fertilizer_id || item.id,
+      id: item.id,
       name: item.name,
-      description: item.description || "Quality fertilizer for healthier crop growth.",
+      description: item.description || item.detailedDescription || "Quality fertilizer for healthier crop growth.",
       price: item.price || 0,
       stock: item.stock || 0,
-      image: item.image_url || FALLBACK_IMAGE,
-      category: normalizeCategory(item.category, item.name, item.description)
+      image: item.imageLink || item.image_url || FALLBACK_IMAGE,
+      category: normalizeCategory(item.category || item.primary_category, item.name, item.description)
     }));
 
     console.log("Processed products:", allProducts.length, allProducts[0]);
@@ -158,7 +159,7 @@ function handleAddToCart(button) {
   // save to database
   const payload = {
     farmerId: parseInt(farmerId),
-    productId: parseInt(productId),
+    productId: productId,
     vendorId: parseInt(vendorId),
     quantity: 1
   };
@@ -206,7 +207,7 @@ function updateCartCount() {
       .then(data => {
         const el = document.getElementById("cart-count");
         if (el) {
-          el.textContent = data.count || 0;
+          el.textContent = data.itemCount !== undefined ? data.itemCount : (data.count || 0);
         }
       })
       .catch(e => {

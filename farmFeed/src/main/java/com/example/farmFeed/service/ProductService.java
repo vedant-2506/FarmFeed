@@ -36,7 +36,7 @@ public class ProductService {
      * Get product by ID
      */
     @Transactional(readOnly = true)
-    public Optional<Product> getProductById(Long id) {
+    public Optional<Product> getProductById(String id) {
         logger.info("Fetching product with ID: {}", id);
         return productRepository.findById(id);
     }
@@ -108,13 +108,13 @@ public class ProductService {
      * Compare products
      */
     @Transactional(readOnly = true)
-    public Map<String, Object> compareProducts(List<Long> productIds) {
+    public Map<String, Object> compareProducts(List<String> productIds) {
         logger.info("Comparing {} products", productIds.size());
         
         Map<String, Object> comparison = new HashMap<>();
         List<Product> products = new ArrayList<>();
         
-        for (Long id : productIds) {
+        for (String id : productIds) {
             Optional<Product> product = productRepository.findById(id);
             product.ifPresent(products::add);
         }
@@ -154,7 +154,7 @@ public class ProductService {
      * Update product
      */
     @Transactional
-    public Product updateProduct(Long id, Product productDetails) {
+    public Product updateProduct(String id, Product productDetails) {
         logger.info("Updating product: {}", id);
         
         Optional<Product> existingProduct = productRepository.findById(id);
@@ -166,7 +166,7 @@ public class ProductService {
             if (productDetails.getCategory() != null) product.setCategory(productDetails.getCategory());
             if (productDetails.getPrice() != null) product.setPrice(productDetails.getPrice());
             if (productDetails.getStock() != null) product.setStock(productDetails.getStock());
-            if (productDetails.getImage() != null) product.setImage(productDetails.getImage());
+            if (productDetails.getImageLink() != null) product.setImageLink(productDetails.getImageLink());
             if (productDetails.getManufacturer() != null) product.setManufacturer(productDetails.getManufacturer());
             
             return productRepository.save(product);
@@ -180,7 +180,7 @@ public class ProductService {
      * Delete product
      */
     @Transactional
-    public boolean deleteProduct(Long id) {
+    public boolean deleteProduct(String id) {
         logger.info("Deleting product: {}", id);
         
         if (productRepository.existsById(id)) {
@@ -196,7 +196,7 @@ public class ProductService {
      * Update stock
      */
     @Transactional
-    public Product updateStock(Long id, Integer quantity) {
+    public Product updateStock(String id, Integer quantity) {
         logger.info("Updating stock for product: {} with quantity: {}", id, quantity);
         
         Optional<Product> product = productRepository.findById(id);
@@ -225,7 +225,7 @@ public class ProductService {
      * Add rating to product and update product rating
      */
     @Transactional
-    public void addRating(Long productId, Integer rating, String review, Long farmerId, Long vendorId) {
+    public void addRating(String productId, Integer rating, String review, Long farmerId, Long vendorId) {
         logger.info("Adding rating {} to product: {}", rating, productId);
         
         Product product = productRepository.findById(productId).orElse(null);
@@ -258,7 +258,7 @@ public class ProductService {
      * Get all ratings for a product
      */
     @Transactional(readOnly = true)
-    public List<Rating> getProductRatings(Long productId) {
+    public List<Rating> getProductRatings(String productId) {
         logger.info("Fetching ratings for product: {}", productId);
         return ratingRepository.findByProductId(productId);
     }

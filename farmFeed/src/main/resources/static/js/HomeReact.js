@@ -1,5 +1,5 @@
 const API_BASE_URL = window.API_BASE_URL || window.location.origin;
-const FERTILIZER_API = `${API_BASE_URL}/api/fertilizers`;
+const PRODUCTS_API = `${API_BASE_URL}/api/products`;
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1592982537447-6f2a6a0b2d8f?w=800&q=80";
 const CACHE_KEY = "farmfeed_products_cache_v3"; // Bumped version to override old cache
 const CACHE_TTL_MS = 2 * 60 * 1000; // 2 minutes for quicker testing
@@ -48,8 +48,8 @@ function normalizeProducts(items) {
     .filter((item) => item && (item.name || item.product_name))
     .map((item, index) => {
       const name = item.name || item.product_name || "Unnamed";
-      const description = item.description || item.description_clean || item.detailed_description_10_sentences || "";
-      const primaryCat = mapPrimaryCategory(item.primary_category);
+      const description = item.description || item.description_clean || item.detailed_description_10_sentences || item.detailedDescription || "";
+      const primaryCat = mapPrimaryCategory(item.primary_category || item.category);
       const subcat = detectSubcategory(name, description, item.subcategory);
 
       const productId = item.fertilizer_id || item.id || index + 1;
@@ -64,7 +64,7 @@ function normalizeProducts(items) {
         description: description,
         price: Number(item.price || item.price_inr || 0),
         stock: Number(item.stock || 0),
-        image: item.image_url || item.image_link || FALLBACK_IMAGE,
+        image: item.imageLink || item.image_url || FALLBACK_IMAGE,
         primaryCategory: primaryCat,
         subcategory: subcat,
         rating: item.rating || "4.5"
@@ -85,7 +85,7 @@ function updateCartCount() {
     .then(data => {
       if (data.success) {
         const badge = document.getElementById("cart-count");
-        if (badge) badge.textContent = String(data.itemCount || 0);
+        if (badge) badge.textContent = String(data.itemCount !== undefined ? data.itemCount : (data.count || 0));
       }
     })
     .catch(e => console.error("error fetching cart count:", e));
@@ -109,27 +109,19 @@ function addToCart(product, showLoginModal) {
 
   const vendorId = shopId || 1;
   
-  // Extract numeric ID from product.id (handles both numeric IDs and "bighaat_123" format)
-  let numericProductId;
-  if (typeof product.id === 'string' && product.id.startsWith('bighaat_')) {
-    numericProductId = parseInt(product.id.split('_')[1]);
-  } else {
-    numericProductId = parseInt(product.id);
-  }
-  
   const parsedFarmerId = parseInt(farmerId);
   const parsedVendorId = parseInt(vendorId);
 
   // Validate all values are valid numbers
-  if (isNaN(numericProductId) || isNaN(parsedFarmerId) || isNaN(parsedVendorId)) {
-    console.error("Invalid IDs - product.id:", product.id, "extracted:", numericProductId, "farmerId:", parsedFarmerId, "vendorId:", parsedVendorId);
+  if (isNaN(parsedFarmerId) || isNaN(parsedVendorId)) {
+    console.error("Invalid IDs - product.id:", product.id, "farmerId:", parsedFarmerId, "vendorId:", parsedVendorId);
     alert("Error: Invalid ID values");
     return;
   }
 
   const payload = {
     farmerId: parsedFarmerId,
-    productId: numericProductId,
+    productId: product.id,
     vendorId: parsedVendorId,
     quantity: 1
   };
@@ -265,16 +257,17 @@ function HomeCatalogApp() {
 
     const controller = new AbortController();
 
-    fetch(FERTILIZER_API, { signal: controller.signal })
+    fetch(PRODUCTS_API, { signal: controller.signal })
       .then((response) => {
         if (!response.ok) throw new Error(`Failed with status ${response.status}`);
         return response.json();
       })
       .then((data) => {
-        const normalized = normalizeProducts(data);
+        const items = Array.isArray(data) ? data : (data.data || []);
+        const normalized = normalizeProducts(items);
         setProducts(normalized);
         setError("");
-        saveCache(data);
+        saveCache(items);
       })
       .catch((fetchError) => {
         if (fetchError.name !== "AbortError") {
