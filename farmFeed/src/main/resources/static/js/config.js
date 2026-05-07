@@ -1,1 +1,1 @@
-window.API_BASE_URL = window.location.origin;
+window.API_BASE_URL = "https://farmfeed.onrender.com";
