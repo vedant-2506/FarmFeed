@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 public class Product {
 
     @Id
-    @Column(name = "id")
+    @Column(name = "product_id")
     private String id;
 
     @Column(name = "product_name")
