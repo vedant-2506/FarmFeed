@@ -69,15 +69,12 @@ public class VendorInventoryService {
                 Object fertIdObj = fert.get("fertilizer_id");
                 Integer id = null;
                 
-                if (fertIdObj instanceof String) {
-                    String fertIdStr = (String) fertIdObj;
-                    if (fertIdStr.contains("_")) {
-                        id = Integer.parseInt(fertIdStr.split("_")[1]);
-                    } else {
-                        id = Integer.parseInt(fertIdStr);
+                if (fertIdObj != null) {
+                    String fertIdStr = fertIdObj.toString();
+                    String numericPart = fertIdStr.replaceAll("[^0-9]", "");
+                    if (!numericPart.isEmpty()) {
+                        id = Integer.parseInt(numericPart);
                     }
-                } else if (fertIdObj instanceof Number) {
-                    id = ((Number) fertIdObj).intValue();
                 }
                 
                 if (id != null) {

@@ -161,7 +161,16 @@ public class OrderService {
         
         // Group cart items by vendor
         for (Map<String, Object> cartItem : cartItems) {
-            Long vendorId = ((Number) cartItem.get("vendor_id")).longValue();
+            Long vendorId;
+            Object vendIdObj = cartItem.get("vendor_id");
+            if (vendIdObj instanceof Number) {
+                vendorId = ((Number) vendIdObj).longValue();
+            } else if (vendIdObj instanceof String) {
+                String sanitized = ((String) vendIdObj).replaceAll("[^0-9]", "");
+                vendorId = sanitized.isEmpty() ? 0L : Long.parseLong(sanitized);
+            } else {
+                vendorId = 0L;
+            }
             ordersByVendor.computeIfAbsent(vendorId, k -> new ArrayList<>()).add(cartItem);
         }
         
@@ -171,9 +180,25 @@ public class OrderService {
             List<Map<String, Object>> vendorItems = entry.getValue();
             
             for (Map<String, Object> item : vendorItems) {
-                Long productId = ((Number) item.get("product_id")).longValue();
-                Integer quantity = ((Number) item.get("quantity")).intValue();
-                Double price = ((Number) item.get("price")).doubleValue();
+                // Robustly parse productId which might be String or Number
+                Long productId;
+                Object prodIdObj = item.get("product_id");
+                if (prodIdObj instanceof Number) {
+                    productId = ((Number) prodIdObj).longValue();
+                } else if (prodIdObj instanceof String) {
+                    String sanitized = ((String) prodIdObj).replaceAll("[^0-9]", "");
+                    productId = sanitized.isEmpty() ? 0L : Long.parseLong(sanitized);
+                } else {
+                    productId = 0L;
+                }
+
+                // Robustly parse quantity and price
+                Integer quantity = item.get("quantity") != null ? 
+                        ((Number) item.get("quantity")).intValue() : 
+                        (item.get("qty") != null ? ((Number) item.get("qty")).intValue() : 1);
+                
+                Double price = item.get("price") != null ? 
+                        ((Number) item.get("price")).doubleValue() : 0.0;
                 
                 Order order = new Order();
                 order.setFarmerId(farmerId);

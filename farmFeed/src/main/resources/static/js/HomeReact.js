@@ -43,8 +43,24 @@ function normalizeProducts(items) {
       const primaryCat = mapPrimaryCategory(item.primary_category);
       const subcat = detectSubcategory(name, description, item.subcategory);
 
+      // Extract numeric ID if it's a string like 'pr997' or 'bighaat_1'
+      let rawId = item.fertilizer_id || item.id || (index + 1);
+      let numericId = rawId;
+      if (typeof rawId === 'string') {
+        const matches = rawId.match(/\d+/);
+        numericId = matches ? parseInt(matches[0]) : (index + 1);
+      }
+
+      let vId = item.vendorId || item.vendor_id || 0;
+      let numericVendorId = vId;
+      if (typeof vId === 'string') {
+        const matches = vId.match(/\d+/);
+        numericVendorId = matches ? parseInt(matches[0]) : 0;
+      }
+
       return {
-        id: item.fertilizer_id || item.id || index + 1,
+        id: numericId,
+        rawId: rawId, // keep rawId for reference if needed
         name: name,
         description: description,
         price: Number(item.price || item.price_inr || 0),
@@ -53,7 +69,7 @@ function normalizeProducts(items) {
         primaryCategory: primaryCat,
         subcategory: subcat,
         rating: item.rating || "4.5",
-        vendorId: item.vendorId || item.vendor_id || 0
+        vendorId: numericVendorId
       };
     });
 }

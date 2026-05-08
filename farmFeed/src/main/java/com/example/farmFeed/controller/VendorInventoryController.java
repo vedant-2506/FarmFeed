@@ -24,10 +24,15 @@ public class VendorInventoryController {
     private FertilizerService fertilizerService;
 
     private Integer parseFertilizerId(String id) {
-        if (id.contains("_")) {
-            return Integer.parseInt(id.split("_")[1]);
+        if (id == null || id.trim().isEmpty() || "undefined".equals(id)) {
+            return null;
         }
-        return Integer.parseInt(id);
+        // Extract only digits from the string (e.g., "pr997" -> "997", "bighaat_123" -> "123")
+        String numericPart = id.replaceAll("[^0-9]", "");
+        if (numericPart.isEmpty()) {
+            throw new IllegalArgumentException("Invalid ID format: " + id);
+        }
+        return Integer.parseInt(numericPart);
     }
 
     @GetMapping("/{vendorId}")
