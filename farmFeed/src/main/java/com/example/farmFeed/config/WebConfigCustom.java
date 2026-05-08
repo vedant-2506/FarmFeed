@@ -10,7 +10,12 @@ public class WebConfigCustom implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins("*")
+                .allowedOrigins(
+                    "http://localhost:3000",
+                    "http://localhost:8080",
+                    "https://farmfeed-three.vercel.app",
+                    "https://farmfeed.onrender.com"
+                )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(false)
