@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await response.json();
       if (response.ok && data.success) {
         // Store farmer info in localStorage
-        localStorage.setItem("farmer_id", data.id);
+        localStorage.setItem("farmer_id", data.farmer_id || data.id || "");
         localStorage.setItem("farmer_name", data.fullName);
         localStorage.setItem("user_name", data.fullName); // For dropdown display
         localStorage.setItem("farmer_phone", data.phone);
@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await response.json();
       if (response.ok && data.success) {
         // Store vendor info in localStorage
-        localStorage.setItem("shop_id", data.id);
+        localStorage.setItem("shop_id", data.shop_id || data.id || "");
         localStorage.setItem("shop_name", data.shopName);
         localStorage.setItem("owner_name", data.ownerName);
         localStorage.setItem("user_name", data.ownerName); // For dropdown display

@@ -1,4 +1,4 @@
-const API_BASE_URL = window.API_BASE_URL || window.location.origin;
+const API_BASE_URL = globalThis.API_BASE_URL || globalThis.location.origin;
 const FERTILIZER_API = `${API_BASE_URL}/api/products`;
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1592982537447-6f2a6a0b2d8f?w=800&q=80";
 const CACHE_KEY = "farmfeed_products_cache_v2";
@@ -9,7 +9,7 @@ const e = React.createElement;
 // Map raw primary_category to display name
 function mapPrimaryCategory(raw) {
   if (!raw) return "Other";
-  const normalized = raw.toLowerCase().replace(/_/g, " ");
+  const normalized = raw.toLowerCase().replaceAll("_", " ");
   return normalized.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 }
 
@@ -47,15 +47,15 @@ function normalizeProducts(items) {
       let rawId = item.fertilizer_id || item.id || (index + 1);
       let numericId = rawId;
       if (typeof rawId === 'string') {
-        const matches = rawId.match(/\d+/);
-        numericId = matches ? parseInt(matches[0]) : (index + 1);
+        const matches = /\d+/.exec(rawId);
+        numericId = matches ? Number.parseInt(matches[0], 10) : (index + 1);
       }
 
       let vId = item.vendorId || item.vendor_id || 0;
       let numericVendorId = vId;
       if (typeof vId === 'string') {
-        const matches = vId.match(/\d+/);
-        numericVendorId = matches ? parseInt(matches[0]) : 0;
+        const matches = /\d+/.exec(vId);
+        numericVendorId = matches ? Number.parseInt(matches[0], 10) : 0;
       }
 
       return {
@@ -101,7 +101,7 @@ function addToCart(product, quantity = 1) {
   localStorage.setItem("cart", JSON.stringify(cart));
   updateCartCount();
   
-  if (window.Toast) {
+  if (globalThis.Toast) {
     Toast.success(`${product.name} added to cart!`);
   } else {
     alert(`${product.name} added to cart!`);
@@ -318,16 +318,18 @@ function HomeCatalogApp() {
 
   const content = [];
 
+  if (loading) {
     content.push(
       e(
         "div",
         { className: "col-12 text-center py-5", key: "loading" },
-        e("div", { className: "spinner-border text-success", role: "status" }, 
+        e("div", { className: "spinner-border text-success", role: "status" },
           e("span", { className: "visually-hidden" }, "Loading...")
         ),
         e("p", { className: "mt-2 text-muted" }, "Loading products...")
       )
     );
+  }
 
   if (!loading && error) {
     content.push(
