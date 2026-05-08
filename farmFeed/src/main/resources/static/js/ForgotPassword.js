@@ -8,13 +8,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const confirmPassword = document.getElementById("farmerConfirmPassword").value.trim();
 
     if (!phone || !newPassword || !confirmPassword) {
-      alert("Please fill all fields"); return;
+      Toast.warning("Please fill all fields"); return;
     }
     if (!/^\d{10}$/.test(phone)) {
-      alert("Phone number must be exactly 10 digits"); return;
+      Toast.warning("Phone number must be exactly 10 digits"); return;
     }
     if (newPassword !== confirmPassword) {
-      alert("Passwords do not match"); return;
+      Toast.warning("Passwords do not match"); return;
     }
 
     try {
@@ -25,12 +25,12 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       const data = await response.json();
       if (response.ok && data.success) {
-        alert("Password Reset Successful!");
+        Toast.success("Password Reset Successful!");
         window.location.href = "Login.html";
       } else {
-        alert(data.error || "Reset Failed");
+        Toast.error(data.error || "Reset Failed");
       }
-    } catch (error) { alert("Server Error! Try again in 30s."); }
+    } catch (error) { Toast.error("Server Error! Try again in 30s."); }
   });
 
   document.getElementById("vendorForgotForm").addEventListener("submit", async (e) => {
@@ -40,10 +40,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const confirmPassword = document.getElementById("vendorConfirmPassword").value.trim();
 
     if (!email || !newPassword || !confirmPassword) {
-      alert("Please fill all fields"); return;
+      Toast.warning("Please fill all fields"); return;
     }
     if (newPassword !== confirmPassword) {
-      alert("Passwords do not match"); return;
+      Toast.warning("Passwords do not match"); return;
     }
 
     try {
@@ -54,11 +54,11 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       const data = await response.json();
       if (response.ok && data.success) {
-        alert("Password Reset Successful!");
-        window.location.href = "Login.html";
+        Toast.success("Password Reset Successful!");
+        setTimeout(() => { window.location.href = "Login.html"; }, 1500);
       } else {
-        alert(data.error || "Reset Failed");
+        Toast.error(data.error || "Reset Failed");
       }
-    } catch (error) { alert("Server Error! Try again in 30s."); }
+    } catch (error) { Toast.error("Server Error! Try again in 30s."); }
   });
 });

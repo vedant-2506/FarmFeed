@@ -173,18 +173,19 @@ public class VendorInventoryController {
     }
 
     /**
-     * GET /api/vendor-inventory/{vendorId}/count - Get inventory count
+     * GET /api/vendor-inventory/analysis/{vendorId} - Get stock analysis
      */
-    @GetMapping("/{vendorId}/count")
-    public ResponseEntity<?> getInventoryCount(@PathVariable Long vendorId) {
+    @GetMapping("/analysis/{vendorId}")
+    public ResponseEntity<?> getStockAnalysis(@PathVariable Long vendorId) {
         try {
-            long count = inventoryService.getInventoryCount(vendorId);
+            logger.info("Fetching stock analysis for vendor: {}", vendorId);
+            Map<String, Object> analysis = inventoryService.getStockAnalysis(vendorId);
             return ResponseEntity.ok(Map.of(
                     "success", true,
-                    "count", count
+                    "data", analysis
             ));
         } catch (Exception e) {
-            logger.error("Error getting inventory count: {}", e.getMessage());
+            logger.error("Error getting stock analysis: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("success", false, "error", e.getMessage()));
         }

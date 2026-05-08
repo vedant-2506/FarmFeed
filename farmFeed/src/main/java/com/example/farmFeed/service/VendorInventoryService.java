@@ -143,6 +143,28 @@ public class VendorInventoryService {
     }
 
     /**
+     * Get stock analysis for vendor
+     */
+    public Map<String, Object> getStockAnalysis(Long vendorId) {
+        List<VendorInventory> items = repository.findByVendorIdAndIsActiveTrue(vendorId);
+        
+        long totalItems = items.size();
+        long lowStock = items.stream().filter(i -> i.getQuantityInStock() > 0 && i.getQuantityInStock() < 10).count();
+        long outOfStock = items.stream().filter(i -> i.getQuantityInStock() <= 0).count();
+        double avgPrice = items.stream().mapToDouble(VendorInventory::getVendorPrice).average().orElse(0.0);
+        double maxPrice = items.stream().mapToDouble(VendorInventory::getVendorPrice).max().orElse(0.0);
+        
+        Map<String, Object> analysis = new HashMap<>();
+        analysis.put("totalItems", totalItems);
+        analysis.put("lowStockCount", lowStock);
+        analysis.put("outOfStockCount", outOfStock);
+        analysis.put("averagePrice", Math.round(avgPrice * 100.0) / 100.0);
+        analysis.put("maxPrice", maxPrice);
+        
+        return analysis;
+    }
+
+    /**
      * Check if vendor already has a fertilizer
      */
     public boolean hasInventoryItem(Long vendorId, Integer fertilizerId) {

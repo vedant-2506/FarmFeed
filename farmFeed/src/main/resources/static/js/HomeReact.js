@@ -1,5 +1,5 @@
 const API_BASE_URL = window.API_BASE_URL || window.location.origin;
-const FERTILIZER_API = `${API_BASE_URL}/api/fertilizers`;
+const FERTILIZER_API = `${API_BASE_URL}/api/products`;
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1592982537447-6f2a6a0b2d8f?w=800&q=80";
 const CACHE_KEY = "farmfeed_products_cache_v2";
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -52,7 +52,8 @@ function normalizeProducts(items) {
         image: item.image_url || item.image_link || FALLBACK_IMAGE,
         primaryCategory: primaryCat,
         subcategory: subcat,
-        rating: item.rating || "4.5"
+        rating: item.rating || "4.5",
+        vendorId: item.vendorId || item.vendor_id || 0
       };
     });
 }
@@ -64,25 +65,31 @@ function updateCartCount() {
   if (badge) badge.textContent = String(total);
 }
 
-function addToCart(product) {
+function addToCart(product, quantity = 1) {
   const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-  const existing = cart.find((item) => item.id === product.id);
+  const existing = cart.find((item) => item.id === product.id && item.vendor_id === product.vendorId);
 
   if (existing) {
-    existing.qty = (existing.qty || 1) + 1;
+    existing.qty = (existing.qty || 1) + quantity;
   } else {
     cart.push({
       id: product.id,
       name: product.name,
       price: product.price,
       img: product.image,
-      qty: 1
+      qty: quantity,
+      vendor_id: product.vendorId
     });
   }
 
   localStorage.setItem("cart", JSON.stringify(cart));
   updateCartCount();
-  alert(`${product.name} added to cart!`);
+  
+  if (window.Toast) {
+    Toast.success(`${product.name} added to cart!`);
+  } else {
+    alert(`${product.name} added to cart!`);
+  }
 }
 
 function saveCache(products) {
@@ -112,6 +119,93 @@ function readCache() {
     console.warn("Unable to read product cache:", error);
     return null;
   }
+}
+
+function ProductCard({ product, onOpen }) {
+  const [qty, setQty] = React.useState(1);
+
+  const handleAdd = (e) => {
+    e.stopPropagation();
+    addToCart(product, qty);
+  };
+
+  const inc = (e) => { e.stopPropagation(); setQty(qty + 1); };
+  const dec = (e) => { e.stopPropagation(); if (qty > 1) setQty(qty - 1); };
+
+  return e(
+    "div",
+    {
+      className: "product-card",
+      onClick: onOpen,
+      style: { cursor: "pointer" }
+    },
+    // Image
+    e(
+      "div",
+      { className: "product-card-image" },
+      e("img", {
+        src: product.image,
+        alt: product.name,
+        loading: "lazy"
+      })
+    ),
+    // Body
+    e(
+      "div",
+      { className: "product-card-body" },
+      // Category badges
+      e(
+        "div",
+        { className: "product-card-badges" },
+        e("span", {
+          className: "badge bg-primary",
+        }, product.primaryCategory),
+        e("span", {
+          className: "badge bg-info",
+        }, product.subcategory)
+      ),
+      // Title
+      e("h6", {
+        className: "product-card-title",
+      }, product.name),
+      // Rating
+      e("div", {
+        className: "product-card-rating",
+      }, `⭐ ${product.rating}`),
+      // Description
+      e("p", {
+        className: "product-card-description",
+      }, product.description),
+      // Price
+      e("div", {
+        className: "product-card-price",
+      }, `₹${Number(product.price).toLocaleString("en-IN")}`),
+      // Stock
+      e("div", {
+        className: "product-card-stock",
+      }, `Stock: ${product.stock} units`),
+      
+      // Quantity selector
+      e("div", {
+        className: "d-flex align-items-center justify-content-center gap-2 mb-3 mt-2",
+        onClick: (e) => e.stopPropagation()
+      },
+        e("button", { className: "btn btn-outline-success btn-sm", onClick: dec }, "−"),
+        e("span", { className: "fw-bold px-2" }, qty),
+        e("button", { className: "btn btn-outline-success btn-sm", onClick: inc }, "+")
+      ),
+
+      // Button
+      e(
+        "button",
+        {
+          className: "product-card-button",
+          onClick: handleAdd
+        },
+        "Add to Cart"
+      )
+    )
+  );
 }
 
 function HomeCatalogApp() {
@@ -159,7 +253,9 @@ function HomeCatalogApp() {
         if (!response.ok) throw new Error(`Failed with status ${response.status}`);
         return response.json();
       })
-      .then((data) => {
+      .then((response) => {
+        // Handle wrapped API response {success: true, data: [...], count: N}
+        const data = response.data || response || [];
         const normalized = normalizeProducts(data);
         setProducts(normalized);
         setError("");
@@ -206,15 +302,16 @@ function HomeCatalogApp() {
 
   const content = [];
 
-  if (loading) {
     content.push(
       e(
         "div",
-        { className: "col-12 text-center py-5 text-muted", key: "loading" },
-        "⏳ Loading products..."
+        { className: "col-12 text-center py-5", key: "loading" },
+        e("div", { className: "spinner-border text-success", role: "status" }, 
+          e("span", { className: "visually-hidden" }, "Loading...")
+        ),
+        e("p", { className: "mt-2 text-muted" }, "Loading products...")
       )
     );
-  }
 
   if (!loading && error) {
     content.push(
@@ -246,75 +343,13 @@ function HomeCatalogApp() {
             key: `p-${product.id}`,
             style: { marginBottom: "24px" }
           },
-          e(
-            "div",
-            {
-              className: "product-card",
-              onClick: () => {
+          e(ProductCard, { 
+            product,
+            onOpen: () => {
                 setSelectedProduct(product);
                 setIsDetailOpen(true);
-              },
-              style: { cursor: "pointer" }
-            },
-            // Image
-            e(
-              "div",
-              { className: "product-card-image" },
-              e("img", {
-                src: product.image,
-                alt: product.name,
-                loading: "lazy"
-              })
-            ),
-            // Body
-            e(
-              "div",
-              { className: "product-card-body" },
-              // Category badges
-              e(
-                "div",
-                { className: "product-card-badges" },
-                e("span", {
-                  className: "badge bg-primary",
-                }, product.primaryCategory),
-                e("span", {
-                  className: "badge bg-info",
-                }, product.subcategory)
-              ),
-              // Title
-              e("h6", {
-                className: "product-card-title",
-              }, product.name),
-              // Rating
-              e("div", {
-                className: "product-card-rating",
-              }, `⭐ ${product.rating}`),
-              // Description
-              e("p", {
-                className: "product-card-description",
-              }, product.description),
-              // Price
-              e("div", {
-                className: "product-card-price",
-              }, `₹${Number(product.price).toLocaleString("en-IN")}`),
-              // Stock
-              e("div", {
-                className: "product-card-stock",
-              }, `Stock: ${product.stock} units`),
-              // Button
-              e(
-                "button",
-                {
-                  className: "product-card-button",
-                  onClick: (event) => {
-                    event.stopPropagation();
-                    addToCart(product);
-                  }
-                },
-                "Add to Cart"
-              )
-            )
-          )
+            }
+          })
         )
       );
     });

@@ -32,15 +32,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const password = document.getElementById("farmerPassword").value.trim();
     const confirmPassword = document.getElementById("farmerConfirmPassword").value.trim();
 
-    if (!fullName || !address || !phone || !password || !confirmPassword) {
-      alert("Please fill all fields"); return;
-    }
-    if (!/^\d{10}$/.test(phone)) {
-      alert("Phone number must be exactly 10 digits"); return;
-    }
-    if (password !== confirmPassword) {
-      alert("Passwords do not match"); return;
-    }
+    if (!fullName || !address || !phone || !password || !confirmPassword) { Toast.warning("Please fill all fields"); return; }
+    if (!/^\d{10}$/.test(phone)) { Toast.warning("Phone number must be exactly 10 digits"); return; }
+    if (password !== confirmPassword) { Toast.warning("Passwords do not match"); return; }
 
     try {
       const response = await fetch(`${BASE_URL}/api/farmer/SignUp`, {
@@ -50,13 +44,13 @@ document.addEventListener("DOMContentLoaded", function () {
       });
       const data = await response.json();
       if (response.ok && data.success) {
-        alert("Farmer Registration Successful! Please login.");
-        window.location.href = "Login.html";
+        Toast.success("Farmer Registration Successful! Please login.");
+        setTimeout(() => { window.location.href = "Login.html"; }, 2000);
       } else {
-        alert(data.error || `Registration failed (${response.status})`);
+        Toast.error(data.error || `Registration failed (${response.status})`);
       }
     } catch (error) {
-      alert("Server error! Try again in 30s.");
+      Toast.error("Server error! Please try again later.");
     }
   });
 
@@ -71,11 +65,9 @@ document.addEventListener("DOMContentLoaded", function () {
     const confirmPassword = document.getElementById("vendorConfirmPassword").value.trim();
 
     if (!ownerName || !shopName || !licenseNumber || !shopAddress || !email || !password || !confirmPassword) {
-      alert("Please fill all fields"); return;
+      Toast.warning("Please fill all fields"); return;
     }
-    if (password !== confirmPassword) {
-      alert("Passwords do not match"); return;
-    }
+    if (password !== confirmPassword) { Toast.warning("Passwords do not match"); return; }
 
     try {
       const response = await fetch(`${BASE_URL}/api/shopkeeper/register`, {
@@ -85,13 +77,13 @@ document.addEventListener("DOMContentLoaded", function () {
       });
       const data = await response.json();
       if (response.ok && data.success) {
-        alert("Vendor Registration Successful! Please login.");
-        window.location.href = "Login.html";
+        Toast.success("Vendor Registration Successful! Please login.");
+        setTimeout(() => { window.location.href = "Login.html"; }, 2000);
       } else {
-        alert(data.error || `Registration failed (${response.status})`);
+        Toast.error(data.error || `Registration failed (${response.status})`);
       }
     } catch (error) {
-      alert("Server error! Try again in 30s.");
+      Toast.error("Server error! Please try again later.");
     }
   });
 

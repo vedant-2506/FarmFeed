@@ -7,8 +7,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const phone = document.getElementById("farmerPhone").value.trim();
     const password = document.getElementById("farmerPassword").value.trim();
 
-    if (!phone || !password) { alert("Please fill all fields"); return; }
-    if (!/^\d{10}$/.test(phone)) { alert("Phone number must be exactly 10 digits"); return; }
+    if (!phone || !password) { Toast.warning("Please fill all fields"); return; }
+    if (!/^\d{10}$/.test(phone)) { Toast.warning("Phone number must be exactly 10 digits"); return; }
 
     try {
       const response = await fetch(`${BASE_URL}/api/farmer/Login`, {
@@ -24,12 +24,14 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("user_name", data.fullName); // For dropdown display
         localStorage.setItem("farmer_phone", data.phone);
         localStorage.setItem("user_type", "farmer");
-        alert("Farmer Login Successful!");
-        window.location.href = "FarmerAccount.html";
+        Toast.success("Farmer Login Successful!");
+        setTimeout(() => {
+            window.location.href = "FarmerAccount.html";
+        }, 1000);
       } else {
-        alert(data.error || "Invalid Farmer Credentials");
+        Toast.error(data.error || "Invalid Farmer Credentials");
       }
-    } catch (error) { alert("Server error! Backend may be waking up, try again in 30s."); }
+    } catch (error) { Toast.error("Server error! Please try again."); }
   });
 
   const vendorForm = document.getElementById("vendorLoginForm");
@@ -38,7 +40,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const email = document.getElementById("vendorEmail").value.trim();
     const password = document.getElementById("vendorPassword").value.trim();
 
-    if (!email || !password) { alert("Please fill all fields"); return; }
+    if (!email || !password) { Toast.warning("Please fill all fields"); return; }
 
     try {
       const response = await fetch(`${BASE_URL}/api/shopkeeper/login`, {
@@ -54,11 +56,13 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("owner_name", data.ownerName);
         localStorage.setItem("user_name", data.ownerName); // For dropdown display
         localStorage.setItem("user_type", "vendor");
-        alert("Vendor Login Successful!");
-        window.location.href = "VendorAccount.html";
+        Toast.success("Vendor Login Successful!");
+        setTimeout(() => {
+            window.location.href = "VendorAccount.html";
+        }, 1000);
       } else {
-        alert(data.error || "Invalid Vendor Credentials");
+        Toast.error(data.error || "Invalid Vendor Credentials");
       }
-    } catch (error) { alert("Server error! Try again in 30s."); }
+    } catch (error) { Toast.error("Server error! Try again later."); }
   });
 });

@@ -101,6 +101,7 @@
     .loading { text-align: center; padding: 20px; }
     .spinner-border { width: 30px; height: 30px; }
   </style>
+  <link rel="stylesheet" href="css/toast.css">
 </head>
 
 <body>
@@ -202,6 +203,7 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/toast.js"></script>
   <script src="js/config.js"></script>
   
   <script>
@@ -211,8 +213,10 @@
     let selectedFertilizer = null;
 
     if (!vendorId) {
-      alert("Please login as vendor first!");
-      window.location.href = "Login.html";
+      Toast.error("Please login as vendor first!");
+      setTimeout(() => {
+        window.location.href = "Login.html";
+      }, 2000);
     }
 
     // Initialize
@@ -285,7 +289,7 @@
     }
 
     function selectFertilizer(fertilizerId) {
-      const fert = allFertilizers.find(f => (f.fertilizer_id || f.id) === fertilizerId);
+      const fert = allFertilizers.find(f => (f.fertilizer_id || f.id) == fertilizerId);
       if (!fert) {
         console.error("Fertilizer not found");
         return;
@@ -333,13 +337,15 @@
 
     async function addToInventory() {
       if (!vendorId) {
-        alert("Vendor ID not found!");
-        window.location.href = "Login.html";
+        Toast.error("Vendor ID not found!");
+        setTimeout(() => {
+            window.location.href = "Login.html";
+        }, 2000);
         return;
       }
 
       if (!selectedFertilizer) {
-        alert("Please select a fertilizer first!");
+        Toast.warning("Please select a fertilizer first!");
         return;
       }
 
@@ -347,12 +353,12 @@
       const qty = parseInt(document.getElementById("addQuantity").value);
 
       if (isNaN(price) || price <= 0) {
-        alert("Enter a valid price!");
+        Toast.warning("Enter a valid price!");
         return;
       }
 
       if (isNaN(qty) || qty < 1) {
-        alert("Enter valid quantity!");
+        Toast.warning("Enter valid quantity!");
         return;
       }
 
@@ -383,20 +389,20 @@
         const data = await res.json();
 
         if (res.ok && data.success) {
-          alert("✅ Added to inventory successfully!");
+          Toast.success("Added to inventory successfully!");
           document.getElementById("searchFertilizer").value = "";
           document.getElementById("selectedCard").style.display = "none";
           loadVendorInventory();
           selectedFertilizer = null;
         } else {
           const msg = data.error || data.message || "Failed to add product";
-          alert("❌ Error: " + msg);
+          Toast.error(msg);
         }
 
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-plus-circle"></i> Add to Inventory';
       } catch (err) {
-        alert("❌ Server error: " + err.message);
+        Toast.error("Server error: " + err.message);
         const btn = document.getElementById("btnAddToInventory");
         btn.disabled = false;
         btn.innerHTML = '<i class="bi bi-plus-circle"></i> Add to Inventory';
@@ -493,7 +499,7 @@
     }
 
     function selectAndScroll(id) {
-      const fert = allFertilizers.find(f => (f.fertilizer_id || f.id) === id);
+      const fert = allFertilizers.find(f => (f.fertilizer_id || f.id) == id);
       if (fert) {
         selectFertilizer(id);
         showInventory();
@@ -510,13 +516,14 @@
         });
 
         if (res.ok) {
-          alert("Removed from inventory!");
+          Toast.success("Removed from inventory!");
           loadVendorInventory();
         } else {
-          alert("Failed to remove");
+          Toast.error("Failed to remove");
         }
       } catch (err) {
         console.error("Error:", err);
+        Toast.error("Server error");
       }
     }
 

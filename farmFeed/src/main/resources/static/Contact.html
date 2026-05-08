@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us - farmFeed</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    :root { --primary-green: #28a745; }
+    body { font-family: 'Segoe UI', sans-serif; background-color: #f8f9fa; }
+    .contact-header { background: var(--primary-green); color: white; padding: 60px 0; text-align: center; }
+    .footer { background: #f1f1f1; padding: 50px 0 20px; border-top: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-lg bg-white shadow-sm sticky-top">
+    <div class="container">
+      <a class="navbar-brand" href="Home.html">
+        <img src="logo.png" alt="logo" height="40">
+      </a>
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="Home.html">Home</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="contact-header">
+    <div class="container">
+      <h1 class="fw-bold">Contact Us</h1>
+      <p class="lead">We're here to help you grow better crops.</p>
+    </div>
+  </div>
+
+  <div class="container py-5">
+    <div class="row">
+      <div class="col-md-6 mb-4">
+        <div class="card border-0 shadow-sm p-4 h-100">
+          <h4 class="fw-bold text-success mb-4">Send us a Message</h4>
+          <form id="contactForm">
+            <div class="mb-3">
+              <label class="form-label">Full Name</label>
+              <input type="text" class="form-control" placeholder="Enter your name" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email Address</label>
+              <input type="email" class="form-control" placeholder="Enter your email" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Message</label>
+              <textarea class="form-control" rows="5" placeholder="How can we help you?" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-success px-5">Send Message</button>
+          </form>
+        </div>
+      </div>
+      <div class="col-md-6 mb-4">
+        <div class="card border-0 shadow-sm p-4 h-100">
+          <h4 class="fw-bold text-success mb-4">Contact Information</h4>
+          <div class="mb-4">
+            <h6 class="fw-bold"><i class="bi bi-geo-alt-fill text-success me-2"></i> Our Office</h6>
+            <p class="text-muted">Sector 5, Hinjewadi Phase 3, Pune, Maharashtra 411057, India</p>
+          </div>
+          <div class="mb-4">
+            <h6 class="fw-bold"><i class="bi bi-envelope-fill text-success me-2"></i> Email</h6>
+            <p class="text-muted">support@farmfeed.com</p>
+          </div>
+          <div class="mb-4">
+            <h6 class="fw-bold"><i class="bi bi-telephone-fill text-success me-2"></i> Phone</h6>
+            <p class="text-muted">+91 98765 43210</p>
+          </div>
+          <div class="mt-auto">
+            <h6 class="fw-bold mb-3">Follow Us</h6>
+            <div class="d-flex gap-3">
+              <a href="#" class="btn btn-outline-success btn-sm"><i class="bi bi-facebook"></i></a>
+              <a href="#" class="btn btn-outline-success btn-sm"><i class="bi bi-twitter"></i></a>
+              <a href="#" class="btn btn-outline-success btn-sm"><i class="bi bi-instagram"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer mt-auto">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4 mb-4">
+          <h5 class="text-success fw-bold">farmFeed</h5>
+          <p class="text-muted small">Connecting India's farmers with quality agricultural supplies since 2026.</p>
+        </div>
+        <div class="col-md-2 mb-4">
+          <h6 class="fw-bold">Company</h6>
+          <ul class="list-unstyled small">
+            <li><a href="About.html" class="text-decoration-none text-muted">About Us</a></li>
+            <li><a href="Contact.html" class="text-decoration-none text-muted">Contact</a></li>
+          </ul>
+        </div>
+        <div class="col-md-2 mb-4">
+          <h6 class="fw-bold">Support</h6>
+          <ul class="list-unstyled small">
+            <li><a href="Help.html" class="text-decoration-none text-muted">Help Center</a></li>
+            <li><a href="Privacy.html" class="text-decoration-none text-muted">Privacy Policy</a></li>
+          </ul>
+        </div>
+        <div class="col-md-4 mb-4">
+          <h6 class="fw-bold">Contact Us</h6>
+          <p class="text-muted small mb-1"><i class="bi bi-geo-alt-fill me-2"></i> Pune, Maharashtra, India</p>
+          <p class="text-muted small mb-1"><i class="bi bi-envelope-fill me-2"></i> support@farmfeed.com</p>
+        </div>
+      </div>
+      <hr>
+      <div class="text-center text-muted small">
+        © 2026 farmFeed. All rights reserved.
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

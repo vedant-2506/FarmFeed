@@ -1,5 +1,5 @@
 const API_BASE_URL = window.API_BASE_URL || window.location.origin;
-const FERTILIZER_API = `${API_BASE_URL}/api/fertilizers`;
+const FERTILIZER_API = `${API_BASE_URL}/api/products`;
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1592982537447-6f2a6a0b2d8f?w=800&q=80";
 
 let allProducts = [];
@@ -24,21 +24,27 @@ async function loadProductsFromApi() {
       throw new Error(`Failed with status ${response.status}`);
     }
 
-    const fertilizers = await response.json();
+    const result = await response.json();
+    
+    // Handle wrapped response format: { success: true, count: N, data: [...] }
+    const fertilizers = result.data || result;
+    
     if (!Array.isArray(fertilizers) || fertilizers.length === 0) {
+      console.warn("No products returned from API");
       return;
     }
 
     allProducts = fertilizers.map(item => ({
-      id: item.fertilizer_id,
+      id: item.id,
       name: item.name,
       description: item.description || "Quality fertilizer for healthier crop growth.",
       price: item.price,
       stock: item.stock,
-      image: item.image_url || FALLBACK_IMAGE,
-      category: normalizeCategory(item.category, item.name, item.description)
+      image: (item.image && item.image.trim()) ? item.image : FALLBACK_IMAGE,
+      category: item.category || "Fertilizer"
     }));
 
+    console.log(`✅ Loaded ${allProducts.length} products from API`);
     applyFilters();
   } catch (error) {
     console.error("Unable to load products from API:", error);

@@ -8,8 +8,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const vendorId = localStorage.getItem("shop_id");
   
   if (!farmerId && !vendorId) {
-    alert("Please login first");
-    window.location.href = "Login.html";
+    if (window.Toast) Toast.error("Please login first");
+    setTimeout(() => {
+      window.location.href = "Login.html";
+    }, 2000);
     return;
   }
 
@@ -18,7 +20,10 @@ document.addEventListener("DOMContentLoaded", () => {
   if (logoutBtn) {
     logoutBtn.addEventListener("click", () => {
       localStorage.clear();
-      window.location.href = "Login.html";
+      if (window.Toast) Toast.success("Logged out successfully");
+      setTimeout(() => {
+        window.location.href = "Login.html";
+      }, 1000);
     });
   }
 
@@ -128,8 +133,10 @@ document.addEventListener("DOMContentLoaded", () => {
     cartContainer.querySelectorAll(".remove-btn").forEach(btn => {
       btn.addEventListener("click", () => {
         const i = parseInt(btn.dataset.index, 10);
+        const name = cart[i].name;
         cart.splice(i, 1);
         save();
+        if (window.Toast) Toast.info(`${name} removed from cart`);
       });
     });
   }
