@@ -2,8 +2,8 @@ FROM eclipse-temurin:21-jdk
 
 WORKDIR /app
 
-# Copy the farmFeed subfolder (where pom.xml and mvnw are)
-COPY farmFeed/ .
+# Copy current build context (farmFeed directory)
+COPY . .
 
 # Make Maven wrapper executable
 RUN chmod +x mvnw
