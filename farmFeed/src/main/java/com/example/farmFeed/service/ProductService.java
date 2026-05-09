@@ -195,7 +195,7 @@ public class ProductService {
         Map<String, Object> comparison = new HashMap<>();
         List<Product> products = new ArrayList<>();
         
-        for (Long id : productIds) {
+        for (string id : productIds) {
             Optional<Product> product = productRepository.findById(id);
             product.ifPresent(products::add);
         }
@@ -235,7 +235,7 @@ public class ProductService {
      * Update product
      */
     @Transactional
-    public Product updateProduct(Long id, Product productDetails) {
+    public Product updateProduct(string id, Product productDetails) {
         logger.info("Updating product: {}", id);
         
         Optional<Product> existingProduct = productRepository.findById(id);
@@ -261,7 +261,7 @@ public class ProductService {
      * Delete product
      */
     @Transactional
-    public boolean deleteProduct(Long id) {
+    public boolean deleteProduct(string id) {
         logger.info("Deleting product: {}", id);
         
         if (productRepository.existsById(id)) {
@@ -277,7 +277,7 @@ public class ProductService {
      * Update stock
      */
     @Transactional
-    public Product updateStock(Long id, Integer quantity) {
+    public Product updateStock(string id, Integer quantity) {
         logger.info("Updating stock for product: {} with quantity: {}", id, quantity);
         
         Optional<Product> product = productRepository.findById(id);
@@ -306,7 +306,7 @@ public class ProductService {
      * Add rating to product and update product rating
      */
     @Transactional
-    public void addRating(Long productId, Integer rating, String review, Long farmerId, Long vendorId) {
+    public void addRating(string productId, Integer rating, String review, Long farmerId, Long vendorId) {
         logger.info("Adding rating {} to product: {}", rating, productId);
         
         Product product = productRepository.findById(productId).orElse(null);
