@@ -24,7 +24,7 @@ public interface RatingRepository extends JpaRepository<Rating, Long> {
     Long getRatingCount(@Param("productId") String productId);
 
     @Query("SELECT r FROM Rating r WHERE r.vendorId = :vendorId ORDER BY r.createdAt DESC")
-    List<Rating> getRatingsByVendor(@Param("vendorId") Long vendorId);
+    List<Rating> getRatingsByVendor(@Param("vendorId") String vendorId);
 
     @Query("SELECT r FROM Rating r WHERE r.productId = :productId AND r.rating >= :minRating ORDER BY r.createdAt DESC")
     List<Rating> getFileredRatings(@Param("productId") String productId, @Param("minRating") Integer minRating);

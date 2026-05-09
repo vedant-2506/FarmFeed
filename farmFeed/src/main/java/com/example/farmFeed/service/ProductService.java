@@ -130,7 +130,7 @@ public class ProductService {
      * Get products by vendor
      */
     @Transactional(readOnly = true)
-    public List<Product> getProductsByVendor(Long vendorId) {
+    public List<Product> getProductsByVendor(String vendorId) {
         logger.info("Fetching products for vendor: {}", vendorId);
         return productRepository.findByVendorId(vendorId);
     }
@@ -296,7 +296,7 @@ public class ProductService {
      * Get low stock products for a vendor
      */
     @Transactional(readOnly = true)
-    public List<Product> getLowStockProducts(Long vendorId, Integer threshold) {
+    public List<Product> getLowStockProducts(String vendorId, Integer threshold) {
         logger.info("Fetching low stock products for vendor: {} with threshold: {}", vendorId, threshold);
         if (threshold == null || threshold <= 0) {
             threshold = 10;
@@ -308,7 +308,7 @@ public class ProductService {
      * Add rating to product and update product rating
      */
     @Transactional
-    public void addRating(String productId, Integer rating, String review, Long farmerId, Long vendorId) {
+    public void addRating(String productId, Integer rating, String review, Long farmerId, String vendorId) {
         logger.info("Adding rating {} to product: {}", rating, productId);
 
         Product product = productRepository.findById(productId).orElse(null);

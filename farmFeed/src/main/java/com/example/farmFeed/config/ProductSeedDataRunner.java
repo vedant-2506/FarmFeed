@@ -62,9 +62,9 @@ public class ProductSeedDataRunner implements CommandLineRunner {
 
         String sql = """
                 INSERT INTO products (
-                    product_id, product_name, description_clean, primary_category, price_inr,
-                    manufacturer, vendor_id, stock, rating, total_reviews, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    product_id, product_name, image_link, primary_category, subcategory, price_inr,
+                    rating, description_clean, detailed_description_10_sentences, manufacturer, vendor_id, stock, total_reviews, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         List<Object[]> batchArgs = new ArrayList<>(toInsert);
@@ -74,8 +74,8 @@ public class ProductSeedDataRunner implements CommandLineRunner {
             int sequence = (int) existingCount + i;
             String category = categories[i % categories.length];
             String manufacturer = manufacturers[i % manufacturers.length];
-            String productId = String.format("ff_%04d", sequence);
-            String productName = String.format("FarmFeed Product %04d", sequence);
+            String productId = String.format("product_%d", sequence);
+            String productName = String.format("FarmFeed Product %d", sequence);
             String description = String.format(
                     "High quality %s input for improved crop performance. Batch %04d for soil and yield optimization.",
                     category,
@@ -86,20 +86,28 @@ public class ProductSeedDataRunner implements CommandLineRunner {
             double rating = 3.5 + (random.nextDouble() * 1.5);
             int totalReviews = 1 + random.nextInt(250);
 
-            batchArgs.add(new Object[]{
+                String imageLink = null;
+                String subcategoryVal = null;
+                String detailedDesc = null;
+                String vendorIdStr = String.format("vendor_%d", (sequence % 10) + 1);
+
+                batchArgs.add(new Object[]{
                     productId,
                     productName,
-                    description,
+                    imageLink,
                     category,
-                    price,
-                    manufacturer,
-                    1L,
-                    stock,
+                    subcategoryVal,
+                    Math.round(price * 100.0) / 100.0,
                     Math.round(rating * 100.0) / 100.0,
+                    description,
+                    detailedDesc,
+                    manufacturer,
+                    vendorIdStr,
+                    stock,
                     totalReviews,
                     now,
                     now
-            });
+                });
         }
 
         jdbcTemplate.batchUpdate(sql, batchArgs);

@@ -24,7 +24,7 @@ public class Rating {
     private Long farmerId;
 
     @Column(name = "vendor_id", nullable = false)
-    private Long vendorId;
+    private String vendorId;
 
     @Column(name = "rating", nullable = false)
     private Integer rating; // 1-5 stars

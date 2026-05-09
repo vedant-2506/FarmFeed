@@ -226,7 +226,7 @@ public class ProductController {
      * GET /api/products/vendor/{vendorId} - Get products by vendor
      */
     @GetMapping("/vendor/{vendorId}")
-    public ResponseEntity<?> getByVendor(@PathVariable Long vendorId) {
+    public ResponseEntity<?> getByVendor(@PathVariable String vendorId) {
         try {
             logger.info("Fetching products for vendor: {}", vendorId);
             List<Product> results = productService.getProductsByVendor(vendorId);
@@ -330,10 +330,16 @@ public class ProductController {
 
             Integer rating = ((Number) ratingData.get("rating")).intValue();
             String review = (String) ratingData.get("review");
-            Long farmerId = ((Number) ratingData.get("farmerId")).longValue();
-                Long vendorId = ratingData.get("vendorId") != null
-                    ? ((Number) ratingData.get("vendorId")).longValue()
-                    : null;
+            Long farmerId = ratingData.get("farmerId") != null ? ((Number) ratingData.get("farmerId")).longValue() : null;
+            Object vendorObj = ratingData.get("vendorId");
+            String vendorId = null;
+            if (vendorObj != null) {
+                if (vendorObj instanceof Number) {
+                    vendorId = String.valueOf(((Number) vendorObj).longValue());
+                } else {
+                    vendorId = String.valueOf(vendorObj);
+                }
+            }
 
             productService.addRating(productId, rating, review, farmerId, vendorId);
 

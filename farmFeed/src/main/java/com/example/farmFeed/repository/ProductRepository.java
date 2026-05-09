@@ -14,7 +14,7 @@ public interface ProductRepository extends JpaRepository<Product, String> {
 
     Optional<Product> findByName(String name);
 
-    List<Product> findByVendorId(Long vendorId);
+    List<Product> findByVendorId(String vendorId);
 
     List<Product> findByCategory(String category);
 
@@ -50,7 +50,7 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     List<Product> getAvailableProducts();
 
     @Query("SELECT p FROM Product p WHERE p.vendorId = :vendorId AND p.stock <= :threshold")
-    List<Product> getLowStockProducts(@Param("vendorId") Long vendorId, @Param("threshold") Integer threshold);
+    List<Product> getLowStockProducts(@Param("vendorId") String vendorId, @Param("threshold") Integer threshold);
 
     @Query("SELECT DISTINCT p.category FROM Product p ORDER BY p.category")
     List<String> getAllCategories();

@@ -44,7 +44,7 @@ public class Product {
     private String manufacturer;
 
     @Column(name = "vendor_id")
-    private Long vendorId;
+    private String vendorId;
 
     @Column(name = "stock")
     private Integer stock;
