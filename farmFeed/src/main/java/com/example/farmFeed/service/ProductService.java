@@ -105,11 +105,14 @@ public class ProductService {
     }
 
     private List<Map<String, Object>> fetchProductsFromSqlFeed() {
-        String sql = "SELECT product_id, product_id AS id, " +
+        // Cast columns explicitly to stable JDBC-friendly types to avoid driver type-inference errors
+        String sql = "SELECT " +
+            "CAST(product_id AS CHAR) AS product_id, CAST(product_id AS CHAR) AS id, " +
             "product_name, product_name AS name, image_link, primary_category, subcategory, " +
-            "price_inr, price_inr AS price, rating, " +
-            "description_clean, description_clean AS description, detailed_description_10_sentences, manufacturer, " +
-                "vendor_id, stock, total_reviews, created_at, updated_at " +
+            "CAST(price_inr AS DECIMAL(12,2)) AS price_inr, CAST(price_inr AS DECIMAL(12,2)) AS price, CAST(rating AS DECIMAL(5,2)) AS rating, " +
+            "CAST(description_clean AS CHAR) AS description_clean, description_clean AS description, detailed_description_10_sentences, manufacturer, " +
+                "CAST(vendor_id AS CHAR) AS vendor_id, CAST(stock AS SIGNED) AS stock, CAST(total_reviews AS SIGNED) AS total_reviews, " +
+                "CAST(created_at AS CHAR) AS created_at, CAST(updated_at AS CHAR) AS updated_at " +
                 "FROM products WHERE COALESCE(stock, 0) > 0 ORDER BY COALESCE(rating, 0) DESC";
         return jdbcTemplate.queryForList(sql);
     }
