@@ -1,15 +1,16 @@
-const API_BASE_URL = window.API_BASE_URL || window.location.origin;
-const PRODUCTS_API = `${API_BASE_URL}/api/products`;
+const API_BASE_URL = globalThis.API_BASE_URL || 'https://farmfeed.onrender.com';
+const FERTILIZER_API = `${API_BASE_URL}/api/products`;
+const FERTILIZER_FALLBACK_API = `${API_BASE_URL}/api/fertilizers`;
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1592982537447-6f2a6a0b2d8f?w=800&q=80";
-const CACHE_KEY = "farmfeed_products_cache_v3"; // Bumped version to override old cache
-const CACHE_TTL_MS = 2 * 60 * 1000; // 2 minutes for quicker testing
+const CACHE_KEY = "farmfeed_products_cache_v2";
+const CACHE_TTL_MS = 5 * 60 * 1000;
 
 const e = React.createElement;
 
 // Map raw primary_category to display name
 function mapPrimaryCategory(raw) {
   if (!raw) return "Other";
-  const normalized = raw.toLowerCase().replace(/_/g, " ");
+  const normalized = raw.toLowerCase().replaceAll("_", " ");
   return normalized.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
 }
 
@@ -33,126 +34,79 @@ function detectSubcategory(name, description, subcategory) {
 }
 
 function normalizeProducts(items) {
-  if (!Array.isArray(items)) {
-    console.error("items is not an array:", items);
-    return [];
-  }
-
-  console.log("Raw API response - Total items:", items.length);
-  if (items.length > 0) {
-    console.log("First item raw:", JSON.stringify(items[0]));
-    console.log("First item keys:", Object.keys(items[0]));
-  }
+  if (!Array.isArray(items)) return [];
 
   return items
     .filter((item) => item && (item.name || item.product_name))
     .map((item, index) => {
       const name = item.name || item.product_name || "Unnamed";
-      const description = item.description || item.description_clean || item.detailed_description_10_sentences || item.detailedDescription || "";
-      const primaryCat = mapPrimaryCategory(item.primary_category || item.category);
+      const description = item.description || item.description_clean || item.detailed_description_10_sentences || "";
+      const primaryCat = mapPrimaryCategory(item.primary_category);
       const subcat = detectSubcategory(name, description, item.subcategory);
 
-      const productId = item.fertilizer_id || item.id || index + 1;
-      
-      if (index < 3) {
-        console.log(`Product ${index}: fertilizer_id=${item.fertilizer_id}, id=${item.id}, finalId=${productId}`);
+      // Extract numeric ID if it's a string like 'pr997' or 'bighaat_1'
+      let rawId = item.fertilizer_id || item.id || (index + 1);
+      let numericId = rawId;
+      if (typeof rawId === 'string') {
+        const matches = /\d+/.exec(rawId);
+        numericId = matches ? Number.parseInt(matches[0], 10) : (index + 1);
+      }
+
+      let vId = item.vendorId || item.vendor_id || 0;
+      let numericVendorId = vId;
+      if (typeof vId === 'string') {
+        const matches = /\d+/.exec(vId);
+        numericVendorId = matches ? Number.parseInt(matches[0], 10) : 0;
       }
 
       return {
-        id: productId,
+        id: numericId,
+        rawId: rawId, // keep rawId for reference if needed
         name: name,
         description: description,
         price: Number(item.price || item.price_inr || 0),
         stock: Number(item.stock || 0),
-        image: item.imageLink || item.image_url || FALLBACK_IMAGE,
+        image: item.image_url || item.image_link || FALLBACK_IMAGE,
         primaryCategory: primaryCat,
         subcategory: subcat,
-        rating: item.rating || "4.5"
+        rating: item.rating || "4.5",
+        vendorId: numericVendorId
       };
     });
 }
 
 function updateCartCount() {
-  const farmerId = localStorage.getItem("farmer_id");
-  if (!farmerId) {
-    const badge = document.getElementById("cart-count");
-    if (badge) badge.textContent = "0";
-    return;
-  }
-
-  fetch(`${API_BASE_URL}/api/cart/farmer/${farmerId}/count`)
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        const badge = document.getElementById("cart-count");
-        if (badge) badge.textContent = String(data.itemCount !== undefined ? data.itemCount : (data.count || 0));
-      }
-    })
-    .catch(e => console.error("error fetching cart count:", e));
+  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+  const total = cart.reduce((sum, item) => sum + (item.qty || item.quantity || 1), 0);
+  const badge = document.getElementById("cart-count");
+  if (badge) badge.textContent = String(total);
 }
 
-function addToCart(product, showLoginModal) {
-  const farmerId = localStorage.getItem("farmer_id");
-  const shopId = localStorage.getItem("shop_id");
-  
-  if (!farmerId) {
-    showLoginModal();
-    return;
+function addToCart(product, quantity = 1) {
+  const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+  const existing = cart.find((item) => item.id === product.id && item.vendor_id === product.vendorId);
+
+  if (existing) {
+    existing.qty = (existing.qty || 1) + quantity;
+  } else {
+    cart.push({
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      img: product.image,
+      qty: quantity,
+      vendor_id: product.vendorId
+    });
   }
 
-  // Validate product has an ID
-  if (!product || !product.id) {
-    console.error("Product object with missing id:", product);
-    alert("Error: Product ID is missing");
-    return;
-  }
-
-  const vendorId = shopId || 1;
+  localStorage.setItem("cart", JSON.stringify(cart));
+  updateCartCount();
   
-  const parsedFarmerId = parseInt(farmerId);
-  const parsedVendorId = parseInt(vendorId);
-
-  // Validate all values are valid numbers
-  if (isNaN(parsedFarmerId) || isNaN(parsedVendorId)) {
-    console.error("Invalid IDs - product.id:", product.id, "farmerId:", parsedFarmerId, "vendorId:", parsedVendorId);
-    alert("Error: Invalid ID values");
-    return;
+  if (globalThis.Toast) {
+    Toast.success(`${product.name} added to cart!`);
+  } else {
+    alert(`${product.name} added to cart!`);
   }
-
-  const payload = {
-    farmerId: parsedFarmerId,
-    productId: product.id,
-    vendorId: parsedVendorId,
-    quantity: 1
-  };
-
-  console.log("Product full object:", product);
-  console.log("Payload being sent:", JSON.stringify(payload));
-  
-  fetch(`${API_BASE_URL}/api/cart/add`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload)
-  })
-  .then(res => {
-    console.log("Response status:", res.status);
-    return res.json().then(data => ({ status: res.status, data }));
-  })
-  .then(({ status, data }) => {
-    console.log("Response data:", data);
-    if (data.success) {
-      updateCartCount();
-      alert(`${product.name} added`);
-    } else {
-      const errorMsg = data.error || "error adding item";
-      console.error("Backend error:", errorMsg);
-      alert(errorMsg);
-    }
-  })
-  .catch(e => {
-    alert("error. try again");
-    console.error(e);
-  });
 }
 
 function saveCache(products) {
@@ -184,39 +138,101 @@ function readCache() {
   }
 }
 
+function ProductCard({ product, onOpen }) {
+  const [qty, setQty] = React.useState(1);
+
+  const handleAdd = (e) => {
+    e.stopPropagation();
+    addToCart(product, qty);
+  };
+
+  const inc = (e) => { e.stopPropagation(); setQty(qty + 1); };
+  const dec = (e) => { e.stopPropagation(); if (qty > 1) setQty(qty - 1); };
+
+  return e(
+    "div",
+    {
+      className: "product-card",
+      onClick: onOpen,
+      style: { cursor: "pointer" }
+    },
+    // Image
+    e(
+      "div",
+      { className: "product-card-image" },
+      e("img", {
+        src: product.image,
+        alt: product.name,
+        loading: "lazy"
+      })
+    ),
+    // Body
+    e(
+      "div",
+      { className: "product-card-body" },
+      // Category badges
+      e(
+        "div",
+        { className: "product-card-badges" },
+        e("span", {
+          className: "badge bg-primary",
+        }, product.primaryCategory),
+        e("span", {
+          className: "badge bg-info",
+        }, product.subcategory)
+      ),
+      // Title
+      e("h6", {
+        className: "product-card-title",
+      }, product.name),
+      // Rating
+      e("div", {
+        className: "product-card-rating",
+      }, `⭐ ${product.rating}`),
+      // Description
+      e("p", {
+        className: "product-card-description",
+      }, product.description),
+      // Price
+      e("div", {
+        className: "product-card-price",
+      }, `₹${Number(product.price).toLocaleString("en-IN")}`),
+      // Stock
+      e("div", {
+        className: "product-card-stock",
+      }, `Stock: ${product.stock} units`),
+      
+      // Quantity selector
+      e("div", {
+        className: "d-flex align-items-center justify-content-center gap-2 mb-3 mt-2",
+        onClick: (e) => e.stopPropagation()
+      },
+        e("button", { className: "btn btn-outline-success btn-sm", onClick: dec }, "−"),
+        e("span", { className: "fw-bold px-2" }, qty),
+        e("button", { className: "btn btn-outline-success btn-sm", onClick: inc }, "+")
+      ),
+
+      // Button
+      e(
+        "button",
+        {
+          className: "product-card-button",
+          onClick: handleAdd
+        },
+        "Add to Cart"
+      )
+    )
+  );
+}
+
 function HomeCatalogApp() {
   const [products, setProducts] = React.useState([]);
-  const [activePrimaryCategory, setActivePrimaryCategory] = React.useState("all");
+  const [activePrimaryCategory, setActivePrimaryCategory] = React.useState("All");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState("");
   const [selectedProduct, setSelectedProduct] = React.useState(null);
   const [isDetailOpen, setIsDetailOpen] = React.useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = React.useState(false);
-
-  // New Filters
-  const [activeSubcategory, setActiveSubcategory] = React.useState("all"); // all, Organic, Chemical
-  const [showOnlyInStock, setShowOnlyInStock] = React.useState(false);
-  const [priceSort, setPriceSort] = React.useState("none"); // none, low-to-high, high-to-low
-  const [minRating, setMinRating] = React.useState(0);
-  // priceRange options: "all", "under500", "500-1000", "over1000"
-  const [priceRange, setPriceRange] = React.useState("all");
-
-  // Helper to reliably close the Bootstrap dropdown upon selection
-  const handlePriceSelect = (sort, range) => {
-    setPriceSort(sort);
-    setPriceRange(range);
-    
-    // Use Bootstrap's API to close the dropdown cleanly without scrolling
-    const dropdownToggleEl = document.getElementById('priceDropdownBtn');
-    if (dropdownToggleEl && window.bootstrap) {
-      const bsDropdown = window.bootstrap.Dropdown.getInstance(dropdownToggleEl);
-      if (bsDropdown) bsDropdown.hide();
-    } else {
-      // Fallback
-      document.body.click();
-    }
-  };
 
   // Get unique primary categories (All, Seed, Crop Production, Crop Nutrition, Other)
   const primaryCategories = React.useMemo(() => {
@@ -241,33 +257,50 @@ function HomeCatalogApp() {
     }
 
     const searchBox = document.getElementById("searchBox");
-    const searchForm = document.getElementById("searchForm");
-    
     const onSearchInput = () => {
       setSearchQuery((searchBox ? searchBox.value : "").trim().toLowerCase());
     };
 
-    const onSearchSubmit = (e) => {
-      e.preventDefault();
-      onSearchInput();
-    };
-
     if (searchBox) searchBox.addEventListener("input", onSearchInput);
-    if (searchForm) searchForm.addEventListener("submit", onSearchSubmit);
 
     const controller = new AbortController();
 
-    fetch(PRODUCTS_API, { signal: controller.signal })
-      .then((response) => {
-        if (!response.ok) throw new Error(`Failed with status ${response.status}`);
+    fetch(FERTILIZER_API, { signal: controller.signal })
+      .then(async (response) => {
+        if (!response.ok) {
+          const text = await response.text().catch(() => null);
+          console.error('Products fetch failed', response.status, text || response.statusText);
+          throw new Error(`Failed with status ${response.status}: ${text || response.statusText}`);
+        }
         return response.json();
       })
-      .then((data) => {
-        const items = Array.isArray(data) ? data : (data.data || []);
-        const normalized = normalizeProducts(items);
-        setProducts(normalized);
-        setError("");
-        saveCache(items);
+      .then((payload) => {
+        const data = payload && (payload.data || payload) ? (payload.data || payload) : [];
+        const normalized = normalizeProducts(data);
+        if (normalized.length > 0) {
+          setProducts(normalized);
+          setError("");
+          saveCache(data);
+          return null;
+        }
+
+        // Try fallback if products empty
+        return fetch(FERTILIZER_FALLBACK_API, { signal: controller.signal })
+          .then(async (fallbackResponse) => {
+            if (!fallbackResponse.ok) {
+              const ftext = await fallbackResponse.text().catch(() => null);
+              console.error('Fallback fetch failed', fallbackResponse.status, ftext || fallbackResponse.statusText);
+              throw new Error(`Fallback failed with status ${fallbackResponse.status}: ${ftext || fallbackResponse.statusText}`);
+            }
+            return fallbackResponse.json();
+          })
+          .then((fallbackPayload) => {
+            const fallbackData = fallbackPayload && (fallbackPayload.data || fallbackPayload) ? (fallbackPayload.data || fallbackPayload) : [];
+            const fallbackNormalized = normalizeProducts(fallbackData);
+            setProducts(fallbackNormalized);
+            setError("");
+            saveCache(fallbackData);
+          });
       })
       .catch((fetchError) => {
         if (fetchError.name !== "AbortError") {
@@ -286,10 +319,10 @@ function HomeCatalogApp() {
   }, []);
 
   const filteredProducts = React.useMemo(() => {
-    let result = products.filter((product) => {
+    return products.filter((product) => {
       // Handle "Other" category - products not in the main categories
       let primaryOk = false;
-      if (activePrimaryCategory === "all") {
+      if (activePrimaryCategory === "All") {
         primaryOk = true;
       } else if (activePrimaryCategory === "Other") {
         const knownCategories = ["Seed", "Crop Production", "Crop Nutrition"];
@@ -300,47 +333,13 @@ function HomeCatalogApp() {
 
       if (!primaryOk) return false;
 
-      // Subcategory filter (Organic/Chemical)
-      if (activeSubcategory !== "all" && product.subcategory !== activeSubcategory) {
-        return false;
-      }
-
-      // Stock filter
-      if (showOnlyInStock && product.stock <= 0) {
-        return false;
-      }
-
-      // Rating filter
-      if (minRating > 0 && parseFloat(product.rating) < minRating) {
-        return false;
-      }
-
-      // Price Range filter
-      if (priceRange !== "all") {
-        const price = product.price;
-        if (priceRange === "under500" && price >= 500) return false;
-        if (priceRange === "500-1000" && (price < 500 || price > 1000)) return false;
-        if (priceRange === "over1000" && price <= 1000) return false;
-      }
-
       if (!searchQuery) return true;
 
       const name = (product.name || "").toLowerCase();
       const description = (product.description || "").toLowerCase();
       return name.includes(searchQuery) || description.includes(searchQuery);
     });
-
-    // Sorting
-    if (priceSort === "low-to-high") {
-      result.sort((a, b) => a.price - b.price);
-    } else if (priceSort === "high-to-low") {
-      result.sort((a, b) => b.price - a.price);
-    } else if (priceSort === "top-rated") {
-      result.sort((a, b) => parseFloat(b.rating) - parseFloat(a.rating));
-    }
-
-    return result;
-  }, [products, activePrimaryCategory, activeSubcategory, showOnlyInStock, priceSort, minRating, priceRange, searchQuery]);
+  }, [products, activePrimaryCategory, searchQuery]);
 
   const content = [];
 
@@ -348,8 +347,11 @@ function HomeCatalogApp() {
     content.push(
       e(
         "div",
-        { className: "col-12 text-center py-5 text-muted", key: "loading" },
-        "⏳ Loading products..."
+        { className: "col-12 text-center py-5", key: "loading" },
+        e("div", { className: "spinner-border text-success", role: "status" },
+          e("span", { className: "visually-hidden" }, "Loading...")
+        ),
+        e("p", { className: "mt-2 text-muted" }, "Loading products...")
       )
     );
   }
@@ -384,148 +386,17 @@ function HomeCatalogApp() {
             key: `p-${product.id}`,
             style: { marginBottom: "24px" }
           },
-          e(
-            "div",
-            {
-              className: "product-card",
-              onClick: () => {
+          e(ProductCard, { 
+            product,
+            onOpen: () => {
                 setSelectedProduct(product);
                 setIsDetailOpen(true);
-              },
-              style: { cursor: "pointer" }
-            },
-            // Image
-            e(
-              "div",
-              { className: "product-card-image" },
-              e("img", {
-                src: product.image,
-                alt: product.name,
-                loading: "lazy"
-              })
-            ),
-            // Body
-            e(
-              "div",
-              { className: "product-card-body" },
-              // Category badges
-              e(
-                "div",
-                { className: "product-card-badges" },
-                e("span", {
-                  className: "badge bg-primary",
-                }, product.primaryCategory),
-                e("span", {
-                  className: "badge bg-info",
-                }, product.subcategory)
-              ),
-              // Title
-              e("h6", {
-                className: "product-card-title",
-              }, product.name),
-              // Rating
-              e("div", {
-                className: "product-card-rating",
-              }, `⭐ ${product.rating}`),
-              // Description
-              e("p", {
-                className: "product-card-description",
-              }, product.description),
-              // Price
-              e("div", {
-                className: "product-card-price",
-              }, `₹${Number(product.price).toLocaleString("en-IN")}`),
-              // Stock
-              e("div", {
-                className: "product-card-stock",
-              }, `Stock: ${product.stock} units`),
-              // Button
-              e(
-                "button",
-                {
-                  className: "product-card-button",
-                  onClick: (event) => {
-                    event.stopPropagation();
-                    addToCart(product, () => setIsLoginModalOpen(true));
-                  }
-                },
-                "Add to Cart"
-              )
-            )
-          )
+            }
+          })
         )
       );
     });
   }
-
-  // Login prompt modal
-  const LoginPromptModal = isLoginModalOpen && e(
-    "div",
-    {
-      className: "modal d-block",
-      style: { 
-        backgroundColor: "rgba(0,0,0,0.5)", 
-        display: "flex", 
-        justifyContent: "center", 
-        alignItems: "center",
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 9999
-      },
-      onClick: () => setIsLoginModalOpen(false)
-    },
-    e(
-      "div",
-      {
-        className: "modal-dialog",
-        style: { maxWidth: "400px" },
-        onClick: (event) => event.stopPropagation()
-      },
-      e(
-        "div",
-        { className: "modal-content" },
-        e(
-          "div",
-          { className: "modal-header bg-warning text-dark" },
-          e("h5", { className: "modal-title" }, "Login Required"),
-          e(
-            "button",
-            { 
-              type: "button", 
-              className: "btn-close", 
-              onClick: () => setIsLoginModalOpen(false)
-            }
-          )
-        ),
-        e(
-          "div",
-          { className: "modal-body" },
-          e(
-            "p",
-            { className: "text-center text-dark fw-bold mb-3", style: { fontSize: "16px" } },
-            "login first to add items"
-          ),
-          e(
-            "p",
-            { className: "text-center text-muted small" },
-            "click login button in top right corner"
-          )
-        ),
-        e(
-          "div",
-          { className: "modal-footer" },
-          e(
-            "button",
-            { type: "button", className: "btn btn-success w-100", onClick: () => setIsLoginModalOpen(false) },
-            "OK, Got it!"
-          )
-        )
-      )
-    )
-  );
 
   // Product detail modal
   const DetailModal = isDetailOpen && selectedProduct && e(
@@ -632,7 +503,7 @@ function HomeCatalogApp() {
               type: "button",
               className: "btn btn-success",
               onClick: () => {
-                addToCart(selectedProduct, () => setIsLoginModalOpen(true));
+                addToCart(selectedProduct);
                 setIsDetailOpen(false);
               }
             },
@@ -649,112 +520,39 @@ function HomeCatalogApp() {
       className: "container-fluid",
       style: { padding: "20px", backgroundColor: "#ffffff", minHeight: "100vh" }
     },
-    LoginPromptModal,
     DetailModal,
 
-    // Unified Filter Bar
+    // Primary category filter bar (below navbar)
     e(
       "div",
       { 
-        className: "mb-4 d-flex align-items-center flex-wrap gap-2",
+        className: "mb-4",
         style: {
-          padding: "15px 0",
-          borderBottom: "1px solid #f0f0f0"
+          display: "flex",
+          gap: "10px",
+          flexWrap: "wrap",
+          paddingBottom: "12px",
+          borderBottom: "1px solid #e0e0e0"
         }
       },
-      // Categories (All, Seed, etc.)
       primaryCategories.map((cat) =>
         e(
           "button",
           {
             key: `cat-${cat}`,
-            className: `btn btn-sm ${activePrimaryCategory === (cat === "All" ? "all" : cat) ? "btn-success" : "btn-outline-success"}`,
-            style: { padding: "6px 14px", fontSize: "12px", fontWeight: "600", borderRadius: "20px" },
-            onClick: () => setActivePrimaryCategory(cat === "All" ? "all" : cat)
+            className: `btn btn-sm ${activePrimaryCategory === cat ? "btn-success" : "btn-outline-success"}`,
+            style: {
+              padding: "8px 16px",
+              fontSize: "13px",
+              fontWeight: "600",
+              borderRadius: "20px"
+            },
+            onClick: () => {
+              setActivePrimaryCategory(cat);
+            }
           },
           cat
         )
-      ),
-
-      // Vertical Divider
-      e("div", { style: { width: "1px", height: "24px", backgroundColor: "#ddd", margin: "0 10px" } }),
-
-      // Organic / Chemical Filter
-      ["Organic", "Chemical"].map(type => 
-        e("button", {
-          key: type,
-          className: `btn btn-sm ${activeSubcategory === type ? "btn-success" : "btn-outline-success"}`,
-          style: { padding: "6px 14px", fontSize: "12px", fontWeight: "600", borderRadius: "20px" },
-          onClick: () => setActiveSubcategory(activeSubcategory === type ? "all" : type)
-        }, type)
-      ),
-
-      // Unified Price & Sort Dropdown
-      e(
-        "div",
-        { className: "dropdown" },
-        e(
-          "button",
-          {
-            id: "priceDropdownBtn",
-            className: `btn btn-sm ${(priceRange !== "all" || priceSort !== "none") ? "btn-success" : "btn-outline-success"} dropdown-toggle`,
-            style: { padding: "6px 14px", fontSize: "12px", fontWeight: "600", borderRadius: "20px" },
-            "data-bs-toggle": "dropdown",
-            "aria-expanded": "false"
-          },
-          e("i", { className: "bi bi-currency-rupee me-1" }),
-          (priceRange === "all" && priceSort === "none") ? "Price" : 
-          (priceSort === "low-to-high" ? "Price: Low to High" : 
-           priceSort === "high-to-low" ? "Price: High to Low" : 
-           priceSort === "top-rated" ? "Top Rated" :
-           priceRange === "under500" ? "Price: Under ₹500" : 
-           priceRange === "500-1000" ? "Price: ₹500 - ₹1000" : "Price: Over ₹1000")
-        ),
-        e(
-          "ul",
-          { className: "dropdown-menu shadow-sm" },
-          // Sorting Options
-          e("li", {}, e("h6", { className: "dropdown-header" }, "Sort By")),
-          e("li", {}, e("button", { className: "dropdown-item", type: "button", onClick: () => handlePriceSelect("low-to-high", "all") }, "Price: Low to High")),
-          e("li", {}, e("button", { className: "dropdown-item", type: "button", onClick: () => handlePriceSelect("high-to-low", "all") }, "Price: High to Low")),
-          e("li", {}, e("button", { className: "dropdown-item", type: "button", onClick: () => handlePriceSelect("top-rated", "all") }, "Top Rated First")),
-          e("li", {}, e("hr", { className: "dropdown-divider" })),
-          // Filter Options
-          e("li", {}, e("h6", { className: "dropdown-header" }, "Filter By Range")),
-          e("li", {}, e("button", { className: "dropdown-item", type: "button", onClick: () => handlePriceSelect("none", "all") }, "All Prices")),
-          e("li", {}, e("button", { className: "dropdown-item", type: "button", onClick: () => handlePriceSelect("none", "under500") }, "Under ₹500")),
-          e("li", {}, e("button", { className: "dropdown-item", type: "button", onClick: () => handlePriceSelect("none", "500-1000") }, "₹500 - ₹1000")),
-          e("li", {}, e("button", { className: "dropdown-item", type: "button", onClick: () => handlePriceSelect("none", "over1000") }, "Over ₹1000"))
-        )
-      ),
-
-      // Stock Filter (Active/All)
-      e(
-        "button",
-        {
-          className: `btn btn-sm ${showOnlyInStock ? "btn-success" : "btn-outline-success"}`,
-          style: { padding: "6px 14px", fontSize: "12px", fontWeight: "600", borderRadius: "20px" },
-          onClick: () => setShowOnlyInStock(!showOnlyInStock)
-        },
-        e("i", { className: `bi ${showOnlyInStock ? "bi-check-circle-fill" : "bi-circle"} me-1` }),
-        "In Stock"
-      ),
-
-      // Clear button (if any filter is active)
-      (activePrimaryCategory !== "all" || activeSubcategory !== "all" || showOnlyInStock || priceSort !== "none" || minRating !== 0 || priceRange !== "all") && e(
-        "button",
-        {
-          className: "btn btn-sm btn-link text-danger text-decoration-none p-0 ms-auto",
-          onClick: () => {
-            setActivePrimaryCategory("all");
-            setActiveSubcategory("all");
-            setShowOnlyInStock(false);
-            setPriceSort("none");
-            setMinRating(0);
-            setPriceRange("all");
-          }
-        },
-        "Clear All"
       )
     ),
 
