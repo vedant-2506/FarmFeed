@@ -6,6 +6,7 @@ import com.example.farmFeed.repository.ProductRepository;
 import com.example.farmFeed.repository.RatingRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
@@ -25,6 +26,9 @@ public class ProductService {
     @Autowired
     private RatingRepository ratingRepository;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     /**
      * Get all available products
      */
@@ -35,12 +39,78 @@ public class ProductService {
     }
 
     /**
+     * Home API-safe fetch that supports both legacy JPA schema and raw SQL product feed schema.
+     */
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getAllProductsForHome() {
+        try {
+            return fetchProductsFromSqlFeed();
+        } catch (Exception ex) {
+            logger.warn("SQL feed fetch failed, falling back to JPA schema: {}", ex.getMessage());
+            try {
+                return productRepository.getAvailableProducts().stream()
+                        .map(this::toHomeProduct)
+                        .collect(Collectors.toList());
+            } catch (Exception fallbackEx) {
+                logger.error("JPA fallback for home products also failed: {}", fallbackEx.getMessage());
+                return Collections.emptyList();
+            }
+        }
+    }
+
+    /**
      * Debug helper: return all products from repository (ignores stock filter)
      */
     @Transactional(readOnly = true)
     public List<Product> getAllProductsRaw() {
         logger.info("Fetching all products (raw findAll) for debug");
         return productRepository.findAll();
+    }
+
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> getAllProductsRawForHome() {
+        try {
+            return fetchProductsFromSqlFeed();
+        } catch (Exception ex) {
+            logger.warn("SQL feed fetch failed, falling back to JPA raw schema: {}", ex.getMessage());
+            try {
+                return productRepository.findAll().stream()
+                        .map(this::toHomeProduct)
+                        .collect(Collectors.toList());
+            } catch (Exception fallbackEx) {
+                logger.error("JPA raw fallback for home products also failed: {}", fallbackEx.getMessage());
+                return Collections.emptyList();
+            }
+        }
+    }
+
+    private Map<String, Object> toHomeProduct(Product p) {
+        Map<String, Object> item = new HashMap<>();
+        item.put("id", p.getId());
+        item.put("product_name", p.getName());
+        item.put("name", p.getName());
+        item.put("description_clean", p.getDescription());
+        item.put("description", p.getDescription());
+        item.put("primary_category", p.getCategory());
+        item.put("price_inr", p.getPrice());
+        item.put("price", p.getPrice());
+        item.put("rating", p.getRating());
+        item.put("manufacturer", p.getManufacturer());
+        item.put("vendor_id", p.getVendorId());
+        item.put("vendorId", p.getVendorId());
+        item.put("stock", p.getStock());
+        item.put("total_reviews", p.getTotalReviews());
+        return item;
+    }
+
+    private List<Map<String, Object>> fetchProductsFromSqlFeed() {
+        String sql = "SELECT product_id, product_id AS id, " +
+            "product_name, product_name AS name, image_link, primary_category, subcategory, " +
+            "price_inr, price_inr AS price, rating, " +
+            "description_clean, description_clean AS description, detailed_description_10_sentences, manufacturer, " +
+                "vendor_id, stock, total_reviews, created_at, updated_at " +
+                "FROM products WHERE COALESCE(stock, 0) > 0 ORDER BY COALESCE(rating, 0) DESC";
+        return jdbcTemplate.queryForList(sql);
     }
 
     /**
@@ -274,12 +344,4 @@ public class ProductService {
         return ratingRepository.findByProductId(productId);
     }
 }
-    /**
-     * Get all ratings for a product
-     */
-    @Transactional(readOnly = true)
-    public List<Rating> getProductRatings(String productId) {
-        logger.info("Fetching ratings for product: {}", productId);
-        return ratingRepository.findByProductId(productId);
-    }
-}
+
