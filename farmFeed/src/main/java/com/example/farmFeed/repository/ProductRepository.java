@@ -26,8 +26,28 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     @Query("SELECT p FROM Product p WHERE p.category = :category AND p.rating >= :minRating ORDER BY p.rating DESC")
     List<Product> filterByCategory(@Param("category") String category, @Param("minRating") Double minRating);
 
-    @Query(value = "SELECT * FROM products WHERE COALESCE(stock,0) > 0 ORDER BY COALESCE(rating,0) DESC", nativeQuery = true)
-    List<Product> getAvailableProducts();
+   @Query(value = """
+SELECT
+    CAST(product_id AS CHAR) AS product_id,
+    product_name,
+    image_link,
+    primary_category,
+    subcategory,
+    price_inr,
+    rating,
+    description_clean,
+    detailed_description_10_sentences,
+    manufacturer,
+    CAST(vendor_id AS CHAR) AS vendor_id,
+    stock,
+    total_reviews,
+    created_at,
+    updated_at
+FROM products
+WHERE COALESCE(stock,0) > 0
+ORDER BY COALESCE(rating,0) DESC
+""", nativeQuery = true)
+List<Product> getAvailableProducts();
 
     @Query("SELECT p FROM Product p WHERE p.vendorId = :vendorId AND p.stock <= :threshold")
     List<Product> getLowStockProducts(@Param("vendorId") String vendorId, @Param("threshold") Integer threshold);
