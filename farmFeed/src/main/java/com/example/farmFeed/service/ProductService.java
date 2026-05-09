@@ -100,6 +100,7 @@ public class ProductService {
         item.put("vendorId", p.getVendorId());
         item.put("stock", p.getStock());
         item.put("total_reviews", p.getTotalReviews());
+        item.put("image_link", p.getImageLink());      // FIX: was p.getImage() — correct getter is getImageLink()
         return item;
     }
 
@@ -117,7 +118,7 @@ public class ProductService {
      * Get product by ID
      */
     @Transactional(readOnly = true)
-    public Optional<Product> getProductById(Long id) {
+    public Optional<Product> getProductById(String id) {          // FIX: was Long id; product PK is String
         logger.info("Fetching product with ID: {}", id);
         return productRepository.findById(id);
     }
@@ -182,6 +183,7 @@ public class ProductService {
         if (limit == null || limit <= 0) {
             limit = 10;
         }
+        // FIX: repository now accepts Pageable instead of Integer; PageRequest.of() was already correct here
         return productRepository.getTopRatedProducts(0.0, PageRequest.of(0, limit));
     }
 
@@ -189,36 +191,34 @@ public class ProductService {
      * Compare products
      */
     @Transactional(readOnly = true)
-    public Map<String, Object> compareProducts(List<Long> productIds) {
+    public Map<String, Object> compareProducts(List<String> productIds) {  // FIX: was List<Long>; IDs are String
         logger.info("Comparing {} products", productIds.size());
-        
+
         Map<String, Object> comparison = new HashMap<>();
         List<Product> products = new ArrayList<>();
-        
-        for (string id : productIds) {
+
+        for (String id : productIds) {                                     // FIX: was 'string' (lowercase)
             Optional<Product> product = productRepository.findById(id);
             product.ifPresent(products::add);
         }
-        
+
         comparison.put("products", products);
         comparison.put("count", products.size());
-        
+
         if (!products.isEmpty()) {
-            // Find cheapest and most expensive
             Optional<Product> cheapest = products.stream()
                     .min(Comparator.comparingDouble(Product::getPrice));
             Optional<Product> expensive = products.stream()
                     .max(Comparator.comparingDouble(Product::getPrice));
-            
+
             comparison.put("cheapest", cheapest.orElse(null));
             comparison.put("mostExpensive", expensive.orElse(null));
-            
-            // Find best rated
+
             Optional<Product> bestRated = products.stream()
                     .max(Comparator.comparingDouble(p -> p.getRating() != null ? p.getRating() : 0.0));
             comparison.put("bestRated", bestRated.orElse(null));
         }
-        
+
         return comparison;
     }
 
@@ -235,24 +235,24 @@ public class ProductService {
      * Update product
      */
     @Transactional
-    public Product updateProduct(string id, Product productDetails) {
+    public Product updateProduct(String id, Product productDetails) {      // FIX: was 'string' (lowercase)
         logger.info("Updating product: {}", id);
-        
+
         Optional<Product> existingProduct = productRepository.findById(id);
         if (existingProduct.isPresent()) {
             Product product = existingProduct.get();
-            
+
             if (productDetails.getName() != null) product.setName(productDetails.getName());
             if (productDetails.getDescription() != null) product.setDescription(productDetails.getDescription());
             if (productDetails.getCategory() != null) product.setCategory(productDetails.getCategory());
             if (productDetails.getPrice() != null) product.setPrice(productDetails.getPrice());
             if (productDetails.getStock() != null) product.setStock(productDetails.getStock());
-            if (productDetails.getImage() != null) product.setImage(productDetails.getImage());
+            if (productDetails.getImageLink() != null) product.setImageLink(productDetails.getImageLink()); // FIX: was getImage()/setImage()
             if (productDetails.getManufacturer() != null) product.setManufacturer(productDetails.getManufacturer());
-            
+
             return productRepository.save(product);
         }
-        
+
         logger.warn("Product not found: {}", id);
         return null;
     }
@@ -261,14 +261,14 @@ public class ProductService {
      * Delete product
      */
     @Transactional
-    public boolean deleteProduct(string id) {
+    public boolean deleteProduct(String id) {                              // FIX: was 'string' (lowercase)
         logger.info("Deleting product: {}", id);
-        
+
         if (productRepository.existsById(id)) {
             productRepository.deleteById(id);
             return true;
         }
-        
+
         logger.warn("Product not found for deletion: {}", id);
         return false;
     }
@@ -277,16 +277,16 @@ public class ProductService {
      * Update stock
      */
     @Transactional
-    public Product updateStock(string id, Integer quantity) {
+    public Product updateStock(String id, Integer quantity) {              // FIX: was 'string' (lowercase)
         logger.info("Updating stock for product: {} with quantity: {}", id, quantity);
-        
+
         Optional<Product> product = productRepository.findById(id);
         if (product.isPresent()) {
             Product p = product.get();
             p.setStock(p.getStock() + quantity);
             return productRepository.save(p);
         }
-        
+
         return null;
     }
 
@@ -306,16 +306,15 @@ public class ProductService {
      * Add rating to product and update product rating
      */
     @Transactional
-    public void addRating(string productId, Integer rating, String review, Long farmerId, Long vendorId) {
+    public void addRating(String productId, Integer rating, String review, Long farmerId, Long vendorId) { // FIX: was 'string'
         logger.info("Adding rating {} to product: {}", rating, productId);
-        
+
         Product product = productRepository.findById(productId).orElse(null);
         if (product == null) {
             logger.warn("Product not found: {}", productId);
             return;
         }
-        
-        // Create rating entry
+
         Rating newRating = Rating.builder()
                 .productId(productId)
                 .farmerId(farmerId)
@@ -323,13 +322,12 @@ public class ProductService {
                 .rating(rating)
                 .review(review)
                 .build();
-        
+
         ratingRepository.save(newRating);
-        
-        // Update product rating
+
         Double avgRating = ratingRepository.getAverageRating(productId);
         Long ratingCount = ratingRepository.getRatingCount(productId);
-        
+
         product.setRating(avgRating != null ? avgRating : 0.0);
         product.setTotalReviews((int)(long)(ratingCount != null ? ratingCount : 0));
         productRepository.save(product);
@@ -339,7 +337,7 @@ public class ProductService {
      * Get all ratings for a product
      */
     @Transactional(readOnly = true)
-    public List<Rating> getProductRatings(Long productId) {
+    public List<Rating> getProductRatings(String productId) {             // FIX: was Long productId; must match String product PK
         logger.info("Fetching ratings for product: {}", productId);
         return ratingRepository.findByProductId(productId);
     }
