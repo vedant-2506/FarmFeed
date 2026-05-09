@@ -5,7 +5,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "Product")
+@Table(name = "products")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,21 +13,29 @@ import java.time.LocalDateTime;
 public class Product {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")
-    private Long id;
+    private String id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "product_name", nullable = false)
     private String name;
 
-    @Column(name = "description", length = 2000)
+    @Column(name = "image_link", length = 2000)
+    private String imageLink;
+
+    @Column(name = "primary_category", nullable = false)
+    private String category;
+
+    @Column(name = "subcategory")
+    private String subcategory;
+
+    @Column(name = "price_inr", nullable = false)
+    private Double price;
+
+    @Column(name = "description_clean", length = 2000)
     private String description;
 
-    @Column(name = "category", nullable = false)
-    private String category; // organic, chemical, fertilizer, pesticide, etc.
-
-    @Column(name = "price", nullable = false)
-    private Double price;
+    @Column(name = "detailed_description_10_sentences", length = 6000)
+    private String detailedDescription;
 
     @Column(name = "manufacturer")
     private String manufacturer;
@@ -37,9 +45,6 @@ public class Product {
 
     @Column(name = "stock", nullable = false)
     private Integer stock;
-
-    @Column(name = "image", columnDefinition = "LONGBLOB")
-    private byte[] image;
 
     @Column(name = "rating", columnDefinition = "DECIMAL(3,2) DEFAULT 0")
     private Double rating;

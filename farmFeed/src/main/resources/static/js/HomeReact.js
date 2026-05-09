@@ -1,5 +1,6 @@
-const API_BASE_URL = globalThis.API_BASE_URL || globalThis.location.origin;
+const API_BASE_URL = globalThis.API_BASE_URL || 'https://farmfeed.onrender.com';
 const FERTILIZER_API = `${API_BASE_URL}/api/products`;
+const FERTILIZER_FALLBACK_API = `${API_BASE_URL}/api/fertilizers`;
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1592982537447-6f2a6a0b2d8f?w=800&q=80";
 const CACHE_KEY = "farmfeed_products_cache_v2";
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -226,7 +227,7 @@ function ProductCard({ product, onOpen }) {
 
 function HomeCatalogApp() {
   const [products, setProducts] = React.useState([]);
-  const [activePrimaryCategory, setActivePrimaryCategory] = React.useState("all");
+  const [activePrimaryCategory, setActivePrimaryCategory] = React.useState("All");
   const [searchQuery, setSearchQuery] = React.useState("");
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState("");
@@ -265,17 +266,41 @@ function HomeCatalogApp() {
     const controller = new AbortController();
 
     fetch(FERTILIZER_API, { signal: controller.signal })
-      .then((response) => {
-        if (!response.ok) throw new Error(`Failed with status ${response.status}`);
+      .then(async (response) => {
+        if (!response.ok) {
+          const text = await response.text().catch(() => null);
+          console.error('Products fetch failed', response.status, text || response.statusText);
+          throw new Error(`Failed with status ${response.status}: ${text || response.statusText}`);
+        }
         return response.json();
       })
-      .then((response) => {
-        // Handle wrapped API response {success: true, data: [...], count: N}
-        const data = response.data || response || [];
+      .then((payload) => {
+        const data = payload && (payload.data || payload) ? (payload.data || payload) : [];
         const normalized = normalizeProducts(data);
-        setProducts(normalized);
-        setError("");
-        saveCache(data);
+        if (normalized.length > 0) {
+          setProducts(normalized);
+          setError("");
+          saveCache(data);
+          return null;
+        }
+
+        // Try fallback if products empty
+        return fetch(FERTILIZER_FALLBACK_API, { signal: controller.signal })
+          .then(async (fallbackResponse) => {
+            if (!fallbackResponse.ok) {
+              const ftext = await fallbackResponse.text().catch(() => null);
+              console.error('Fallback fetch failed', fallbackResponse.status, ftext || fallbackResponse.statusText);
+              throw new Error(`Fallback failed with status ${fallbackResponse.status}: ${ftext || fallbackResponse.statusText}`);
+            }
+            return fallbackResponse.json();
+          })
+          .then((fallbackPayload) => {
+            const fallbackData = fallbackPayload && (fallbackPayload.data || fallbackPayload) ? (fallbackPayload.data || fallbackPayload) : [];
+            const fallbackNormalized = normalizeProducts(fallbackData);
+            setProducts(fallbackNormalized);
+            setError("");
+            saveCache(fallbackData);
+          });
       })
       .catch((fetchError) => {
         if (fetchError.name !== "AbortError") {
@@ -297,7 +322,7 @@ function HomeCatalogApp() {
     return products.filter((product) => {
       // Handle "Other" category - products not in the main categories
       let primaryOk = false;
-      if (activePrimaryCategory === "all") {
+      if (activePrimaryCategory === "All") {
         primaryOk = true;
       } else if (activePrimaryCategory === "Other") {
         const knownCategories = ["Seed", "Crop Production", "Crop Nutrition"];
@@ -515,7 +540,7 @@ function HomeCatalogApp() {
           "button",
           {
             key: `cat-${cat}`,
-            className: `btn btn-sm ${activePrimaryCategory === cat.toLowerCase() ? "btn-success" : "btn-outline-success"}`,
+            className: `btn btn-sm ${activePrimaryCategory === cat ? "btn-success" : "btn-outline-success"}`,
             style: {
               padding: "8px 16px",
               fontSize: "13px",
@@ -523,7 +548,7 @@ function HomeCatalogApp() {
               borderRadius: "20px"
             },
             onClick: () => {
-              setActivePrimaryCategory(cat === "All" ? "all" : cat);
+              setActivePrimaryCategory(cat);
             }
           },
           cat

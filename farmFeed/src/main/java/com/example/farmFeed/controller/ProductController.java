@@ -29,7 +29,7 @@ public class ProductController {
     public ResponseEntity<?> getAllProducts() {
         try {
             logger.info("Fetching all products");
-            List<Product> products = productService.getAllProducts();
+            List<Map<String, Object>> products = productService.getAllProductsForHome();
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "count", products.size(),
@@ -43,10 +43,30 @@ public class ProductController {
     }
 
     /**
+     * GET /api/products/debug - Debug endpoint returning all products (no stock filter)
+     */
+    @GetMapping("/debug")
+    public ResponseEntity<?> debugAllProducts() {
+        try {
+            logger.info("Debug: fetching all products (raw)");
+            List<Map<String, Object>> products = productService.getAllProductsRawForHome();
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "count", products.size(),
+                    "data", products
+            ));
+        } catch (Exception e) {
+            logger.error("Error in debug fetching products: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    /**
      * GET /api/products/{id} - Get product details
      */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getProductById(@PathVariable Long id) {
+    public ResponseEntity<?> getProductById(@PathVariable String id) {
         try {
             logger.info("Fetching product: {}", id);
             Optional<Product> product = productService.getProductById(id);
@@ -183,7 +203,7 @@ public class ProductController {
             logger.info("Comparing products");
             
             @SuppressWarnings("unchecked")
-            List<Long> productIds = (List<Long>) request.get("productIds");
+            List<String> productIds = (List<String>) request.get("productIds");
             
             if (productIds == null || productIds.isEmpty()) {
                 return ResponseEntity.badRequest()
@@ -250,7 +270,7 @@ public class ProductController {
      * PUT /api/products/{id} - Update product (vendor only)
      */
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateProduct(@PathVariable Long id, @RequestBody Product productDetails) {
+    public ResponseEntity<?> updateProduct(@PathVariable String id, @RequestBody Product productDetails) {
         try {
             logger.info("Updating product: {}", id);
             
@@ -277,7 +297,7 @@ public class ProductController {
      * DELETE /api/products/{id} - Delete product (vendor only)
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<?> deleteProduct(@PathVariable String id) {
         try {
             logger.info("Deleting product: {}", id);
             
@@ -304,7 +324,7 @@ public class ProductController {
      */
     @PostMapping("/{productId}/rating")
     public ResponseEntity<?> addRating(
-            @PathVariable Long productId,
+            @PathVariable String productId,
             @RequestBody Map<String, Object> ratingData) {
         try {
             logger.info("Adding rating for product: {}", productId);
@@ -331,7 +351,7 @@ public class ProductController {
      * GET /api/products/{id}/ratings - Get all ratings for product
      */
     @GetMapping("/{productId}/ratings")
-    public ResponseEntity<?> getProductRatings(@PathVariable Long productId) {
+    public ResponseEntity<?> getProductRatings(@PathVariable String productId) {
         try {
             logger.info("Fetching ratings for product: {}", productId);
             List<Rating> ratings = productService.getProductRatings(productId);
