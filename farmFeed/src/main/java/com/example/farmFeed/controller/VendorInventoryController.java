@@ -1,7 +1,6 @@
 package com.example.farmFeed.controller;
 
 import com.example.farmFeed.service.VendorInventoryService;
-import com.example.farmFeed.service.FertilizerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,19 +19,11 @@ public class VendorInventoryController {
     @Autowired
     private VendorInventoryService inventoryService;
 
-    @Autowired
-    private FertilizerService fertilizerService;
-
-    private Integer parseFertilizerId(String id) {
+    private String parseFertilizerId(String id) {
         if (id == null || id.trim().isEmpty() || "undefined".equals(id)) {
             return null;
         }
-        // Extract only digits from the string (e.g., "pr997" -> "997", "bighaat_123" -> "123")
-        String numericPart = id.replaceAll("[^0-9]", "");
-        if (numericPart.isEmpty()) {
-            throw new IllegalArgumentException("Invalid ID format: " + id);
-        }
-        return Integer.parseInt(numericPart);
+        return id.trim();
     }
 
     @GetMapping("/{vendorId}")
@@ -73,7 +64,7 @@ public class VendorInventoryController {
                 throw new IllegalArgumentException("Invalid fertilizer ID");
             }
             
-            Integer fertilizerId = parseFertilizerId(fertId);
+            String fertilizerId = parseFertilizerId(fertId);
             Double price = Double.parseDouble(request.get("vendorPrice").toString());
             Integer qty = Integer.parseInt(request.get("quantity").toString());
 
@@ -103,7 +94,7 @@ public class VendorInventoryController {
         try {
             Long vendorId = Long.parseLong(request.get("vendorId").toString());
             String fertilizerIdStr = request.get("fertilizerId").toString();
-            Integer fertilizerId = parseFertilizerId(fertilizerIdStr);
+            String fertilizerId = parseFertilizerId(fertilizerIdStr);
 
             boolean exists = inventoryService.hasInventoryItem(vendorId, fertilizerId);
 
@@ -126,7 +117,7 @@ public class VendorInventoryController {
         try {
             Long vendorId = Long.parseLong(request.get("vendorId").toString());
             String fertilizerIdStr = request.get("fertilizerId").toString();
-            Integer fertilizerId = parseFertilizerId(fertilizerIdStr);
+            String fertilizerId = parseFertilizerId(fertilizerIdStr);
             
             Double vendorPrice = request.get("vendorPrice") != null ?
                     Double.parseDouble(request.get("vendorPrice").toString()) : null;
@@ -155,7 +146,7 @@ public class VendorInventoryController {
     @DeleteMapping("/{vendorId}/{fertilizerId}")
     public ResponseEntity<?> removeFromInventory(
             @PathVariable Long vendorId,
-            @PathVariable Integer fertilizerId) {
+            @PathVariable String fertilizerId) {
         try {
             logger.info("Removing fertilizer {} from vendor {} inventory", fertilizerId, vendorId);
 

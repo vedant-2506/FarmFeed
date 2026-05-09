@@ -1,9 +1,9 @@
 package com.example.farmFeed.entity;
-
+ 
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
-
+ 
 @Entity
 @Table(name = "products")
 @Data
@@ -11,48 +11,48 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class Product {
-
+ 
     @Id
     @Column(name = "product_id")
     private String id;
 
-    @Column(name = "product_name", nullable = false)
+    @Column(name = "product_name")
     private String name;
 
     @Column(name = "image_link", length = 2000)
     private String imageLink;
 
-    @Column(name = "primary_category", nullable = false)
+    @Column(name = "primary_category")
     private String category;
 
     @Column(name = "subcategory")
     private String subcategory;
 
-    @Column(name = "price_inr", nullable = false)
+    @Column(name = "price_inr")
     private Double price;
 
-    @Column(name = "description_clean", length = 2000)
+    @Column(name = "rating")
+    private Double rating;
+
+    @Column(name = "description_clean", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "detailed_description_10_sentences", length = 6000)
+    @Column(name = "detailed_description_10_sentences", columnDefinition = "TEXT")
     private String detailedDescription;
 
     @Column(name = "manufacturer")
     private String manufacturer;
 
-    @Column(name = "vendor_id", nullable = false)
+    @Column(name = "vendor_id")
     private Long vendorId;
 
-    @Column(name = "stock", nullable = false)
+    @Column(name = "stock")
     private Integer stock;
 
-    @Column(name = "rating", columnDefinition = "DECIMAL(3,2) DEFAULT 0")
-    private Double rating;
-
-    @Column(name = "total_reviews", columnDefinition = "INT DEFAULT 0")
+    @Column(name = "total_reviews")
     private Integer totalReviews;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at")
@@ -64,6 +64,7 @@ public class Product {
         updatedAt = LocalDateTime.now();
         if (rating == null) rating = 0.0;
         if (totalReviews == null) totalReviews = 0;
+        if (stock == null) stock = 100;
     }
 
     @PreUpdate

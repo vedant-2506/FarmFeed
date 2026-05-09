@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 // ============================================================
 // FarmFeed - Global Config
 // ============================================================
@@ -12,3 +13,6 @@ if (window.location.hostname === 'localhost' || window.location.hostname === '12
   // Fallback to current origin
   window.API_BASE_URL = window.location.origin;
 }
+=======
+window.API_BASE_URL = "https://farmfeed.onrender.com";
+>>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263

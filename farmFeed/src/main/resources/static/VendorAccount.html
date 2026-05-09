@@ -89,15 +89,35 @@
     .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
 
     .stat-card {
-      background: linear-gradient(135deg, #e8f5e9 0%, #f0fdf4 100%);
-      border: 2px solid #c8e6c9;
-      border-radius: 12px;
-      padding: 20px;
+      background: #ffffff;
+      border: 1px solid #e0e0e0;
+      border-radius: 16px;
+      padding: 24px 20px;
       text-align: center;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      position: relative;
+      overflow: hidden;
     }
 
-    .stat-number { font-size: 28px; font-weight: 700; color: #28a745; }
-    .stat-label { font-size: 13px; color: #999; margin-top: 5px; }
+    .stat-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: #28a745;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 12px 24px rgba(40, 167, 69, 0.12);
+      border-color: #28a745;
+    }
+
+    .stat-number { font-size: 32px; font-weight: 800; color: #1a1a1a; letter-spacing: -0.5px; }
+    .stat-label { font-size: 14px; color: #666; margin-top: 4px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
 
     /* Inventory Grid */
     .inventory-grid {
@@ -268,6 +288,51 @@
     .list-left { display: flex; gap: 15px; align-items: center; flex: 1; }
     .list-image { width: 80px; height: 80px; background: #f5f5f5; border-radius: 8px; overflow: hidden; }
     .list-actions { display: flex; gap: 10px; }
+
+    /* Analytics Styles */
+    .analytics-section {
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid #e0e0e0;
+    }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .analytics-box {
+      background: linear-gradient(135deg, #f0fdf4 0%, #e8f5e9 100%);
+      border: 2px solid #c8e6c9;
+      border-radius: 10px;
+      padding: 18px;
+      text-align: center;
+      transition: all 0.3s;
+    }
+
+    .analytics-box:hover {
+      border-color: #28a745;
+      box-shadow: 0 2px 8px rgba(40, 167, 69, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .analytics-label {
+      font-size: 13px;
+      color: #666;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .analytics-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #28a745;
+      word-break: break-word;
+    }
   </style>
   <link rel="stylesheet" href="css/toast.css">
 </head>
@@ -311,11 +376,19 @@
           <div class="sidebar-item" onclick="showSection('inventory')">
             <i class="bi bi-box-seam"></i> My Inventory
           </div>
+          <div class="sidebar-item" onclick="showSection('analytics')">
+            <i class="bi bi-graph-up"></i> Business Analytics
+          </div>
           <div class="sidebar-item" onclick="showSection('orders')">
             <i class="bi bi-bag-check"></i> Orders
           </div>
+<<<<<<< HEAD
           <div class="sidebar-item" id="analysisTab" onclick="showSection('analysis')">
             <i class="bi bi-graph-up"></i> Stock Analysis
+=======
+          <div class="sidebar-item" onclick="showSection('shiftingOrders')">
+            <i class="bi bi-truck"></i> Shifting Orders
+>>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
           </div>
         </div>
       </div>
@@ -344,7 +417,15 @@
           <div class="stats-container">
             <div class="stat-card">
               <div class="stat-number" id="inventoryCount">0</div>
-              <div class="stat-label">Products in Inventory</div>
+              <div class="stat-label">Total Products</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="availableCountOverview">0</div>
+              <div class="stat-label">Available Items</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="outOfStockCountOverview">0</div>
+              <div class="stat-label">Out of Stock</div>
             </div>
             <div class="stat-card">
               <div class="stat-number" id="totalOrders">0</div>
@@ -368,12 +449,28 @@
             <i class="bi bi-plus-circle"></i> Add New Products
           </button>
 
-          <div id="inventoryList" class="inventory-grid">
-            <div class="loading-spinner">
-              <div class="spinner-border text-success" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-            </div>
+          <div class="table-responsive mt-4 shadow-sm rounded">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-success">
+                <tr>
+                  <th>Image</th>
+                  <th>Product Name</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Status</th>
+                  <th class="text-center">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="inventoryList">
+                <tr>
+                  <td colspan="6" class="text-center py-4">
+                    <div class="spinner-border text-success" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -382,6 +479,7 @@
           <div class="content-title">
             <i class="bi bi-bag-check"></i> Your Orders
           </div>
+<<<<<<< HEAD
           <div class="content-subtitle">Track customer orders</div>
           <div id="ordersList">
             <div class="loading-spinner">
@@ -416,14 +514,163 @@
               <div class="card border-0 shadow-sm p-4 text-center h-100" style="background: #f0fdf4;">
                 <h2 id="avgPrice" class="fw-bold text-success">0</h2>
                 <p class="text-muted small mb-0">Average Price</p>
+=======
+          <div class="content-subtitle">Track customer orders pending approval</div>
+          <div class="table-responsive mt-4 shadow-sm rounded">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-success">
+                <tr>
+                  <th>Order ID</th>
+                  <th>Product Name</th>
+                  <th>Farmer Name</th>
+                  <th>Mobile Number</th>
+                  <th>Delivery Address</th>
+                  <th>Quantity</th>
+                  <th>Total Amount</th>
+                  <th class="text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody id="ordersContainer">
+                <tr>
+                  <td colspan="8" class="text-center py-4">
+                    <div class="spinner-border text-success" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Shifting Orders Section -->
+        <div id="shiftingOrdersSection" class="content-area" style="display: none;">
+          <div class="content-title">
+            <i class="bi bi-truck"></i> Shifting Orders
+          </div>
+          <div class="content-subtitle">Orders out for delivery</div>
+          <div class="table-responsive mt-4 shadow-sm rounded">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-info">
+                <tr>
+                  <th>Order ID</th>
+                  <th>Product Name</th>
+                  <th>Farmer Name</th>
+                  <th>Mobile Number</th>
+                  <th>Delivery Address</th>
+                  <th class="text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody id="shiftingOrdersContainer">
+                <tr>
+                  <td colspan="6" class="text-center py-4">
+                    <div class="spinner-border text-info" role="status">
+                      <span class="visually-hidden">Loading...</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div id="analyticsSection" class="content-area" style="display: none;">
+          <div class="content-title">
+            <i class="bi bi-bar-chart-line"></i> Business Analytics
+          </div>
+          <div class="content-subtitle">Key metrics and business performance</div>
+
+          <div class="stats-container">
+            <div class="stat-card">
+              <div class="stat-number" id="totalProductsAnalytics">0</div>
+              <div class="stat-label">Total Products Listed</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="totalOrdersAnalytics">0</div>
+              <div class="stat-label">Total Orders Received</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="completedOrdersAnalytics">0</div>
+              <div class="stat-label">Completed Orders</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-number" id="pendingOrdersAnalytics">0</div>
+              <div class="stat-label">Pending Orders</div>
+            </div>
+          </div>
+
+          <div class="analytics-section mt-4">
+            <h5 class="mb-3"><i class="bi bi-cash-coin"></i> Revenue Metrics</h5>
+            <div class="analytics-grid">
+              <div class="analytics-box">
+                <div class="analytics-label">Total Revenue</div>
+                <div class="analytics-value" id="totalRevenue">₹0</div>
+              </div>
+              <div class="analytics-box">
+                <div class="analytics-label">Average Order Value</div>
+                <div class="analytics-value" id="avgOrderValue">₹0</div>
+              </div>
+              <div class="analytics-box">
+                <div class="analytics-label">Best Selling Product</div>
+                <div class="analytics-value" id="bestProduct">N/A</div>
+              </div>
+              <div class="analytics-box">
+                <div class="analytics-label">Total Revenue This Month</div>
+                <div class="analytics-value" id="monthlyRevenue">₹0</div>
+>>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
               </div>
             </div>
           </div>
 
+<<<<<<< HEAD
           <div class="mt-4">
             <h5 class="fw-bold mb-3">Recommendations</h5>
             <div id="recommendations" class="list-group list-group-flush">
               <div class="list-group-item bg-transparent text-muted">Loading insights...</div>
+=======
+          <div class="analytics-section mt-4">
+            <h5 class="mb-3"><i class="bi bi-bar-chart"></i> Inventory Metrics</h5>
+            <div class="analytics-grid">
+              <div class="analytics-box">
+                <div class="analytics-label">Total Stock Value</div>
+                <div class="analytics-value" id="stockValue">₹0</div>
+              </div>
+              <div class="analytics-box">
+                <div class="analytics-label">Low Stock Products</div>
+                <div class="analytics-value" id="lowStockCount">0</div>
+              </div>
+              <div class="analytics-box">
+                <div class="analytics-label">Out of Stock</div>
+                <div class="analytics-value" id="outOfStock">0</div>
+              </div>
+              <div class="analytics-box">
+                <div class="analytics-label">Average Product Price</div>
+                <div class="analytics-value" id="avgPrice">₹0</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="analytics-section mt-4">
+            <h5 class="mb-3"><i class="bi bi-people"></i> Customer Metrics</h5>
+            <div class="analytics-grid">
+              <div class="analytics-box">
+                <div class="analytics-label">Unique Customers</div>
+                <div class="analytics-value" id="uniqueCustomers">0</div>
+              </div>
+              <div class="analytics-box">
+                <div class="analytics-label">Repeat Customers</div>
+                <div class="analytics-value" id="repeatCustomers">0</div>
+              </div>
+              <div class="analytics-box">
+                <div class="analytics-label">Orders Per Customer</div>
+                <div class="analytics-value" id="ordersPerCustomer">0</div>
+              </div>
+              <div class="analytics-box">
+                <div class="analytics-label">Customer Satisfaction Rate</div>
+                <div class="analytics-value" id="satisfactionRate">N/A</div>
+              </div>
+>>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
             </div>
           </div>
         </div>
@@ -440,10 +687,6 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <div class="mb-3">
-            <label class="form-label">Your Price (Rs)</label>
-            <input type="number" id="editPrice" class="form-control" min="0" step="0.01">
-          </div>
           <div class="mb-3">
             <label class="form-label">Quantity in Stock</label>
             <input type="number" id="editQuantity" class="form-control" min="0">
@@ -484,15 +727,21 @@
       try {
         const res = await fetch(`${BASE_URL}/api/shopkeeper/${shopId}`);
         const data = await res.json();
+        console.log("Vendor info response:", data);
 
-        if (data.success && data.data) {
-          const vendor = data.data;
-          document.getElementById("shopName").textContent = vendor.shop_name || "My Shop";
-          document.getElementById("ownerName").textContent = vendor.owner_name || "-";
-          document.getElementById("shopEmail").textContent = vendor.email || "-";
+        if (data.success && data) {
+          document.getElementById("shopName").textContent = data.shop_name || "My Shop";
+          document.getElementById("ownerName").textContent = data.owner_name || "-";
+          document.getElementById("shopEmail").textContent = data.email || "-";
+          console.log("Vendor info loaded successfully");
+        } else {
+          console.warn("Vendor info not available:", data);
         }
       } catch (err) {
         console.error("Error loading vendor info:", err);
+        document.getElementById("shopName").textContent = "My Shop";
+        document.getElementById("ownerName").textContent = "-";
+        document.getElementById("shopEmail").textContent = "-";
       }
     }
 
@@ -516,8 +765,18 @@
 
         if (data.success) {
           const items = data.data || [];
-          console.log("Items count:", items.length);
           document.getElementById("inventoryCount").textContent = items.length;
+          
+          // Calculate stats for overview
+          const available = items.filter(i => i.quantity_in_stock > 0).length;
+          const outOfStock = items.filter(i => i.quantity_in_stock === 0).length;
+          
+          if (document.getElementById("availableCountOverview")) {
+            document.getElementById("availableCountOverview").textContent = available;
+          }
+          if (document.getElementById("outOfStockCountOverview")) {
+            document.getElementById("outOfStockCountOverview").textContent = outOfStock;
+          }
 
           if (items.length === 0) {
             console.log("No items found, showing empty state");
@@ -551,60 +810,63 @@
     }
 
     function displayInventory(items) {
-      const container = document.getElementById("inventoryList");
+      const tbody = document.getElementById("inventoryList");
+      tbody.innerHTML = "";
 
-      container.innerHTML = items.map(item => `
-        <div class="product-card">
-          <div class="product-image">
-            <img src="https://via.placeholder.com/280x180?text=${item.name}" alt="${item.name}" onerror="this.src='https://via.placeholder.com/280x180?text=Fertilizer'">
-          </div>
-          <div class="product-info">
-            <div class="product-name">${item.name}</div>
-            <div class="product-details">
-              <div class="detail-item">
-                <div class="detail-label">Base Price</div>
-                <div class="detail-value">Rs${item.base_price}</div>
-              </div>
-              <div class="detail-item">
-                <div class="detail-label">Your Price</div>
-                <div class="detail-value">Rs${item.vendor_price}</div>
-              </div>
-              <div class="detail-item">
-                <div class="detail-label">In Stock</div>
-                <div class="detail-value">${item.quantity_in_stock}</div>
-              </div>
-              <div class="detail-item">
-                <div class="detail-label">Rating</div>
-                <div class="detail-value">${item.rating_review || "4.5"}</div>
-              </div>
-            </div>
-            <div class="product-actions">
-              <button class="btn-edit" onclick="openEditModal(${item.fertilizer_id || item.id}, ${item.vendor_price}, ${item.quantity_in_stock})">
-                <i class="bi bi-pencil"></i> Edit
+      if (!items || items.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="text-center py-5 text-muted">No products in inventory</td></tr>`;
+        return;
+      }
+
+      items.forEach(item => {
+        const stock = item.quantity_in_stock || 0;
+        const stockStatus = stock > 50 ? 'In Stock' : stock > 10 ? 'Low Stock' : 'Critical';
+        const stockColor = stock > 50 ? 'success' : stock > 10 ? 'warning' : 'danger';
+        
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>
+            <img src="${item.image_url || 'https://via.placeholder.com/50'}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+          </td>
+          <td>
+            <div class="fw-bold">${item.name}</div>
+            <small class="text-muted">ID: #${item.fertilizer_id}</small>
+          </td>
+          <td class="text-muted">₹${(item.base_price || item.vendor_price || 0).toLocaleString('en-IN')}</td>
+          <td>
+            <span class="fw-bold">${stock}</span>
+            <small class="text-muted"> units</small>
+          </td>
+          <td>
+            <span class="badge bg-${stockColor}">${stockStatus}</span>
+          </td>
+          <td class="text-center">
+            <div class="btn-group">
+              <button onclick='openEditModal(${JSON.stringify(item.fertilizer_id)}, ${stock})' class="btn btn-sm btn-outline-success">
+                <i class="bi bi-pencil"></i>
               </button>
-              <button class="btn-delete" onclick="deleteProduct(${item.fertilizer_id || item.id})">
-                <i class="bi bi-trash"></i> Delete
+              <button onclick='deleteProduct(${JSON.stringify(item.fertilizer_id)})' class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-trash"></i>
               </button>
             </div>
-          </div>
-        </div>
-      `).join("");
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
     }
 
-    function openEditModal(productId, price, quantity) {
+    function openEditModal(productId, quantity) {
       editingProductId = productId;
-      document.getElementById("editPrice").value = price;
       document.getElementById("editQuantity").value = quantity;
       const modal = new bootstrap.Modal(document.getElementById("editModal"));
       modal.show();
     }
 
     async function saveEdit() {
-      const price = parseFloat(document.getElementById("editPrice").value);
       const quantity = parseInt(document.getElementById("editQuantity").value);
 
-      if (!price || !quantity) {
-        alert("Please fill all fields!");
+      if (!quantity) {
+        alert("Please enter a valid quantity!");
         return;
       }
 
@@ -615,7 +877,7 @@
           body: JSON.stringify({
             vendorId: shopId,
             fertilizerId: editingProductId,
-            vendorPrice: price,
+            vendorPrice: 0, // vendor price not allowed to be changed
             quantity: quantity
           })
         });
@@ -813,7 +1075,11 @@
     }
 
     function showSection(section) {
+<<<<<<< HEAD
       const sections = ['overviewSection', 'inventorySection', 'ordersSection', 'analysisSection'];
+=======
+      const sections = ['overviewSection', 'inventorySection', 'ordersSection', 'shiftingOrdersSection', 'analyticsSection'];
+>>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
       sections.forEach(s => document.getElementById(s).style.display = 'none');
 
       if (section === 'overview') document.getElementById("overviewSection").style.display = 'block';
@@ -821,6 +1087,7 @@
         document.getElementById("inventorySection").style.display = 'block';
         loadInventory();
       }
+<<<<<<< HEAD
       if (section === 'orders') {
         document.getElementById("ordersSection").style.display = 'block';
         loadOrders();
@@ -828,6 +1095,19 @@
       if (section === 'analysis') {
         document.getElementById("analysisSection").style.display = 'block';
         loadAnalysis();
+=======
+      if (section === 'analytics') {
+        document.getElementById("analyticsSection").style.display = 'block';
+        loadAnalytics();
+      }
+      if (section === 'orders') {
+        document.getElementById("ordersSection").style.display = 'block';
+        loadVendorOrders();
+      }
+      if (section === 'shiftingOrders') {
+        document.getElementById("shiftingOrdersSection").style.display = 'block';
+        loadShiftingOrders();
+>>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
       }
 
       document.querySelectorAll(".sidebar-item").forEach(item => item.classList.remove("active"));
@@ -835,13 +1115,336 @@
       if (sidebarItem) sidebarItem.classList.add("active");
     }
 
+    async function loadVendorOrders() {
+      try {
+        const res = await fetch(`${BASE_URL}/api/orders/vendor/${shopId}/pending`);
+        const data = await res.json();
+
+        const container = document.getElementById("ordersContainer");
+        
+        if (data.success && data.data && data.data.length > 0) {
+          let html = "";
+          data.data.forEach(order => {
+            html += `
+              <tr>
+                <td><strong>#${order.id}</strong></td>
+                <td>${order.productName || order.product_name || 'N/A'}</td>
+                <td>${order.farmerName || order.farmer_name || 'N/A'}</td>
+                <td>${order.farmerPhone || order.farmer_phone || 'N/A'}</td>
+                <td>${order.farmerAddress || order.farmer_address || 'N/A'}</td>
+                <td><span class="badge bg-light text-dark">${order.quantity || 0} units</span></td>
+                <td><strong>₹${Number(order.totalPrice || order.total_price || 0).toFixed(2)}</strong></td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn-success" onclick="acceptOrder(${order.id})">
+                    <i class="bi bi-check-circle"></i> Accept
+                  </button>
+                  <button class="btn btn-sm btn-danger mt-1" onclick="rejectOrder(${order.id})">
+                    <i class="bi bi-x-circle"></i> Reject
+                  </button>
+                </td>
+              </tr>
+            `;
+          });
+          container.innerHTML = html;
+          document.getElementById("totalOrders").textContent = data.data.length;
+        } else {
+          container.innerHTML = `
+            <tr>
+              <td colspan="8" class="text-center py-4">
+                <i class="bi bi-inbox" style="font-size: 2rem; color: #ddd;"></i>
+                <p class="text-muted mt-2">No pending orders</p>
+              </td>
+            </tr>
+          `;
+        }
+      } catch (err) {
+        console.error("Error loading vendor orders:", err);
+        document.getElementById("ordersContainer").innerHTML = `
+          <tr>
+            <td colspan="8" class="text-center text-danger py-4">Error loading orders</td>
+          </tr>
+        `;
+      }
+    }
+
+    async function acceptOrder(orderId) {
+      if (!confirm("Accept this order?")) return;
+      
+      try {
+        const res = await fetch(`${BASE_URL}/api/orders/${orderId}/accept`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ vendorId: parseInt(shopId, 10) })
+        });
+        
+        const data = await res.json();
+        if (data.success) {
+          alert("Order accepted!");
+          loadVendorOrders();
+        } else {
+          alert("Error: " + data.error);
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        alert("Server error!");
+      }
+    }
+
+    async function rejectOrder(orderId) {
+      if (!confirm("Reject this order?")) return;
+      
+      try {
+        const res = await fetch(`${BASE_URL}/api/orders/${orderId}/reject`, {
+          method: "POST"
+        });
+        
+        const data = await res.json();
+        if (data.success) {
+          alert("Order rejected!");
+          loadVendorOrders();
+        } else {
+          alert("Error: " + data.error);
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        alert("Server error!");
+      }
+    }
+
+    async function shipOrder(orderId) {
+      const trackingNumber = prompt("Enter tracking number:");
+      if (!trackingNumber) return;
+      
+      try {
+        const res = await fetch(`${BASE_URL}/api/orders/${orderId}/ship`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ trackingNumber: trackingNumber })
+        });
+        
+        const data = await res.json();
+        if (data.success) {
+          alert("Order shipped!");
+          loadVendorOrders();
+        } else {
+          alert("Error: " + data.error);
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        alert("Server error!");
+      }
+    }
+
+    async function loadShiftingOrders() {
+      try {
+        const res = await fetch(`${BASE_URL}/api/orders/vendor/${shopId}/shifting`);
+        const data = await res.json();
+        const container = document.getElementById("shiftingOrdersContainer");
+        
+        if (data.success && data.data && data.data.length > 0) {
+          let html = "";
+          data.data.forEach(order => {
+            html += `
+              <tr>
+                <td><strong>#${order.id}</strong></td>
+                <td>${order.productName || order.product_name || 'N/A'}</td>
+                <td>${order.farmerName || order.farmer_name || 'N/A'}</td>
+                <td>${order.farmerPhone || order.farmer_phone || 'N/A'}</td>
+                <td>${order.farmerAddress || order.farmer_address || 'N/A'}</td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn-success" onclick="deliverOrder(${order.id})">
+                    <i class="bi bi-check2-circle"></i> Delivered
+                  </button>
+                </td>
+              </tr>
+            `;
+          });
+          container.innerHTML = html;
+        } else {
+          container.innerHTML = `
+            <tr>
+              <td colspan="6" class="text-center py-4">
+                <i class="bi bi-inbox" style="font-size: 2rem; color: #ddd;"></i>
+                <p class="text-muted mt-2">No shifting orders</p>
+              </td>
+            </tr>
+          `;
+        }
+      } catch (err) {
+        console.error("Error loading shifting orders:", err);
+        document.getElementById("shiftingOrdersContainer").innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center text-danger py-4">Error loading orders</td>
+          </tr>
+        `;
+      }
+    }
+
+    async function deliverOrder(orderId) {
+      if (!confirm("Mark this order as delivered?")) return;
+      
+      try {
+        const res = await fetch(`${BASE_URL}/api/orders/${orderId}/deliver`, {
+          method: "POST"
+        });
+        
+        const data = await res.json();
+        if (data.success) {
+          alert("Order marked as delivered!");
+          loadShiftingOrders();
+        } else {
+          alert("Error: " + data.error);
+        }
+      } catch (err) {
+        console.error("Error:", err);
+        alert("Server error!");
+      }
+    }
+
+    async function loadAnalytics() {
+      try {
+        // Load inventory data
+        const inventoryRes = await fetch(`${BASE_URL}/api/vendor-inventory/${shopId}`);
+        const inventoryData = await inventoryRes.json();
+        const products = inventoryData.data || [];
+
+        // Load orders data
+        const ordersRes = await fetch(`${BASE_URL}/api/orders/vendor/${shopId}`);
+        const ordersData = await ordersRes.json();
+        const orders = ordersData.data || [];
+
+        // Calculate analytics
+        document.getElementById("totalProductsAnalytics").textContent = products.length;
+        document.getElementById("totalOrdersAnalytics").textContent = orders.length;
+
+        const completedOrders = orders.filter(o => o.status === 'completed').length;
+        const pendingOrders = orders.filter(o => o.status === 'pending').length;
+        
+        document.getElementById("completedOrdersAnalytics").textContent = completedOrders;
+        document.getElementById("pendingOrdersAnalytics").textContent = pendingOrders;
+
+        // Revenue calculation
+        let totalRevenue = 0;
+        let totalCompleted = 0;
+        const currentMonth = new Date().getMonth();
+        const currentYear = new Date().getFullYear();
+        let monthlyRevenue = 0;
+
+        orders.forEach(order => {
+          if (order.status === 'completed') {
+            const amount = order.totalAmount || order.total_amount || 0;
+            totalRevenue += amount;
+            totalCompleted += 1;
+            
+            const orderDate = new Date(order.createdAt || order.created_at);
+            if (orderDate.getMonth() === currentMonth && orderDate.getFullYear() === currentYear) {
+              monthlyRevenue += amount;
+            }
+          }
+        });
+
+        document.getElementById("totalRevenue").textContent = "₹" + totalRevenue.toLocaleString("en-IN");
+        document.getElementById("monthlyRevenue").textContent = "₹" + monthlyRevenue.toLocaleString("en-IN");
+        
+        const avgOrderValue = totalCompleted > 0 ? (totalRevenue / totalCompleted).toFixed(0) : 0;
+        document.getElementById("avgOrderValue").textContent = "₹" + parseFloat(avgOrderValue).toLocaleString("en-IN");
+
+        // Best selling product
+        const productSales = {};
+        orders.forEach(order => {
+          const productId = order.productId || order.product_id;
+          if (productId) {
+            productSales[productId] = (productSales[productId] || 0) + (order.quantity || 1);
+          }
+        });
+
+        let bestProduct = "N/A";
+        let maxSales = 0;
+        Object.entries(productSales).forEach(([productId, sales]) => {
+          if (sales > maxSales) {
+            maxSales = sales;
+            const product = products.find(p => p.id == productId);
+            bestProduct = product ? product.name : "Product #" + productId;
+          }
+        });
+        document.getElementById("bestProduct").textContent = bestProduct;
+
+        // Inventory metrics
+        let totalStockValue = 0;
+        let lowStockCount = 0;
+        let outOfStockCount = 0;
+        let avgPrice = 0;
+
+        products.forEach(product => {
+          const price = product.price || 0;
+          const quantity = product.quantity_in_stock || 0;
+          totalStockValue += price * quantity;
+          avgPrice += price;
+
+          if (quantity === 0) {
+            outOfStockCount += 1;
+          } else if (quantity < 10) {
+            lowStockCount += 1;
+          }
+        });
+
+        document.getElementById("stockValue").textContent = "₹" + totalStockValue.toLocaleString("en-IN");
+        document.getElementById("lowStockCount").textContent = lowStockCount;
+        document.getElementById("outOfStock").textContent = outOfStockCount;
+        
+        const avgPriceValue = products.length > 0 ? (avgPrice / products.length).toFixed(0) : 0;
+        document.getElementById("avgPrice").textContent = "₹" + parseFloat(avgPriceValue).toLocaleString("en-IN");
+
+        // Customer metrics
+        const customerSet = new Set();
+        const customerOrderCount = {};
+
+        orders.forEach(order => {
+          const customerId = order.farmerId || order.farmer_id;
+          if (customerId) {
+            customerSet.add(customerId);
+            customerOrderCount[customerId] = (customerOrderCount[customerId] || 0) + 1;
+          }
+        });
+
+        const uniqueCustomers = customerSet.size;
+        let repeatCustomers = 0;
+        Object.values(customerOrderCount).forEach(count => {
+          if (count > 1) repeatCustomers += 1;
+        });
+
+        document.getElementById("uniqueCustomers").textContent = uniqueCustomers;
+        document.getElementById("repeatCustomers").textContent = repeatCustomers;
+        
+        const ordersPerCustomer = uniqueCustomers > 0 ? (orders.length / uniqueCustomers).toFixed(1) : 0;
+        document.getElementById("ordersPerCustomer").textContent = ordersPerCustomer;
+
+        // Customer satisfaction (based on completed orders percentage)
+        const satisfactionRate = totalCompleted > 0 ? ((totalCompleted / orders.length) * 100).toFixed(1) : 0;
+        document.getElementById("satisfactionRate").textContent = satisfactionRate + "%";
+
+      } catch (err) {
+        console.error("Error loading analytics:", err);
+      }
+    }
+
     function logout() {
       if (confirm("Are you sure you want to logout?")) {
+<<<<<<< HEAD
         localStorage.clear();
         Toast.success("Logged out successfully");
         setTimeout(() => {
             window.location.href = "Login.html";
         }, 1000);
+=======
+        localStorage.removeItem("shop_id");
+        localStorage.removeItem("shop_name");
+        localStorage.removeItem("owner_name");
+        localStorage.removeItem("user_type");
+        localStorage.removeItem("user_name");
+        alert("logged out");
+        window.location.href = "Home.html";
+>>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
       }
     }
   </script>

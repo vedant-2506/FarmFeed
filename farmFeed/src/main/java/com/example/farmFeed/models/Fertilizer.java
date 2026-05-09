@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Fertilizer {
-    private Integer fertilizerId;
+   private String fertilizerId;
     private String name;
     private byte[] image;
     private Integer price;

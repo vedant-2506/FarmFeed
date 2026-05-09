@@ -9,6 +9,7 @@ import com.example.farmFeed.repository.FarmerRepository;
 import com.example.farmFeed.repository.VendorRepository;
 import com.example.farmFeed.repository.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
@@ -16,11 +17,13 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.regex.Pattern;
 
 @Service
 public class AdminService {
 
     private static final Logger logger = LoggerFactory.getLogger(AdminService.class);
+    private static final Pattern BCRYPT_PATTERN = Pattern.compile("^\\$2[aby]\\$\\d{2}\\$.{53}$");
 
     @Autowired
     private AdminRepository adminRepository;
@@ -37,39 +40,47 @@ public class AdminService {
     @Autowired
     private OrderService orderService;
 
-    /**
-     * Register new admin
-     */
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Transactional
     public Admin registerAdmin(Admin admin) {
-        logger.info("Registering new admin: {}", admin.getUsername());
+        logger.info("registering admin: {}", admin.getUsername());
+        // Encrypt password before saving
+        admin.setPassword(passwordEncoder.encode(admin.getPassword()));
         return adminRepository.save(admin);
     }
 
-    /**
-     * Admin login
-     */
     @Transactional(readOnly = true)
     public Optional<Admin> login(String username, String password) {
-        logger.info("Admin login attempt for username: {}", username);
-        return adminRepository.findByUsernameAndPassword(username, password);
+        logger.info("admin login: {}", username);
+        Optional<Admin> admin = adminRepository.findByUsername(username);
+        if (admin.isEmpty()) {
+            admin = adminRepository.findByEmail(username);
+        }
+
+        if (admin.isPresent()
+                && Boolean.TRUE.equals(admin.get().getIsActive())
+                && isBcryptHash(admin.get().getPassword())
+                && passwordEncoder.matches(password, admin.get().getPassword())) {
+            return admin;
+        }
+        return Optional.empty();
     }
 
-    /**
-     * Get admin by ID
-     */
+    private boolean isBcryptHash(String password) {
+        return password != null && BCRYPT_PATTERN.matcher(password).matches();
+    }
+
     @Transactional(readOnly = true)
     public Optional<Admin> getAdminById(Long id) {
-        logger.info("Fetching admin: {}", id);
+        logger.info("getting admin: {}", id);
         return adminRepository.findById(id);
     }
 
-    /**
-     * Update admin last login
-     */
     @Transactional
     public void updateLastLogin(Long adminId) {
-        logger.info("Updating last login for admin: {}", adminId);
+        logger.info("updating login for: {}", adminId);
         
         Optional<Admin> admin = adminRepository.findById(adminId);
         if (admin.isPresent()) {
@@ -79,30 +90,21 @@ public class AdminService {
         }
     }
 
-    /**
-     * Get all farmers (for admin panel)
-     */
     @Transactional(readOnly = true)
     public List<Farmer> getAllFarmers() {
-        logger.info("Fetching all farmers");
+        logger.info("fetching farmers");
         return farmerRepository.findAll();
     }
 
-    /**
-     * Get all vendors (for admin panel)
-     */
     @Transactional(readOnly = true)
     public List<Vendor> getAllVendors() {
-        logger.info("Fetching all vendors");
+        logger.info("fetching vendors");
         return vendorRepository.findAll();
     }
 
-    /**
-     * Approve vendor registration
-     */
     @Transactional
     public Vendor approveVendor(Long vendorId) {
-        logger.info("Approving vendor: {}", vendorId);
+        logger.info("approving vendor: {}", vendorId);
         
         Optional<Vendor> vendor = vendorRepository.findById(vendorId);
         if (vendor.isPresent()) {
@@ -121,22 +123,16 @@ public class AdminService {
         return null;
     }
 
-    /**
-     * Reject vendor registration
-     */
     @Transactional
     public Vendor rejectVendor(Long vendorId) {
-        logger.info("Rejecting vendor: {}", vendorId);
+        logger.info("rejecting vendor: {}", vendorId);
         vendorRepository.deleteById(vendorId);
         return null;
     }
 
-    /**
-     * Suspend user (farmer or vendor)
-     */
     @Transactional
     public void suspendUser(String userType, Long userId) {
-        logger.info("Suspending {} with ID: {}", userType, userId);
+        logger.info("suspending {} with id: {}", userType, userId);
         
         if ("farmer".equalsIgnoreCase(userType)) {
             Optional<Farmer> farmer = farmerRepository.findById(userId);
@@ -155,16 +151,14 @@ public class AdminService {
         }
     }
 
-    /**
-     * Get system statistics
-     */
     @Transactional(readOnly = true)
     public Map<String, Object> getSystemStats() {
-        logger.info("Fetching system statistics");
+        logger.info("getting stats");
         
         Map<String, Object> stats = new HashMap<>();
         stats.put("totalFarmers", farmerRepository.count());
         stats.put("totalVendors", vendorRepository.count());
+        stats.put("totalAdmins", adminRepository.count());
         stats.put("activeFarmers", (long) farmerRepository.findByIsActive(true).size());
         stats.put("activeVendors", (long) vendorRepository.findByIsActive(true).size());
         stats.put("totalPendingOrders", orderService.getAllUndeliveredOrders().size());
@@ -177,7 +171,7 @@ public class AdminService {
      */
     @Transactional
     public Notification createNotification(Long adminId, String type, String title, String message, 
-                                          Long orderId, Long productId, Long vendorId) {
+                                          Long orderId, String productId, Long vendorId) {
         logger.info("Creating notification of type: {}", type);
         
         Notification notification = Notification.builder()
@@ -244,15 +238,6 @@ public class AdminService {
         logger.info("Reporting issue: {}", issue);
         
         return createNotification(adminId, "SYSTEM_ISSUE", issue, description, null, null, null);
-    }
-
-    /**
-     * Get all super admins
-     */
-    @Transactional(readOnly = true)
-    public List<Admin> getSuperAdmins() {
-        logger.info("Fetching all super admins");
-        return adminRepository.getSuperAdmins();
     }
 
     /**

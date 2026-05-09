@@ -13,14 +13,14 @@ public interface CartRepository extends JpaRepository<Cart, Long> {
 
     List<Cart> findByFarmerId(Long farmerId);
 
-    Optional<Cart> findByFarmerIdAndProductIdAndVendorId(Long farmerId, Long productId, Long vendorId);
+    Optional<Cart> findByFarmerIdAndProductIdAndVendorId(Long farmerId, String productId, Long vendorId);
 
     @Query("SELECT c FROM Cart c WHERE c.farmerId = :farmerId ORDER BY c.addedAt DESC")
     List<Cart> getCartByFarmer(@Param("farmerId") Long farmerId);
 
     void deleteByFarmerId(Long farmerId);
 
-    void deleteByFarmerIdAndProductId(Long farmerId, Long productId);
+    void deleteByFarmerIdAndProductId(Long farmerId, String productId);
 
     @Query("SELECT COUNT(c) FROM Cart c WHERE c.farmerId = :farmerId")
     Long getCartCount(@Param("farmerId") Long farmerId);

@@ -69,15 +69,15 @@ public class ProductController {
     public ResponseEntity<?> getProductById(@PathVariable String id) {
         try {
             logger.info("Fetching product: {}", id);
-            Optional<Product> product = productService.getProductById(id);
-            
+            Optional<Product> product = productService.getProductById(id); // FIX: service now accepts String, no Long conversion needed
+
             if (product.isPresent()) {
                 return ResponseEntity.ok(Map.of(
                         "success", true,
                         "data", product.get()
                 ));
             }
-            
+
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("success", false, "error", "Product not found"));
         } catch (Exception e) {
@@ -88,14 +88,14 @@ public class ProductController {
     }
 
     /**
-     * GET /api/products/search?keyword=keyword - Smart search
+     * GET /api/products/search/smart?keyword=keyword - Smart search
      */
     @GetMapping("/search/smart")
     public ResponseEntity<?> smartSearch(@RequestParam String keyword) {
         try {
             logger.info("Smart searching for: {}", keyword);
             List<Product> results = productService.smartSearch(keyword);
-            
+
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "count", results.size(),
@@ -118,7 +118,7 @@ public class ProductController {
         try {
             logger.info("Filtering products by category: {}, minRating: {}", category, minRating);
             List<Product> results = productService.filterByCategory(category, minRating);
-            
+
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "count", results.size(),
@@ -132,14 +132,14 @@ public class ProductController {
     }
 
     /**
-     * GET /api/products/categories - Get all categories
+     * GET /api/products/categories/all - Get all categories
      */
     @GetMapping("/categories/all")
     public ResponseEntity<?> getAllCategories() {
         try {
             logger.info("Fetching all categories");
             List<String> categories = productService.getAllCategories();
-            
+
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "count", categories.size(),
@@ -160,7 +160,7 @@ public class ProductController {
         try {
             logger.info("Fetching products for category: {}", category);
             List<Product> results = productService.getProductsByCategory(category);
-            
+
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "count", results.size(),
@@ -181,7 +181,7 @@ public class ProductController {
         try {
             logger.info("Fetching top rated products");
             List<Product> results = productService.getTopRatedProducts(limit);
-            
+
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "count", results.size(),
@@ -201,17 +201,16 @@ public class ProductController {
     public ResponseEntity<?> compareProducts(@RequestBody Map<String, Object> request) {
         try {
             logger.info("Comparing products");
-            
+
             @SuppressWarnings("unchecked")
             List<String> productIds = (List<String>) request.get("productIds");
-            
             if (productIds == null || productIds.isEmpty()) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("success", false, "error", "No product IDs provided"));
             }
-            
+
             Map<String, Object> comparison = productService.compareProducts(productIds);
-            
+
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "data", comparison
@@ -231,7 +230,7 @@ public class ProductController {
         try {
             logger.info("Fetching products for vendor: {}", vendorId);
             List<Product> results = productService.getProductsByVendor(vendorId);
-            
+
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "count", results.size(),
@@ -251,9 +250,9 @@ public class ProductController {
     public ResponseEntity<?> addProduct(@RequestBody Product product) {
         try {
             logger.info("Adding new product: {}", product.getName());
-            
+
             Product savedProduct = productService.addProduct(product);
-            
+
             return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                     "success", true,
                     "message", "Product added successfully",
@@ -273,14 +272,14 @@ public class ProductController {
     public ResponseEntity<?> updateProduct(@PathVariable String id, @RequestBody Product productDetails) {
         try {
             logger.info("Updating product: {}", id);
-            
+
             Product updatedProduct = productService.updateProduct(id, productDetails);
-            
+
             if (updatedProduct == null) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(Map.of("success", false, "error", "Product not found"));
             }
-            
+
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "message", "Product updated successfully",
@@ -300,14 +299,14 @@ public class ProductController {
     public ResponseEntity<?> deleteProduct(@PathVariable String id) {
         try {
             logger.info("Deleting product: {}", id);
-            
+
             boolean deleted = productService.deleteProduct(id);
-            
+
             if (!deleted) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                         .body(Map.of("success", false, "error", "Product not found"));
             }
-            
+
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "message", "Product deleted successfully"
@@ -320,7 +319,7 @@ public class ProductController {
     }
 
     /**
-     * POST /api/products/{id}/rating - Add rating/review
+     * POST /api/products/{productId}/rating - Add rating/review
      */
     @PostMapping("/{productId}/rating")
     public ResponseEntity<?> addRating(
@@ -328,14 +327,16 @@ public class ProductController {
             @RequestBody Map<String, Object> ratingData) {
         try {
             logger.info("Adding rating for product: {}", productId);
-            
+
             Integer rating = ((Number) ratingData.get("rating")).intValue();
             String review = (String) ratingData.get("review");
             Long farmerId = ((Number) ratingData.get("farmerId")).longValue();
-            Long vendorId = ((Number) ratingData.get("vendorId")).longValue();
-            
+                Long vendorId = ratingData.get("vendorId") != null
+                    ? ((Number) ratingData.get("vendorId")).longValue()
+                    : null;
+
             productService.addRating(productId, rating, review, farmerId, vendorId);
-            
+
             return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                     "success", true,
                     "message", "Rating added successfully"
@@ -348,14 +349,14 @@ public class ProductController {
     }
 
     /**
-     * GET /api/products/{id}/ratings - Get all ratings for product
+     * GET /api/products/{productId}/ratings - Get all ratings for product
      */
     @GetMapping("/{productId}/ratings")
     public ResponseEntity<?> getProductRatings(@PathVariable String productId) {
         try {
             logger.info("Fetching ratings for product: {}", productId);
-            List<Rating> ratings = productService.getProductRatings(productId);
-            
+            List<Rating> ratings = productService.getProductRatings(productId); // FIX: service now takes String, not Long
+
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "count", ratings.size(),

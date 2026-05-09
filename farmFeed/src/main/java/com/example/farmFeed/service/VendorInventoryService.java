@@ -4,8 +4,6 @@ import com.example.farmFeed.entity.VendorInventory;
 import com.example.farmFeed.repository.VendorInventoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map;
@@ -15,15 +13,13 @@ import java.util.ArrayList;
 @Service
 public class VendorInventoryService {
 
-    private static final Logger logger = LoggerFactory.getLogger(VendorInventoryService.class);
-
     @Autowired
     private VendorInventoryRepository repository;
 
     @Autowired
     private FertilizerService fertilizerService;
 
-    public VendorInventory addToInventory(Long vendorId, Integer fertilizerId, Double vendorPrice, Integer quantity) {
+    public VendorInventory addToInventory(Long vendorId, String fertilizerId, Double vendorPrice, Integer quantity) {
         try {
             Optional<VendorInventory> existing = repository.findByVendorIdAndFertilizerId(vendorId, fertilizerId);
 
@@ -57,28 +53,18 @@ public class VendorInventoryService {
                 return new ArrayList<>();
             }
 
-            List<Integer> fertIds = items.stream()
+                List<String> fertIds = items.stream()
                     .map(VendorInventory::getFertilizerId)
                     .distinct()
                     .toList();
 
             List<Map<String, Object>> allFerts = fertilizerService.getFertilizersByIds(fertIds);
             
-            Map<Integer, Map<String, Object>> fertMap = new HashMap<>();
+            Map<String, Map<String, Object>> fertMap = new HashMap<>();
             for (Map<String, Object> fert : allFerts) {
                 Object fertIdObj = fert.get("fertilizer_id");
-                Integer id = null;
-                
                 if (fertIdObj != null) {
-                    String fertIdStr = fertIdObj.toString();
-                    String numericPart = fertIdStr.replaceAll("[^0-9]", "");
-                    if (!numericPart.isEmpty()) {
-                        id = Integer.parseInt(numericPart);
-                    }
-                }
-                
-                if (id != null) {
-                    fertMap.put(id, fert);
+                    fertMap.put(fertIdObj.toString(), fert);
                 }
             }
 
@@ -89,6 +75,7 @@ public class VendorInventoryService {
                 if (data != null) {
                     Map<String, Object> inv = new HashMap<>(data);
                     inv.put("inventory_id", item.getId());
+                    inv.put("fertilizer_id", item.getFertilizerId());
                     inv.put("vendor_price", item.getVendorPrice());
                     inv.put("quantity_in_stock", item.getQuantityInStock());
                     inv.put("base_price", data.get("price"));
@@ -103,7 +90,7 @@ public class VendorInventoryService {
         }
     }
 
-    public VendorInventory updateInventoryItem(Long vendorId, Integer fertilizerId, Double newPrice, Integer newQuantity) {
+    public VendorInventory updateInventoryItem(Long vendorId, String fertilizerId, Double newPrice, Integer newQuantity) {
         try {
             Optional<VendorInventory> item = repository.findByVendorIdAndFertilizerId(vendorId, fertilizerId);
 
@@ -121,7 +108,7 @@ public class VendorInventoryService {
         }
     }
 
-    public boolean removeFromInventory(Long vendorId, Integer fertilizerId) {
+    public boolean removeFromInventory(Long vendorId, String fertilizerId) {
         try {
             Optional<VendorInventory> item = repository.findByVendorIdAndFertilizerId(vendorId, fertilizerId);
 
@@ -164,7 +151,7 @@ public class VendorInventoryService {
     /**
      * Check if vendor already has a fertilizer
      */
-    public boolean hasInventoryItem(Long vendorId, Integer fertilizerId) {
+    public boolean hasInventoryItem(Long vendorId, String fertilizerId) {
         return repository.existsByVendorIdAndFertilizerId(vendorId, fertilizerId);
     }
 

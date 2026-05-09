@@ -3,7 +3,6 @@ package com.example.farmFeed.repository;
 import com.example.farmFeed.entity.Admin;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import java.util.List;
@@ -23,7 +22,4 @@ public interface AdminRepository extends JpaRepository<Admin, Long> {
 
     @Query("SELECT a FROM Admin a WHERE a.isActive = true ORDER BY a.createdAt DESC")
     List<Admin> getActiveAdmins();
-
-    @Query("SELECT a FROM Admin a WHERE a.role = 'SUPER_ADMIN'")
-    List<Admin> getSuperAdmins();
 }

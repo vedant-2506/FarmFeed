@@ -2,7 +2,6 @@ package com.example.farmFeed.repository;
 
 import com.example.farmFeed.entity.VendorInventory;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
@@ -18,17 +17,17 @@ public interface VendorInventoryRepository extends JpaRepository<VendorInventory
     /**
      * Get a specific inventory item for a vendor
      */
-    Optional<VendorInventory> findByVendorIdAndFertilizerId(Long vendorId, Integer fertilizerId);
+    Optional<VendorInventory> findByVendorIdAndFertilizerId(Long vendorId, String fertilizerId);
 
     /**
      * Check if vendor already has this fertilizer in inventory
      */
-    boolean existsByVendorIdAndFertilizerId(Long vendorId, Integer fertilizerId);
+    boolean existsByVendorIdAndFertilizerId(Long vendorId, String fertilizerId);
 
     /**
      * Get all vendors selling a specific fertilizer
      */
-    List<VendorInventory> findByFertilizerIdAndIsActiveTrue(Integer fertilizerId);
+    List<VendorInventory> findByFertilizerIdAndIsActiveTrue(String fertilizerId);
 
     /**
      * Get deleted inventory items (soft delete)

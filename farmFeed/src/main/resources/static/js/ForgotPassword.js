@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const confirmPassword = document.getElementById("farmerConfirmPassword").value.trim();
 
     if (!phone || !newPassword || !confirmPassword) {
+<<<<<<< HEAD
       Toast.warning("Please fill all fields"); return;
     }
     if (!/^\d{10}$/.test(phone)) {
@@ -15,6 +16,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (newPassword !== confirmPassword) {
       Toast.warning("Passwords do not match"); return;
+=======
+      alert("fill in everything"); return;
+    }
+    if (!/^\d{10}$/.test(phone)) {
+      alert("phone needs 10 digits"); return;
+    }
+    if (newPassword !== confirmPassword) {
+      alert("passwords don't match"); return;
+>>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
     }
 
     try {

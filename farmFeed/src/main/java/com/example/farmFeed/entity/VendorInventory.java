@@ -26,7 +26,7 @@ public class VendorInventory {
     private Long vendorId;  // References shopkeeper table
 
     @Column(name = "fertilizer_id", nullable = false)
-    private Integer fertilizerId;  // References fertilizers table
+    private String fertilizerId;  // References fertilizers/products table
 
     @Column(name = "vendor_price", nullable = false)
     private Double vendorPrice;  // Vendor's selling price (markup allowed)
@@ -35,6 +35,7 @@ public class VendorInventory {
     private Integer quantityInStock;  // Vendor's stock
 
     @Column(name = "is_active", nullable = false)
+    @Builder.Default
     private Boolean isActive = true;
 
     @Column(name = "added_at", nullable = false, updatable = false)

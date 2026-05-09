@@ -86,12 +86,12 @@ body {
   padding: 28px 20px;
   border-radius: 16px;
   transition: transform 0.25s, box-shadow 0.25s;
-  border-bottom: 4px solid #1e7d3f;
+  /* Removed border-bottom so it doesn't clash with border-start */
 }
 
 .stat-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 12px 30px rgba(30,125,63,0.15) !important;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.1) !important;
 }
 
 .stat-icon {

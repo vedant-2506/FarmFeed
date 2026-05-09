@@ -2,7 +2,6 @@ package com.example.farmFeed.repository;
 
 import org.springframework.fix that bufdata.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import com.example.farmFeed.entity.Farmer;
 import java.util.Optional;

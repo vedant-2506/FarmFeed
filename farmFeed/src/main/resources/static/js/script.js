@@ -10,7 +10,15 @@ document.addEventListener("DOMContentLoaded", () => {
   cartButtons.forEach((btn) => {
     btn.addEventListener("click", (e) => {
       e.preventDefault();
-
+      // Check if user is logged in
+      const farmerId = localStorage.getItem("farmer_id");
+      const shopId = localStorage.getItem("shop_id");
+      
+      if (!farmerId && !shopId) {
+        alert("login first");
+        window.location.href = "Login.html";
+        return;
+      }
       const card = btn.closest(".card");
       const name = card.querySelector(".card-title").textContent;
       const price = card.querySelector("p strong").textContent;
@@ -61,7 +69,7 @@ addToCartButtons.forEach(button => {
     cartCountElement.textContent = cartCount;
 
     // Optional: show feedback
-    button.textContent = "Added ✓";
+    button.textContent = "Added";
     button.disabled = true;
     button.classList.remove('btn-success');
     button.classList.add('btn-secondary');
@@ -104,13 +112,11 @@ document.addEventListener("DOMContentLoaded", () => {
       // Update count
       updateCartCount();
 
-      // Feedback
-      btn.textContent = "Added ✓";
+      btn.textContent = "added";
       btn.disabled = true;
       btn.classList.remove("btn-success");
       btn.classList.add("btn-secondary");
 
-      // Reset button text after 2 seconds
       setTimeout(() => {
         btn.textContent = "Add to Cart";
         btn.disabled = false;
@@ -134,9 +140,9 @@ document.addEventListener("DOMContentLoaded", () => {
       const query = searchForm.querySelector("input[type='search']").value.trim();
 
       if (!query) {
-        alert("Please enter a search term.");
+        alert("enter a search term");
       } else {
-        alert(`Searching for "${query}"...`);
+        // search for this
       }
     });
   }

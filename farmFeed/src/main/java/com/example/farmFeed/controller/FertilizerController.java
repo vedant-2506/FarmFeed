@@ -42,7 +42,7 @@ public class FertilizerController {
      * GET /api/fertilizers/{id} - Get fertilizer by ID
      */
     @GetMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> getFertilizerById(@PathVariable Integer id) {
+    public ResponseEntity<Map<String, Object>> getFertilizerById(@PathVariable String id) {
         Map<String, Object> fertilizer = service.getFertilizerById(id);
         if (fertilizer == null) {
             return ResponseEntity.notFound().build();

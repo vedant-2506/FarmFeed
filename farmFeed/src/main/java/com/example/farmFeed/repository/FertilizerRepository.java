@@ -18,13 +18,13 @@ public class FertilizerRepository {
      * Fetch all fertilizers from database
      */
     public List<Map<String, Object>> getAllFertilizers() {
-        if (tableExists("bighaat_products_raw")) {
+        if (tableExists("products")) {
             String sql = """
                 SELECT
-                    mysql_import_key AS fertilizer_id,
+                    product_id AS fertilizer_id,
                     product_name AS name,
-                    COALESCE(CAST(price_inr AS SIGNED), 0) AS price,
-                    100 AS stock,
+                    COALESCE(price_inr, 0) AS price,
+                    COALESCE(stock, 100) AS stock,
                     COALESCE(NULLIF(description_clean, ''), detailed_description_10_sentences) AS description,
                     image_link AS image_url,
                     primary_category,
@@ -39,7 +39,7 @@ public class FertilizerRepository {
                         THEN 'Chemical'
                         ELSE 'Other'
                     END AS category
-                FROM bighaat_products_raw
+                FROM products
                 WHERE product_name IS NOT NULL
             """;
             return jdbcTemplate.queryForList(sql);
@@ -51,12 +51,12 @@ public class FertilizerRepository {
 
         String sql = """
             SELECT
-                fertilizer_id,
+                id AS fertilizer_id,
                 name,
                 price,
                 stock,
                 description,
-                NULL AS image_url,
+                image_url,
                 CASE
                     WHEN LOWER(CONCAT(IFNULL(name, ''), ' ', IFNULL(description, ''))) LIKE '%organic%' THEN 'Organic'
                     WHEN LOWER(CONCAT(IFNULL(name, ''), ' ', IFNULL(description, ''))) LIKE '%chemical%'
@@ -76,10 +76,15 @@ public class FertilizerRepository {
      * Search fertilizers by name (case-insensitive) in a DB-safe way
      */
     public List<Map<String, Object>> searchByName(String name) {
+        if (tableExists("products")) {
+            String sql = "SELECT product_id AS fertilizer_id, product_name AS name, COALESCE(price_inr, 0) AS price, COALESCE(stock, 100) AS stock, COALESCE(NULLIF(description_clean, ''), detailed_description_10_sentences) AS description, image_link AS image_url, 'Other' AS category FROM products WHERE LOWER(product_name) LIKE ?";
+            String param = "%" + (name == null ? "" : name.toLowerCase()) + "%";
+            return jdbcTemplate.queryForList(sql, param);
+        }
         if (!tableExists("fertilizers")) {
             return List.of();
         }
-        String sql = "SELECT fertilizer_id, name, price, stock, description, NULL AS image_url, 'Other' AS category FROM fertilizers WHERE LOWER(name) LIKE ?";
+        String sql = "SELECT id AS fertilizer_id, name, price, stock, description, image_url, 'Other' AS category FROM fertilizers WHERE LOWER(name) LIKE ?";
         String param = "%" + (name == null ? "" : name.toLowerCase()) + "%";
         return jdbcTemplate.queryForList(sql, param);
     }
@@ -87,11 +92,16 @@ public class FertilizerRepository {
     /**
      * Get fertilizer by ID
      */
-    public Map<String, Object> getFertilizerById(Integer id) {
+    public Map<String, Object> getFertilizerById(String id) {
+        if (tableExists("products")) {
+            String sql = "SELECT product_id AS fertilizer_id, product_name AS name, COALESCE(price_inr, 0) AS price, COALESCE(stock, 100) AS stock, COALESCE(NULLIF(description_clean, ''), detailed_description_10_sentences) AS description, image_link AS image_url, 'Other' AS category FROM products WHERE product_id = ?";
+            List<Map<String, Object>> results = jdbcTemplate.queryForList(sql, id);
+            if (!results.isEmpty()) return results.get(0);
+        }
         if (!tableExists("fertilizers")) {
             return null;
         }
-        String sql = "SELECT fertilizer_id, name, price, stock, description, NULL AS image_url, 'Other' AS category FROM fertilizers WHERE fertilizer_id = ?";
+        String sql = "SELECT id AS fertilizer_id, name, price, stock, description, image_url, 'Other' AS category FROM fertilizers WHERE id = ?";
         List<Map<String, Object>> results = jdbcTemplate.queryForList(sql, id);
         return results.isEmpty() ? null : results.get(0);
     }
@@ -100,21 +110,21 @@ public class FertilizerRepository {
      * Get multiple fertilizers by IDs in a single query (optimized to avoid N+1 problem)
      * Handles both numeric IDs (from fertilizers table) and string IDs (bighaat_1 format)
      */
-    public List<Map<String, Object>> getFertilizersByIds(List<Integer> ids) {
+    public List<Map<String, Object>> getFertilizersByIds(List<String> ids) {
         if (ids == null || ids.isEmpty()) {
             return List.of();
         }
         
+        if (tableExists("products")) {
+            String placeholders = String.join(",", ids.stream().map(id -> "?").toList());
+            String sql = "SELECT product_id AS fertilizer_id, product_name AS name, COALESCE(price_inr, 0) AS price, COALESCE(stock, 100) AS stock, COALESCE(NULLIF(description_clean, ''), detailed_description_10_sentences) AS description, image_link AS image_url, 'Other' AS category FROM products WHERE product_id IN (" + placeholders + ")";
+            return jdbcTemplate.queryForList(sql, ids.toArray());
+        }
+        
         if (tableExists("bighaat_products_raw")) {
-            //Build bighaat IDs like "bighaat_1", "bighaat_10", etc. for the IN clause
-            StringBuilder inClause = new StringBuilder();
-            List<String> bighaat = new ArrayList<>();
-            for (Integer id : ids) {
-                bighaat.add("bighaat_" + id);
-            }
-            String placeholders = String.join(",", bighaat.stream().map(id -> "?").toList());
+            String placeholders = String.join(",", ids.stream().map(id -> "?").toList());
             String sql = "SELECT mysql_import_key AS fertilizer_id, product_name AS name, COALESCE(CAST(price_inr AS SIGNED), 0) AS price, 100 AS stock, COALESCE(NULLIF(description_clean, ''), detailed_description_10_sentences) AS description, image_link AS image_url, 'Other' AS category FROM bighaat_products_raw WHERE mysql_import_key IN (" + placeholders + ")";
-            return jdbcTemplate.queryForList(sql, bighaat.toArray());
+            return jdbcTemplate.queryForList(sql, ids.toArray());
         }
 
         if (!tableExists("fertilizers")) {
@@ -122,8 +132,38 @@ public class FertilizerRepository {
         }
 
         String placeholders = String.join(",", ids.stream().map(id -> "?").toList());
-        String sql = "SELECT fertilizer_id, name, price, stock, description, NULL AS image_url, 'Other' AS category FROM fertilizers WHERE fertilizer_id IN (" + placeholders + ")";
+        String sql = "SELECT id AS fertilizer_id, name, price, stock, description, image_url, 'Other' AS category FROM fertilizers WHERE id IN (" + placeholders + ")";
         return jdbcTemplate.queryForList(sql, ids.toArray());
+    }
+
+    /**
+     * Find image URL by product name (fallback for products without LOB images)
+     */
+    public String findImageByProductName(String productName) {
+        if (productName == null) return null;
+        
+        try {
+            if (tableExists("products")) {
+                String sql = "SELECT image_link FROM products WHERE product_name = ? LIMIT 1";
+                List<String> results = jdbcTemplate.queryForList(sql, String.class, productName);
+                if (!results.isEmpty()) return results.get(0);
+            }
+
+            if (tableExists("bighaat_products_raw")) {
+                String sql = "SELECT image_link FROM bighaat_products_raw WHERE product_name = ? LIMIT 1";
+                List<String> results = jdbcTemplate.queryForList(sql, String.class, productName);
+                if (!results.isEmpty()) return results.get(0);
+            }
+            
+            if (tableExists("fertilizers")) {
+                String sql = "SELECT image_url FROM fertilizers WHERE name = ? LIMIT 1";
+                List<String> results = jdbcTemplate.queryForList(sql, String.class, productName);
+                if (!results.isEmpty()) return results.get(0);
+            }
+        } catch (Exception e) {
+            // Log error but return null
+        }
+        return null;
     }
 
     private boolean tableExists(String tableName) {

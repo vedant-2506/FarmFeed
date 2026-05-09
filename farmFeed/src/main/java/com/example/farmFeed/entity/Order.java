@@ -3,7 +3,6 @@ package com.example.farmFeed.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "orders")
@@ -21,11 +20,11 @@ public class Order {
     @Column(name = "farmer_id", nullable = false)
     private Long farmerId;
 
-    @Column(name = "vendor_id", nullable = false)
+    @Column(name = "vendor_id", nullable = true)
     private Long vendorId;
 
     @Column(name = "product_id", nullable = false)
-    private Long productId;
+    private String productId;
 
     @Column(name = "quantity", nullable = false)
     private Integer quantity;
@@ -34,13 +33,28 @@ public class Order {
     private Double totalPrice;
 
     @Column(name = "status", nullable = false)
-    private String status; // pending, confirmed, shipped, delivered, cancelled
+    private String status; // pending, shifting, delivered, cancelled
 
-    @Column(name = "delivery_address", nullable = false)
+    @Column(name = "delivery_address")
     private String deliveryAddress;
 
     @Column(name = "tracking_number")
     private String trackingNumber;
+
+    @Column(name = "farmer_name")
+    private String farmerName;
+
+    @Column(name = "farmer_phone")
+    private String farmerPhone;
+
+    @Column(name = "farmer_address")
+    private String farmerAddress;
+
+    @Column(name = "product_name")
+    private String productName;
+
+    @Column(name = "product_quantity")
+    private Integer productQuantity;
 
     @Column(name = "order_date", nullable = false)
     private LocalDateTime orderDate;

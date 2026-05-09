@@ -20,8 +20,8 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT o FROM Order o WHERE o.farmerId = :farmerId ORDER BY o.orderDate DESC")
     List<Order> getOrderHistoryByFarmer(@Param("farmerId") Long farmerId);
 
-    @Query("SELECT o FROM Order o WHERE o.vendorId = :vendorId AND o.status = 'pending'")
-    List<Order> getPendingOrdersByVendor(@Param("vendorId") Long vendorId);
+    @Query("SELECT o FROM Order o WHERE (o.vendorId = :vendorId OR o.vendorId IS NULL) AND o.status = 'pending' ORDER BY o.orderDate DESC")
+    List<Order> getPendingOrdersForVendor(@Param("vendorId") Long vendorId);
 
     @Query("SELECT o FROM Order o WHERE o.vendorId = :vendorId AND o.status = 'delivered' ORDER BY o.deliveryDate DESC")
     List<Order> getDeliveredOrdersByVendor(@Param("vendorId") Long vendorId);
@@ -35,6 +35,12 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("SELECT COUNT(o) FROM Order o WHERE o.vendorId = :vendorId AND o.status = 'pending'")
     Long getPendingOrderCount(@Param("vendorId") Long vendorId);
 
-    @Query("SELECT o FROM Order o WHERE o.status = 'pending' OR o.status = 'shipped' ORDER BY o.orderDate ASC")
+    @Query("SELECT o FROM Order o WHERE o.status = 'pending' OR o.status = 'shipped' OR o.status = 'shifting' ORDER BY o.orderDate ASC")
     List<Order> getAllUndeliveredOrders();
+
+    @Query("SELECT o FROM Order o WHERE o.vendorId IS NULL AND o.status = 'pending' ORDER BY o.orderDate DESC")
+    List<Order> getUnassignedOrders();
+
+    @Query("SELECT o FROM Order o WHERE o.vendorId = :vendorId AND o.status = 'shifting' ORDER BY o.updatedAt DESC")
+    List<Order> getShiftingOrdersByVendor(@Param("vendorId") Long vendorId);
 }
