@@ -108,7 +108,7 @@ public class ProductController {
     /**
      * GET /api/products/{id} - Get product details
      */
-    @GetMapping("/{id}")
+    @GetMapping("/{id:\\d+}")
     public ResponseEntity<?> getProductById(@PathVariable Long id) {
         try {
             logger.info("Fetching product: {}", id);

@@ -2,6 +2,7 @@ package com.example.farmFeed.service;
 
 import com.example.farmFeed.entity.Product;
 import com.example.farmFeed.entity.Rating;
+import com.example.farmFeed.config.ProductSeedDataRunner;
 import com.example.farmFeed.repository.ProductRepository;
 import com.example.farmFeed.repository.RatingRepository;
 import org.springframework.data.domain.PageRequest;
@@ -26,12 +27,16 @@ public class ProductService {
     @Autowired
     private RatingRepository ratingRepository;
 
+    @Autowired
+    private ProductSeedDataRunner productSeedDataRunner;
+
     /**
      * Get all available products
      */
     @Transactional(readOnly = true)
     public List<Product> getAllProducts() {
         logger.info("Fetching all products");
+        productSeedDataRunner.seedIfNeeded();
         return productRepository.findAll(Sort.by(Sort.Order.desc("rating"), Sort.Order.asc("name")));
     }
 
@@ -59,6 +64,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public List<Product> getProductsByCategory(String category) {
         logger.info("Fetching products for category: {}", category);
+        productSeedDataRunner.seedIfNeeded();
         if (category == null || category.trim().isEmpty()) {
             return getAllProducts();
         }
@@ -71,6 +77,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public List<Product> smartSearch(String keyword) {
         logger.info("Performing smart search for keyword: {}", keyword);
+        productSeedDataRunner.seedIfNeeded();
         if (keyword == null || keyword.trim().isEmpty()) {
             return getAllProducts();
         }
@@ -91,6 +98,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public List<Product> filterByCategory(String category, Double minRating) {
         logger.info("Filtering products by category: {} with minRating: {}", category, minRating);
+        productSeedDataRunner.seedIfNeeded();
         if (minRating == null) {
             minRating = 0.0;
         }
@@ -103,6 +111,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public List<String> getAllCategories() {
         logger.info("Fetching all categories");
+        productSeedDataRunner.seedIfNeeded();
         return productRepository.getAllCategories();
     }
 
@@ -112,6 +121,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public List<Product> getTopRatedProducts(Integer limit) {
         logger.info("Fetching top {} rated products", limit);
+        productSeedDataRunner.seedIfNeeded();
         if (limit == null || limit <= 0) {
             limit = 10;
         }
