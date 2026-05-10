@@ -33,7 +33,7 @@ public class Notification {
     private Long relatedOrderId;
 
     @Column(name = "related_product_id")
-    private String relatedProductId;
+    private Long relatedProductId;
 
     @Column(name = "related_vendor_id")
     private Long relatedVendorId;

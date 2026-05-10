@@ -53,7 +53,7 @@ public class CartController {
             }
             
             Long farmerId = ((Number) request.get("farmerId")).longValue();
-            String productId = request.get("productId").toString();
+            Long productId = ((Number) request.get("productId")).longValue();
             Long vendorId = ((Number) request.get("vendorId")).longValue();
             Integer quantity = ((Number) request.get("quantity")).intValue();
             
@@ -225,7 +225,7 @@ public class CartController {
     @DeleteMapping("/farmer/{farmerId}/product/{productId}")
     public ResponseEntity<?> removeProductFromCart(
             @PathVariable Long farmerId,
-            @PathVariable String productId) {
+            @PathVariable Long productId) {
         try {
             logger.info("Removing product {} from cart for farmer: {}", productId, farmerId);
             

@@ -66,10 +66,10 @@ public class ProductController {
      * GET /api/products/{id} - Get product details
      */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getProductById(@PathVariable String id) {
+    public ResponseEntity<?> getProductById(@PathVariable Long id) {
         try {
             logger.info("Fetching product: {}", id);
-            Optional<Product> product = productService.getProductById(id); // FIX: service now accepts String, no Long conversion needed
+            Optional<Product> product = productService.getProductById(id);
 
             if (product.isPresent()) {
                 return ResponseEntity.ok(Map.of(
@@ -203,10 +203,19 @@ public class ProductController {
             logger.info("Comparing products");
 
             @SuppressWarnings("unchecked")
-            List<String> productIds = (List<String>) request.get("productIds");
-            if (productIds == null || productIds.isEmpty()) {
+            List<Object> productIdsRaw = (List<Object>) request.get("productIds");
+            if (productIdsRaw == null || productIdsRaw.isEmpty()) {
                 return ResponseEntity.badRequest()
                         .body(Map.of("success", false, "error", "No product IDs provided"));
+            }
+
+            List<Long> productIds = new ArrayList<>();
+            for (Object raw : productIdsRaw) {
+                if (raw instanceof Number) {
+                    productIds.add(((Number) raw).longValue());
+                } else if (raw != null) {
+                    productIds.add(Long.parseLong(raw.toString()));
+                }
             }
 
             Map<String, Object> comparison = productService.compareProducts(productIds);
@@ -226,7 +235,7 @@ public class ProductController {
      * GET /api/products/vendor/{vendorId} - Get products by vendor
      */
     @GetMapping("/vendor/{vendorId}")
-    public ResponseEntity<?> getByVendor(@PathVariable String vendorId) {
+    public ResponseEntity<?> getByVendor(@PathVariable Long vendorId) {
         try {
             logger.info("Fetching products for vendor: {}", vendorId);
             List<Product> results = productService.getProductsByVendor(vendorId);
@@ -269,7 +278,7 @@ public class ProductController {
      * PUT /api/products/{id} - Update product (vendor only)
      */
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateProduct(@PathVariable String id, @RequestBody Product productDetails) {
+    public ResponseEntity<?> updateProduct(@PathVariable Long id, @RequestBody Product productDetails) {
         try {
             logger.info("Updating product: {}", id);
 
@@ -296,7 +305,7 @@ public class ProductController {
      * DELETE /api/products/{id} - Delete product (vendor only)
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteProduct(@PathVariable String id) {
+    public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
         try {
             logger.info("Deleting product: {}", id);
 
@@ -323,7 +332,7 @@ public class ProductController {
      */
     @PostMapping("/{productId}/rating")
     public ResponseEntity<?> addRating(
-            @PathVariable String productId,
+            @PathVariable Long productId,
             @RequestBody Map<String, Object> ratingData) {
         try {
             logger.info("Adding rating for product: {}", productId);
@@ -332,12 +341,12 @@ public class ProductController {
             String review = (String) ratingData.get("review");
             Long farmerId = ratingData.get("farmerId") != null ? ((Number) ratingData.get("farmerId")).longValue() : null;
             Object vendorObj = ratingData.get("vendorId");
-            String vendorId = null;
+            Long vendorId = null;
             if (vendorObj != null) {
                 if (vendorObj instanceof Number) {
-                    vendorId = String.valueOf(((Number) vendorObj).longValue());
+                    vendorId = ((Number) vendorObj).longValue();
                 } else {
-                    vendorId = String.valueOf(vendorObj);
+                    vendorId = Long.parseLong(vendorObj.toString());
                 }
             }
 
@@ -358,10 +367,10 @@ public class ProductController {
      * GET /api/products/{productId}/ratings - Get all ratings for product
      */
     @GetMapping("/{productId}/ratings")
-    public ResponseEntity<?> getProductRatings(@PathVariable String productId) {
+    public ResponseEntity<?> getProductRatings(@PathVariable Long productId) {
         try {
             logger.info("Fetching ratings for product: {}", productId);
-            List<Rating> ratings = productService.getProductRatings(productId); // FIX: service now takes String, not Long
+            List<Rating> ratings = productService.getProductRatings(productId);
 
             return ResponseEntity.ok(Map.of(
                     "success", true,

@@ -32,7 +32,7 @@ public class CartService {
      * Add item to cart
      */
     @Transactional
-    public Cart addToCart(Long farmerId, String productId, Long vendorId, Integer quantity) {
+    public Cart addToCart(Long farmerId, Long productId, Long vendorId, Integer quantity) {
         logger.info("Adding product {} to cart for farmer {}", productId, farmerId);
         
         Optional<Cart> existingCart = cartRepository.findByFarmerIdAndProductIdAndVendorId(farmerId, productId, vendorId);
@@ -141,7 +141,7 @@ public class CartService {
      * Remove product from cart
      */
     @Transactional
-    public void removeProductFromCart(Long farmerId, String productId) {
+    public void removeProductFromCart(Long farmerId, Long productId) {
         logger.info("Removing product {} from farmer {}'s cart", productId, farmerId);
         cartRepository.deleteByFarmerIdAndProductId(farmerId, productId);
     }

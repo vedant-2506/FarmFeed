@@ -11,21 +11,21 @@ import java.util.Optional;
 @Repository
 public interface RatingRepository extends JpaRepository<Rating, Long> {
 
-    List<Rating> findByProductId(String productId);
+    List<Rating> findByProductId(Long productId);
 
     List<Rating> findByFarmerId(Long farmerId);
 
-    Optional<Rating> findByProductIdAndFarmerId(String productId, Long farmerId);
+    Optional<Rating> findByProductIdAndFarmerId(Long productId, Long farmerId);
 
     @Query("SELECT AVG(r.rating) FROM Rating r WHERE r.productId = :productId")
-    Double getAverageRating(@Param("productId") String productId);
+    Double getAverageRating(@Param("productId") Long productId);
 
     @Query("SELECT COUNT(r) FROM Rating r WHERE r.productId = :productId")
-    Long getRatingCount(@Param("productId") String productId);
+    Long getRatingCount(@Param("productId") Long productId);
 
     @Query("SELECT r FROM Rating r WHERE r.vendorId = :vendorId ORDER BY r.createdAt DESC")
-    List<Rating> getRatingsByVendor(@Param("vendorId") String vendorId);
+    List<Rating> getRatingsByVendor(@Param("vendorId") Long vendorId);
 
     @Query("SELECT r FROM Rating r WHERE r.productId = :productId AND r.rating >= :minRating ORDER BY r.createdAt DESC")
-    List<Rating> getFileredRatings(@Param("productId") String productId, @Param("minRating") Integer minRating);
+    List<Rating> getFileredRatings(@Param("productId") Long productId, @Param("minRating") Integer minRating);
 }

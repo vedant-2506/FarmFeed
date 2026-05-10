@@ -13,8 +13,9 @@ import java.time.LocalDateTime;
 public class Product {
  
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")
-    private String id;
+    private Long id;
 
     @Column(name = "product_name")
     private String name;
@@ -44,7 +45,7 @@ public class Product {
     private String manufacturer;
 
     @Column(name = "vendor_id")
-    private String vendorId;
+    private Long vendorId;
 
     @Column(name = "stock")
     private Integer stock;

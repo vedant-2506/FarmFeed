@@ -24,7 +24,7 @@ public class Order {
     private Long vendorId;
 
     @Column(name = "product_id", nullable = false)
-    private String productId;
+    private Long productId;
 
     @Column(name = "quantity", nullable = false)
     private Integer quantity;

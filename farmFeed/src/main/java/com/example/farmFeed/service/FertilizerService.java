@@ -60,14 +60,14 @@ public class FertilizerService {
     /**
      * Get fertilizer by ID
      */
-    public Map<String, Object> getFertilizerById(String id) {
+    public Map<String, Object> getFertilizerById(Long id) {
         return repository.getFertilizerById(id);
     }
 
     /**
      * Get multiple fertilizers by IDs in a single optimized query
      */
-    public List<Map<String, Object>> getFertilizersByIds(List<String> ids) {
+    public List<Map<String, Object>> getFertilizersByIds(List<Long> ids) {
         return repository.getFertilizersByIds(ids);
     }
 }

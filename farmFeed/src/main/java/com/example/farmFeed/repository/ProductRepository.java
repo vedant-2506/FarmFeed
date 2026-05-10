@@ -10,11 +10,11 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, String> {
+public interface ProductRepository extends JpaRepository<Product, Long> {
 
     Optional<Product> findByName(String name);
 
-    List<Product> findByVendorId(String vendorId);
+    List<Product> findByVendorId(Long vendorId);
 
     List<Product> findByCategory(String category);
 
@@ -28,7 +28,7 @@ public interface ProductRepository extends JpaRepository<Product, String> {
 
    @Query(value = """
 SELECT
-    CAST(product_id AS CHAR) AS product_id,
+    CAST(product_id AS SIGNED) AS product_id,
     product_name,
     image_link,
     primary_category,
@@ -38,7 +38,7 @@ SELECT
     description_clean,
     detailed_description_10_sentences,
     manufacturer,
-    CAST(vendor_id AS CHAR) AS vendor_id,
+    CAST(vendor_id AS SIGNED) AS vendor_id,
     stock,
     total_reviews,
     created_at,
@@ -50,9 +50,7 @@ ORDER BY COALESCE(rating,0) DESC
 List<Product> getAvailableProducts();
 
     @Query("SELECT p FROM Product p WHERE p.vendorId = :vendorId AND p.stock <= :threshold")
-    List<Product> getLowStockProducts(@Param("vendorId") String vendorId, @Param("threshold") Integer threshold);
-
-    @Query("SELECT DISTINCT p.category FROM Product p ORDER BY p.category")
+    List<Product> getLowStockProducts(@Param("vendorId") Long vendorId, @Param("threshold") Integer threshold);
     List<String> getAllCategories();
 
     @Query("SELECT p FROM Product p WHERE p.rating >= :minRating ORDER BY p.rating DESC")

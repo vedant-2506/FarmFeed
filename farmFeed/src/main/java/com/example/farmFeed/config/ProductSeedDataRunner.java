@@ -62,9 +62,9 @@ public class ProductSeedDataRunner implements CommandLineRunner {
 
         String sql = """
                 INSERT INTO products (
-                    product_id, product_name, image_link, primary_category, subcategory, price_inr,
+                    product_name, image_link, primary_category, subcategory, price_inr,
                     rating, description_clean, detailed_description_10_sentences, manufacturer, vendor_id, stock, total_reviews, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         List<Object[]> batchArgs = new ArrayList<>(toInsert);
@@ -74,7 +74,6 @@ public class ProductSeedDataRunner implements CommandLineRunner {
             int sequence = (int) existingCount + i;
             String category = categories[i % categories.length];
             String manufacturer = manufacturers[i % manufacturers.length];
-            String productId = String.format("product_%d", sequence);
             String productName = String.format("FarmFeed Product %d", sequence);
             String description = String.format(
                     "High quality %s input for improved crop performance. Batch %04d for soil and yield optimization.",
@@ -89,10 +88,9 @@ public class ProductSeedDataRunner implements CommandLineRunner {
                 String imageLink = null;
                 String subcategoryVal = null;
                 String detailedDesc = null;
-                String vendorIdStr = String.format("vendor_%d", (sequence % 10) + 1);
+                Long vendorId = (long) ((sequence % 10) + 1);
 
                 batchArgs.add(new Object[]{
-                    productId,
                     productName,
                     imageLink,
                     category,
@@ -102,7 +100,7 @@ public class ProductSeedDataRunner implements CommandLineRunner {
                     description,
                     detailedDesc,
                     manufacturer,
-                    vendorIdStr,
+                    vendorId,
                     stock,
                     totalReviews,
                     now,

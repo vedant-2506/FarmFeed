@@ -19,11 +19,11 @@ public class VendorInventoryController {
     @Autowired
     private VendorInventoryService inventoryService;
 
-    private String parseFertilizerId(String id) {
+    private Long parseFertilizerId(String id) {
         if (id == null || id.trim().isEmpty() || "undefined".equals(id)) {
             return null;
         }
-        return id.trim();
+        return Long.parseLong(id.trim());
     }
 
     @GetMapping("/{vendorId}")
@@ -64,7 +64,7 @@ public class VendorInventoryController {
                 throw new IllegalArgumentException("Invalid fertilizer ID");
             }
             
-            String fertilizerId = parseFertilizerId(fertId);
+            Long fertilizerId = parseFertilizerId(fertId);
             Double price = Double.parseDouble(request.get("vendorPrice").toString());
             Integer qty = Integer.parseInt(request.get("quantity").toString());
 
@@ -94,7 +94,7 @@ public class VendorInventoryController {
         try {
             Long vendorId = Long.parseLong(request.get("vendorId").toString());
             String fertilizerIdStr = request.get("fertilizerId").toString();
-            String fertilizerId = parseFertilizerId(fertilizerIdStr);
+            Long fertilizerId = parseFertilizerId(fertilizerIdStr);
 
             boolean exists = inventoryService.hasInventoryItem(vendorId, fertilizerId);
 
@@ -117,7 +117,7 @@ public class VendorInventoryController {
         try {
             Long vendorId = Long.parseLong(request.get("vendorId").toString());
             String fertilizerIdStr = request.get("fertilizerId").toString();
-            String fertilizerId = parseFertilizerId(fertilizerIdStr);
+            Long fertilizerId = parseFertilizerId(fertilizerIdStr);
             
             Double vendorPrice = request.get("vendorPrice") != null ?
                     Double.parseDouble(request.get("vendorPrice").toString()) : null;
@@ -146,7 +146,7 @@ public class VendorInventoryController {
     @DeleteMapping("/{vendorId}/{fertilizerId}")
     public ResponseEntity<?> removeFromInventory(
             @PathVariable Long vendorId,
-            @PathVariable String fertilizerId) {
+            @PathVariable Long fertilizerId) {
         try {
             logger.info("Removing fertilizer {} from vendor {} inventory", fertilizerId, vendorId);
 

@@ -40,7 +40,7 @@ public interface VendorRepository extends JpaRepository<Vendor, Long> {
             bp.image_link as image_url,
             bp.description_clean as description
         FROM vendor_inventory vi
-        LEFT JOIN bighaat_products_raw bp ON CONCAT('bighaat_', vi.fertilizer_id) = bp.mysql_import_key
+        LEFT JOIN bighaat_products_raw bp ON CAST(bp.mysql_import_key AS SIGNED) = vi.fertilizer_id
         WHERE vi.vendor_id = :vendorId AND vi.is_active = true
     """, nativeQuery = true)
     List<Map<String, Object>> getVendorInventoryDetails(@Param("vendorId") Long vendorId);

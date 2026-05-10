@@ -92,7 +92,7 @@ public class FertilizerRepository {
     /**
      * Get fertilizer by ID
      */
-    public Map<String, Object> getFertilizerById(String id) {
+    public Map<String, Object> getFertilizerById(Long id) {
         if (tableExists("products")) {
             String sql = "SELECT product_id AS fertilizer_id, product_name AS name, COALESCE(price_inr, 0) AS price, COALESCE(stock, 100) AS stock, COALESCE(NULLIF(description_clean, ''), detailed_description_10_sentences) AS description, image_link AS image_url, 'Other' AS category FROM products WHERE product_id = ?";
             List<Map<String, Object>> results = jdbcTemplate.queryForList(sql, id);
@@ -108,9 +108,8 @@ public class FertilizerRepository {
 
     /**
      * Get multiple fertilizers by IDs in a single query (optimized to avoid N+1 problem)
-     * Handles both numeric IDs (from fertilizers table) and string IDs (bighaat_1 format)
      */
-    public List<Map<String, Object>> getFertilizersByIds(List<String> ids) {
+    public List<Map<String, Object>> getFertilizersByIds(List<Long> ids) {
         if (ids == null || ids.isEmpty()) {
             return List.of();
         }
@@ -123,7 +122,7 @@ public class FertilizerRepository {
         
         if (tableExists("bighaat_products_raw")) {
             String placeholders = String.join(",", ids.stream().map(id -> "?").toList());
-            String sql = "SELECT mysql_import_key AS fertilizer_id, product_name AS name, COALESCE(CAST(price_inr AS SIGNED), 0) AS price, 100 AS stock, COALESCE(NULLIF(description_clean, ''), detailed_description_10_sentences) AS description, image_link AS image_url, 'Other' AS category FROM bighaat_products_raw WHERE mysql_import_key IN (" + placeholders + ")";
+            String sql = "SELECT CAST(mysql_import_key AS SIGNED) AS fertilizer_id, product_name AS name, COALESCE(CAST(price_inr AS SIGNED), 0) AS price, 100 AS stock, COALESCE(NULLIF(description_clean, ''), detailed_description_10_sentences) AS description, image_link AS image_url, 'Other' AS category FROM bighaat_products_raw WHERE CAST(mysql_import_key AS SIGNED) IN (" + placeholders + ")";
             return jdbcTemplate.queryForList(sql, ids.toArray());
         }
 

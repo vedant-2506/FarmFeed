@@ -26,7 +26,7 @@ public class VendorInventory {
     private Long vendorId;  // References shopkeeper table
 
     @Column(name = "fertilizer_id", nullable = false)
-    private String fertilizerId;  // References fertilizers/products table
+    private Long fertilizerId;  // References fertilizers/products table
 
     @Column(name = "vendor_price", nullable = false)
     private Double vendorPrice;  // Vendor's selling price (markup allowed)

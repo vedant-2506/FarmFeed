@@ -163,7 +163,10 @@ public class OrderService {
         List<Order> createdOrders = new ArrayList<>();
 
         for (Map<String, Object> item : cartItems) {
-            String productId = item.get("product_id") != null ? item.get("product_id").toString() : null;
+            Long productId = null;
+            if (item.get("product_id") != null) {
+                productId = ((Number) item.get("product_id")).longValue();
+            }
             Long vendorId = null;
             Object vendorObj = item.get("vendor_id");
             if (vendorObj instanceof Number) {

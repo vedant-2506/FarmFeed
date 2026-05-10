@@ -19,7 +19,7 @@ public class VendorInventoryService {
     @Autowired
     private FertilizerService fertilizerService;
 
-    public VendorInventory addToInventory(Long vendorId, String fertilizerId, Double vendorPrice, Integer quantity) {
+    public VendorInventory addToInventory(Long vendorId, Long fertilizerId, Double vendorPrice, Integer quantity) {
         try {
             Optional<VendorInventory> existing = repository.findByVendorIdAndFertilizerId(vendorId, fertilizerId);
 
@@ -53,7 +53,7 @@ public class VendorInventoryService {
                 return new ArrayList<>();
             }
 
-                List<String> fertIds = items.stream()
+                List<Long> fertIds = items.stream()
                     .map(VendorInventory::getFertilizerId)
                     .distinct()
                     .toList();
@@ -70,7 +70,7 @@ public class VendorInventoryService {
 
             List<Map<String, Object>> result = new ArrayList<>();
             for (VendorInventory item : items) {
-                Map<String, Object> data = fertMap.get(item.getFertilizerId());
+                Map<String, Object> data = fertMap.get(String.valueOf(item.getFertilizerId()));
                 
                 if (data != null) {
                     Map<String, Object> inv = new HashMap<>(data);
@@ -90,7 +90,7 @@ public class VendorInventoryService {
         }
     }
 
-    public VendorInventory updateInventoryItem(Long vendorId, String fertilizerId, Double newPrice, Integer newQuantity) {
+    public VendorInventory updateInventoryItem(Long vendorId, Long fertilizerId, Double newPrice, Integer newQuantity) {
         try {
             Optional<VendorInventory> item = repository.findByVendorIdAndFertilizerId(vendorId, fertilizerId);
 
@@ -108,7 +108,7 @@ public class VendorInventoryService {
         }
     }
 
-    public boolean removeFromInventory(Long vendorId, String fertilizerId) {
+    public boolean removeFromInventory(Long vendorId, Long fertilizerId) {
         try {
             Optional<VendorInventory> item = repository.findByVendorIdAndFertilizerId(vendorId, fertilizerId);
 
@@ -151,7 +151,7 @@ public class VendorInventoryService {
     /**
      * Check if vendor already has a fertilizer
      */
-    public boolean hasInventoryItem(Long vendorId, String fertilizerId) {
+    public boolean hasInventoryItem(Long vendorId, Long fertilizerId) {
         return repository.existsByVendorIdAndFertilizerId(vendorId, fertilizerId);
     }
 

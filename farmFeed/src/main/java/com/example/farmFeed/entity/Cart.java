@@ -21,7 +21,7 @@ public class Cart {
     private Long farmerId;
 
     @Column(name = "product_id", nullable = false)
-    private String productId;
+    private Long productId;
 
     @Column(name = "vendor_id", nullable = false)
     private Long vendorId;

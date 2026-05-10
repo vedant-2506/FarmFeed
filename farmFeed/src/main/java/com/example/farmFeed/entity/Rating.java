@@ -18,13 +18,13 @@ public class Rating {
     private Long id;
 
     @Column(name = "product_id", nullable = false)
-    private String productId;
+    private Long productId;
 
     @Column(name = "farmer_id", nullable = false)
     private Long farmerId;
 
     @Column(name = "vendor_id", nullable = false)
-    private String vendorId;
+    private Long vendorId;
 
     @Column(name = "rating", nullable = false)
     private Integer rating; // 1-5 stars

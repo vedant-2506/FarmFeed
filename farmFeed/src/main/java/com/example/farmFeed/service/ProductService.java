@@ -107,11 +107,11 @@ public class ProductService {
     private List<Map<String, Object>> fetchProductsFromSqlFeed() {
         // Cast columns explicitly to stable JDBC-friendly types to avoid driver type-inference errors
         String sql = "SELECT " +
-            "CAST(product_id AS CHAR) AS product_id, CAST(product_id AS CHAR) AS id, " +
+            "CAST(product_id AS SIGNED) AS product_id, CAST(product_id AS SIGNED) AS id, " +
             "product_name, product_name AS name, image_link, primary_category, subcategory, " +
             "CAST(price_inr AS DECIMAL(12,2)) AS price_inr, CAST(price_inr AS DECIMAL(12,2)) AS price, CAST(rating AS DECIMAL(5,2)) AS rating, " +
             "CAST(description_clean AS CHAR) AS description_clean, description_clean AS description, detailed_description_10_sentences, manufacturer, " +
-                "CAST(vendor_id AS CHAR) AS vendor_id, CAST(stock AS SIGNED) AS stock, CAST(total_reviews AS SIGNED) AS total_reviews, " +
+                "CAST(vendor_id AS SIGNED) AS vendor_id, CAST(stock AS SIGNED) AS stock, CAST(total_reviews AS SIGNED) AS total_reviews, " +
                 "CAST(created_at AS CHAR) AS created_at, CAST(updated_at AS CHAR) AS updated_at " +
                 "FROM products WHERE COALESCE(stock, 0) > 0 ORDER BY COALESCE(rating, 0) DESC";
         return jdbcTemplate.queryForList(sql);
@@ -121,7 +121,7 @@ public class ProductService {
      * Get product by ID
      */
     @Transactional(readOnly = true)
-    public Optional<Product> getProductById(String id) {
+    public Optional<Product> getProductById(Long id) {
         logger.info("Fetching product with ID: {}", id);
         return productRepository.findById(id);
     }
@@ -130,7 +130,7 @@ public class ProductService {
      * Get products by vendor
      */
     @Transactional(readOnly = true)
-    public List<Product> getProductsByVendor(String vendorId) {
+    public List<Product> getProductsByVendor(Long vendorId) {
         logger.info("Fetching products for vendor: {}", vendorId);
         return productRepository.findByVendorId(vendorId);
     }
@@ -193,13 +193,13 @@ public class ProductService {
      * Compare products
      */
     @Transactional(readOnly = true)
-    public Map<String, Object> compareProducts(List<String> productIds) {
+    public Map<String, Object> compareProducts(List<Long> productIds) {
         logger.info("Comparing {} products", productIds.size());
 
         Map<String, Object> comparison = new HashMap<>();
         List<Product> products = new ArrayList<>();
 
-        for (String id : productIds) {
+        for (Long id : productIds) {
             Optional<Product> product = productRepository.findById(id);
             product.ifPresent(products::add);
         }
@@ -237,7 +237,7 @@ public class ProductService {
      * Update product
      */
     @Transactional
-    public Product updateProduct(String id, Product productDetails) {
+    public Product updateProduct(Long id, Product productDetails) {
         logger.info("Updating product: {}", id);
 
         Optional<Product> existingProduct = productRepository.findById(id);
@@ -263,7 +263,7 @@ public class ProductService {
      * Delete product
      */
     @Transactional
-    public boolean deleteProduct(String id) {
+    public boolean deleteProduct(Long id) {
         logger.info("Deleting product: {}", id);
 
         if (productRepository.existsById(id)) {
@@ -279,7 +279,7 @@ public class ProductService {
      * Update stock
      */
     @Transactional
-    public Product updateStock(String id, Integer quantity) {
+    public Product updateStock(Long id, Integer quantity) {
         logger.info("Updating stock for product: {} with quantity: {}", id, quantity);
 
         Optional<Product> product = productRepository.findById(id);
@@ -296,7 +296,7 @@ public class ProductService {
      * Get low stock products for a vendor
      */
     @Transactional(readOnly = true)
-    public List<Product> getLowStockProducts(String vendorId, Integer threshold) {
+    public List<Product> getLowStockProducts(Long vendorId, Integer threshold) {
         logger.info("Fetching low stock products for vendor: {} with threshold: {}", vendorId, threshold);
         if (threshold == null || threshold <= 0) {
             threshold = 10;
@@ -308,7 +308,7 @@ public class ProductService {
      * Add rating to product and update product rating
      */
     @Transactional
-    public void addRating(String productId, Integer rating, String review, Long farmerId, String vendorId) {
+    public void addRating(Long productId, Integer rating, String review, Long farmerId, Long vendorId) {
         logger.info("Adding rating {} to product: {}", rating, productId);
 
         Product product = productRepository.findById(productId).orElse(null);
@@ -339,9 +339,9 @@ public class ProductService {
      * Get all ratings for a product
      */
     @Transactional(readOnly = true)
-    public List<Rating> getProductRatings(String productId) {
+    public List<Rating> getProductRatings(Long productId) {
         logger.info("Fetching ratings for product: {}", productId);
-        if (productId == null || productId.isBlank()) {
+        if (productId == null) {
             return Collections.emptyList();
         }
         return ratingRepository.findByProductId(productId);

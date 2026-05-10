@@ -171,7 +171,7 @@ public class AdminService {
      */
     @Transactional
     public Notification createNotification(Long adminId, String type, String title, String message, 
-                                          Long orderId, String productId, Long vendorId) {
+                                          Long orderId, Long productId, Long vendorId) {
         logger.info("Creating notification of type: {}", type);
         
         Notification notification = Notification.builder()

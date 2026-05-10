@@ -17,17 +17,17 @@ public interface VendorInventoryRepository extends JpaRepository<VendorInventory
     /**
      * Get a specific inventory item for a vendor
      */
-    Optional<VendorInventory> findByVendorIdAndFertilizerId(Long vendorId, String fertilizerId);
+    Optional<VendorInventory> findByVendorIdAndFertilizerId(Long vendorId, Long fertilizerId);
 
     /**
      * Check if vendor already has this fertilizer in inventory
      */
-    boolean existsByVendorIdAndFertilizerId(Long vendorId, String fertilizerId);
+    boolean existsByVendorIdAndFertilizerId(Long vendorId, Long fertilizerId);
 
     /**
      * Get all vendors selling a specific fertilizer
      */
-    List<VendorInventory> findByFertilizerIdAndIsActiveTrue(String fertilizerId);
+    List<VendorInventory> findByFertilizerIdAndIsActiveTrue(Long fertilizerId);
 
     /**
      * Get deleted inventory items (soft delete)
