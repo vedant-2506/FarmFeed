@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import jakarta.validation.Valid;
 
@@ -27,8 +28,42 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-        @Autowired
-        private VendorInventoryService vendorInventoryService;
+    @Autowired
+    private VendorInventoryService vendorInventoryService;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    /**
+     * GET /api/health - Health check endpoint for debugging database connectivity
+     */
+    @GetMapping("/health")
+    public ResponseEntity<?> health() {
+        try {
+            logger.info("Health check requested");
+            
+            // Test database connectivity
+            String dbVersion = jdbcTemplate.queryForObject("SELECT VERSION()", String.class);
+            Long productCount = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM products", Long.class);
+            
+            return ResponseEntity.ok(Map.of(
+                    "status", "UP",
+                    "database", "CONNECTED",
+                    "databaseVersion", dbVersion,
+                    "productCount", productCount != null ? productCount : 0,
+                    "message", "FarmFeed API is running and database is accessible"
+            ));
+        } catch (Exception e) {
+            logger.error("Health check failed: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+                    .body(Map.of(
+                            "status", "DOWN",
+                            "database", "DISCONNECTED",
+                            "error", e.getMessage(),
+                            "message", "Database connection failed. Check environment variables."
+                    ));
+        }
+    }
 
     /**
      * GET /api/products - Get all available products

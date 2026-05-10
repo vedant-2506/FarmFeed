@@ -71,9 +71,17 @@ async function loadProductsFromApi() {
     const container = document.getElementById("products-container");
     if (container) {
       container.innerHTML = `
-        <div class="col-12 text-center py-5 text-muted">
-          <p>Unable to load products. Please refresh the page.</p>
-          <small>${error.message}</small>
+        <div class="col-12 text-center py-5">
+          <div class="alert alert-warning">
+            <h5>Unable to load products</h5>
+            <p class="mb-1"><strong>Error:</strong> ${error.message}</p>
+            <small>Please check:</small>
+            <ul class="text-start" style="max-width: 400px; margin: 10px auto;">
+              <li>Is the API running? Check <a href="/api/products/health" target="_blank">/api/products/health</a></li>
+              <li>Are database environment variables configured?</li>
+              <li>Try refreshing the page</li>
+            </ul>
+          </div>
         </div>`;
     }
   }
