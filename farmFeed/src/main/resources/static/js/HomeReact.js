@@ -1,4 +1,4 @@
-const API_BASE_URL = globalThis.API_BASE_URL || 'https://farmfeed.onrender.com';
+const API_BASE_URL = globalThis.API_BASE_URL || window.API_BASE_URL || window.location.origin;
 const FERTILIZER_API = `${API_BASE_URL}/api/products`;
 const FERTILIZER_FALLBACK_API = `${API_BASE_URL}/api/fertilizers`;
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1592982537447-6f2a6a0b2d8f?w=800&q=80";
@@ -40,38 +40,33 @@ function normalizeProducts(items) {
     .map((item, index) => {
       if (!item) return null;
 
-      const rawId = item.fertilizer_id || item.id || (index + 1);
+      const rawId = item.product_id || item.id || (index + 1);
       const name = (item.name || item.product_name || "").trim() || `Product #${rawId}`;
-      const description = (item.description || item.description_clean || item.detailed_description_10_sentences || "").trim() || `FarmFeed product #${rawId}`;
-      const primaryCat = mapPrimaryCategory(item.primary_category || item.category);
+      const description = (item.description || item.description_clean || "").trim() || `FarmFeed product #${rawId}`;
+      const primaryCat = mapPrimaryCategory(item.category || item.primary_category);
       const subcat = detectSubcategory(name, description, item.subcategory);
 
-      // Extract numeric ID if it's a string like 'pr997' or 'bighaat_1'
-      let numericId = rawId;
-      if (typeof rawId === 'string') {
-        const matches = /\d+/.exec(rawId);
-        numericId = matches ? Number.parseInt(matches[0], 10) : (index + 1);
-      }
+      const numericId = typeof rawId === 'number'
+        ? rawId
+        : (() => {
+            const matches = /\d+/.exec(String(rawId));
+            return matches ? Number.parseInt(matches[0], 10) : (index + 1);
+          })();
 
-      let vId = item.vendorId || item.vendor_id || 0;
-      let numericVendorId = vId;
-      if (typeof vId === 'string') {
-        const matches = /\d+/.exec(vId);
-        numericVendorId = matches ? Number.parseInt(matches[0], 10) : 0;
-      }
+      const vendorId = 1;
 
       return {
         id: numericId,
-        rawId: rawId, // keep rawId for reference if needed
+        rawId: rawId,
         name: name,
         description: description,
         price: Number(item.price || item.price_inr || 0),
-        stock: Number(item.stock || 0),
-        image: item.image_url || item.image_link || item.image || FALLBACK_IMAGE,
+        stock: Number(item.stock_quantity || item.stock || 0),
+        image: item.imageUrl || item.image_url || item.image_link || item.image || FALLBACK_IMAGE,
         primaryCategory: primaryCat,
         subcategory: subcat,
         rating: item.rating || "4.5",
-        vendorId: numericVendorId
+        vendorId: vendorId
       };
     })
     .filter(Boolean);

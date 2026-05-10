@@ -177,14 +177,14 @@ async function loadInventory() {
               <small style="color: #666;">Base Price: Rs${item.base_price} | Your Price: Rs${item.vendor_price}</small>
             </div>
             <div>
-              <span class="badge bg-info">Qty: ${item.quantity}</span>
+              <span class="badge bg-info">Qty: ${item.quantity_in_stock}</span>
             </div>
           </div>
           <div class="inventory-actions">
-            <button class="btn btn-sm btn-warning" onclick='editInventoryItem(${JSON.stringify(item.fertilizer_id || item.id)})'>
+            <button class="btn btn-sm btn-warning" onclick='editInventoryItem(${JSON.stringify(item.inventory_id || item.fertilizer_id || item.id)})'>
               <i class="bi bi-pencil"></i> Edit
             </button>
-            <button class="btn btn-sm btn-danger" onclick='deleteInventoryItem(${JSON.stringify(item.fertilizer_id || item.id)})'>
+            <button class="btn btn-sm btn-danger" onclick='deleteInventoryItem(${JSON.stringify(item.inventory_id || item.fertilizer_id || item.id)})'>
               <i class="bi bi-trash"></i> Delete
             </button>
           </div>

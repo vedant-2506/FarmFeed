@@ -22,25 +22,25 @@ public class FertilizerRepository {
             String sql = """
                 SELECT
                     product_id AS fertilizer_id,
-                    product_name AS name,
-                    COALESCE(price_inr, 0) AS price,
-                    COALESCE(stock, 100) AS stock,
-                    COALESCE(NULLIF(description_clean, ''), detailed_description_10_sentences) AS description,
-                    image_link AS image_url,
-                    primary_category,
+                    name,
+                    COALESCE(price, 0) AS price,
+                    COALESCE(stock_quantity, 100) AS stock,
+                    COALESCE(NULLIF(description, ''), '') AS description,
+                    image_url,
+                    category,
                     subcategory,
                     CASE
-                        WHEN LOWER(CONCAT(IFNULL(product_name, ''), ' ', IFNULL(description_clean, ''))) LIKE '%organic%' THEN 'Organic'
-                        WHEN LOWER(CONCAT(IFNULL(product_name, ''), ' ', IFNULL(description_clean, ''))) LIKE '%chemical%'
-                             OR LOWER(CONCAT(IFNULL(product_name, ''), ' ', IFNULL(description_clean, ''))) LIKE '%urea%'
-                             OR LOWER(CONCAT(IFNULL(product_name, ''), ' ', IFNULL(description_clean, ''))) LIKE '%dap%'
-                             OR LOWER(CONCAT(IFNULL(product_name, ''), ' ', IFNULL(description_clean, ''))) LIKE '%potash%'
-                             OR LOWER(CONCAT(IFNULL(product_name, ''), ' ', IFNULL(description_clean, ''))) LIKE '%npk%'
+                        WHEN LOWER(CONCAT(IFNULL(name, ''), ' ', IFNULL(description, ''))) LIKE '%organic%' THEN 'Organic'
+                        WHEN LOWER(CONCAT(IFNULL(name, ''), ' ', IFNULL(description, ''))) LIKE '%chemical%'
+                             OR LOWER(CONCAT(IFNULL(name, ''), ' ', IFNULL(description, ''))) LIKE '%urea%'
+                             OR LOWER(CONCAT(IFNULL(name, ''), ' ', IFNULL(description, ''))) LIKE '%dap%'
+                             OR LOWER(CONCAT(IFNULL(name, ''), ' ', IFNULL(description, ''))) LIKE '%potash%'
+                             OR LOWER(CONCAT(IFNULL(name, ''), ' ', IFNULL(description, ''))) LIKE '%npk%'
                         THEN 'Chemical'
                         ELSE 'Other'
                     END AS category
                 FROM products
-                WHERE product_name IS NOT NULL
+                WHERE name IS NOT NULL
             """;
             return jdbcTemplate.queryForList(sql);
         }
@@ -77,7 +77,7 @@ public class FertilizerRepository {
      */
     public List<Map<String, Object>> searchByName(String name) {
         if (tableExists("products")) {
-            String sql = "SELECT product_id AS fertilizer_id, product_name AS name, COALESCE(price_inr, 0) AS price, COALESCE(stock, 100) AS stock, COALESCE(NULLIF(description_clean, ''), detailed_description_10_sentences) AS description, image_link AS image_url, 'Other' AS category FROM products WHERE LOWER(product_name) LIKE ?";
+            String sql = "SELECT product_id AS fertilizer_id, name, COALESCE(price, 0) AS price, COALESCE(stock_quantity, 100) AS stock, COALESCE(NULLIF(description, ''), '') AS description, image_url, 'Other' AS category FROM products WHERE LOWER(name) LIKE ?";
             String param = "%" + (name == null ? "" : name.toLowerCase()) + "%";
             return jdbcTemplate.queryForList(sql, param);
         }
@@ -94,7 +94,7 @@ public class FertilizerRepository {
      */
     public Map<String, Object> getFertilizerById(Long id) {
         if (tableExists("products")) {
-            String sql = "SELECT product_id AS fertilizer_id, product_name AS name, COALESCE(price_inr, 0) AS price, COALESCE(stock, 100) AS stock, COALESCE(NULLIF(description_clean, ''), detailed_description_10_sentences) AS description, image_link AS image_url, 'Other' AS category FROM products WHERE product_id = ?";
+            String sql = "SELECT product_id AS fertilizer_id, name, COALESCE(price, 0) AS price, COALESCE(stock_quantity, 100) AS stock, COALESCE(NULLIF(description, ''), '') AS description, image_url, 'Other' AS category FROM products WHERE product_id = ?";
             List<Map<String, Object>> results = jdbcTemplate.queryForList(sql, id);
             if (!results.isEmpty()) return results.get(0);
         }
@@ -116,7 +116,7 @@ public class FertilizerRepository {
         
         if (tableExists("products")) {
             String placeholders = String.join(",", ids.stream().map(id -> "?").toList());
-            String sql = "SELECT product_id AS fertilizer_id, product_name AS name, COALESCE(price_inr, 0) AS price, COALESCE(stock, 100) AS stock, COALESCE(NULLIF(description_clean, ''), detailed_description_10_sentences) AS description, image_link AS image_url, 'Other' AS category FROM products WHERE product_id IN (" + placeholders + ")";
+            String sql = "SELECT product_id AS fertilizer_id, name, COALESCE(price, 0) AS price, COALESCE(stock_quantity, 100) AS stock, COALESCE(NULLIF(description, ''), '') AS description, image_url, 'Other' AS category FROM products WHERE product_id IN (" + placeholders + ")";
             return jdbcTemplate.queryForList(sql, ids.toArray());
         }
         
@@ -143,7 +143,7 @@ public class FertilizerRepository {
         
         try {
             if (tableExists("products")) {
-                String sql = "SELECT image_link FROM products WHERE product_name = ? LIMIT 1";
+                String sql = "SELECT image_url FROM products WHERE name = ? LIMIT 1";
                 List<String> results = jdbcTemplate.queryForList(sql, String.class, productName);
                 if (!results.isEmpty()) return results.get(0);
             }

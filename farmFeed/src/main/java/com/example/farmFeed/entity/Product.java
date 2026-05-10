@@ -1,31 +1,38 @@
 package com.example.farmFeed.entity;
- 
-import com.fasterxml.jackson.annotation.JsonAlias;
- 
+
+import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
+
 @Entity
-@Table(name = "products")
+@Table(name = "products", indexes = {
+        @Index(name = "idx_products_category", columnList = "category"),
+        @Index(name = "idx_products_name", columnList = "name")
+})
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class Product {
- 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")
     private Long id;
 
     @NotBlank(message = "Product name is required")
-    @JsonAlias({"productName", "product_name"})
-    @Column(name = "product_name")
+    @Column(name = "name", nullable = false, unique = true)
     private String name;
 
-    @Column(name = "image_link", length = 2000)
-    private String imageLink;
-
     @NotBlank(message = "Category is required")
-    @JsonAlias({"primary_category", "categoryName"})
-    @Column(name = "primary_category")
+    @Column(name = "category", nullable = false)
     private String category;
 
     @Column(name = "subcategory")
@@ -33,54 +40,47 @@ public class Product {
 
     @NotNull(message = "Price is required")
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be greater than 0")
-    @JsonAlias({"price_inr", "productPrice"})
-    @Column(name = "price_inr")
+    @Column(name = "price", nullable = false)
     private Double price;
+
+    @NotBlank(message = "Description is required")
+    @Lob
+    @Column(name = "description", nullable = false)
+    private String description;
+
+    @Column(name = "image_url", length = 2000)
+    private String imageUrl;
+
+    @Column(name = "stock_quantity", nullable = false)
+    private Integer stockQuantity;
 
     @Column(name = "rating")
     private Double rating;
 
-    @NotBlank(message = "Description is required")
-    @JsonAlias({"description_clean", "productDescription"})
-    @Column(name = "description_clean", columnDefinition = "TEXT")
-    private String description;
-
-    @Column(name = "detailed_description_10_sentences", columnDefinition = "TEXT")
-    private String detailedDescription;
-
-    @Column(name = "manufacturer")
-    private String manufacturer;
-
-    @NotNull(message = "Vendor ID is required")
-    @JsonAlias({"vendor_id", "vendorId"})
-    @Column(name = "vendor_id")
-    private Long vendorId;
-
-    @Column(name = "stock")
-    private Integer stock;
-
     @Column(name = "total_reviews")
     private Integer totalReviews;
 
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-        if (rating == null) rating = 0.0;
-        if (totalReviews == null) totalReviews = 0;
-        if (stock == null) stock = 100;
-        // Set defaults for required fields if null or empty
-        if (name == null || name.trim().isEmpty()) name = "Unnamed Product";
-        if (category == null || category.trim().isEmpty()) category = "General";
-        if (price == null || price <= 0) price = 0.0; // But validation prevents this
-        if (description == null || description.trim().isEmpty()) description = "No description available";
-        if (vendorId == null) vendorId = 1L; // Default vendor, but validation prevents this
+        LocalDateTime now = LocalDateTime.now();
+        createdAt = now;
+        updatedAt = now;
+
+        if (rating == null) {
+            rating = 0.0;
+        }
+        if (totalReviews == null) {
+            totalReviews = 0;
+        }
+        if (stockQuantity == null) {
+            stockQuantity = 0;
+        }
     }
 
     @PreUpdate

@@ -86,15 +86,14 @@ public class CartService {
                 productMap.put("description", p.getDescription());
                 productMap.put("category", p.getCategory());
                 productMap.put("price", p.getPrice());
-                productMap.put("manufacturer", p.getManufacturer());
-                productMap.put("vendor_id", p.getVendorId());
-                productMap.put("stock", p.getStock());
+                productMap.put("stock", p.getStockQuantity());
                 productMap.put("rating", p.getRating());
                 productMap.put("total_reviews", p.getTotalReviews());
+                productMap.put("image_url", p.getImageUrl());
                 
                 // Use imageLink directly
-                if (p.getImageLink() != null && !p.getImageLink().isEmpty()) {
-                    productMap.put("image", p.getImageLink());
+                if (p.getImageUrl() != null && !p.getImageUrl().isEmpty()) {
+                    productMap.put("image", p.getImageUrl());
                 } else {
                     // Try to get image from catalog (FertilizerRepository) by name - much more reliable
                     String imageUrl = fertilizerRepository.findImageByProductName(p.getName());

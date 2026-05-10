@@ -20,6 +20,11 @@ async function loadProductsFromApi() {
   if (!container) return;
 
   try {
+    container.innerHTML = `
+      <div class="col-12 text-center py-5 text-muted">
+        Loading products...
+      </div>`;
+
     const response = await fetch(PRODUCTS_API);
     if (!response.ok) throw new Error(`Failed with status ${response.status}`);
 
@@ -43,22 +48,19 @@ async function loadProductsFromApi() {
     console.log("Sample product:", fertilizers[0]);
 
     allProducts = fertilizers.map(item => ({
-      // FIX: SQL feed uses product_id/product_name; JPA entity uses id/name — handle both
-      id:          item.product_id   || item.id,
-      name:        item.product_name || item.name,
-      description: item.description_clean || item.description || item.detailedDescription || "Quality product for healthier crop growth.",
-      price:       item.price_inr    || item.price  || 0,
-      stock:       item.stock        || 0,
-      rating:      item.rating       || 0,
+      id:           item.product_id || item.id,
+      name:         item.name || item.product_name,
+      description:  item.description || item.description_clean || "Quality product for healthier crop growth.",
+      price:        item.price || item.price_inr || 0,
+      stock:        item.stock_quantity || item.stock || 0,
+      rating:       item.rating || 0,
       totalReviews: item.total_reviews || item.totalReviews || 0,
-      // FIX: SQL feed uses image_link; JPA entity uses imageLink
-      image:       item.image_link   || item.imageLink || FALLBACK_IMAGE,
-      vendorId:    item.vendor_id    || item.vendorId  || 1,
-      // FIX: SQL feed uses primary_category; JPA uses category
-      category:    normalizeCategory(
-                     item.primary_category || item.category,
-                     item.product_name     || item.name,
-                     item.description_clean || item.description
+      image:        item.imageUrl || item.image_url || item.image_link || FALLBACK_IMAGE,
+      vendorId:     item.vendorId || item.vendor_id || 1,
+      category:     normalizeCategory(
+                     item.category || item.primary_category,
+                     item.name || item.product_name,
+                     item.description || item.description_clean
                    )
     }));
 
@@ -220,7 +222,7 @@ function handleAddToCart(button) {
   }
 
   const productId = button.dataset.id;           // String e.g. "bighaat_1" — DO NOT parseInt
-  const vendorId  = button.dataset.vendorId || 1; // FIX: from product data, not hardcoded
+  const vendorId  = button.dataset.vendorId || 1;
 
   const payload = {
     farmerId:  parseInt(farmerId),

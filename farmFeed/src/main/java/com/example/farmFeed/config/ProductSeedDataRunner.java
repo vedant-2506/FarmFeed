@@ -56,15 +56,13 @@ public class ProductSeedDataRunner implements CommandLineRunner {
 
         Random random = new Random(42);
         String[] categories = {"Seed", "Crop Production", "Crop Nutrition", "Organic", "Chemical"};
-        String[] manufacturers = {
-                "IFFCO", "UPL", "Rallis", "Coromandel", "Bayer", "Syngenta", "BioAgri", "GreenGrow"
-        };
+        String[] subcategories = {"Seeds", "Plant Nutrition", "Biostimulants", "Bio Control", "Micronutrients"};
 
         String sql = """
-                INSERT INTO products (
-                    product_name, image_link, primary_category, subcategory, price_inr,
-                    rating, description_clean, detailed_description_10_sentences, manufacturer, vendor_id, stock, total_reviews, created_at, updated_at
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO products (
+                name, category, subcategory, price, description, image_url, stock_quantity,
+                rating, total_reviews, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """;
 
         List<Object[]> batchArgs = new ArrayList<>(toInsert);
@@ -73,7 +71,7 @@ public class ProductSeedDataRunner implements CommandLineRunner {
         for (int i = 1; i <= toInsert; i++) {
             int sequence = (int) existingCount + i;
             String category = categories[i % categories.length];
-            String manufacturer = manufacturers[i % manufacturers.length];
+            String subcategory = subcategories[i % subcategories.length];
             String productName = String.format("FarmFeed Product %d", sequence);
             String description = String.format(
                     "High quality %s input for improved crop performance. Batch %04d for soil and yield optimization.",
@@ -85,27 +83,21 @@ public class ProductSeedDataRunner implements CommandLineRunner {
             double rating = 3.5 + (random.nextDouble() * 1.5);
             int totalReviews = 1 + random.nextInt(250);
 
-                String imageLink = null;
-                String subcategoryVal = null;
-                String detailedDesc = null;
-                Long vendorId = (long) ((sequence % 10) + 1);
+            String imageUrl = null;
 
-                batchArgs.add(new Object[]{
+            batchArgs.add(new Object[]{
                     productName,
-                    imageLink,
                     category,
-                    subcategoryVal,
+                    subcategory,
                     Math.round(price * 100.0) / 100.0,
-                    Math.round(rating * 100.0) / 100.0,
                     description,
-                    detailedDesc,
-                    manufacturer,
-                    vendorId,
+                    imageUrl,
                     stock,
+                    Math.round(rating * 100.0) / 100.0,
                     totalReviews,
                     now,
                     now
-                });
+            });
         }
 
         jdbcTemplate.batchUpdate(sql, batchArgs);

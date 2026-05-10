@@ -43,7 +43,7 @@ public class OrderService {
         if (product.isPresent()) {
             // Update product stock
             Product p = product.get();
-            p.setStock(p.getStock() - order.getQuantity());
+            p.setStockQuantity(Math.max(0, (p.getStockQuantity() == null ? 0 : p.getStockQuantity()) - order.getQuantity()));
             productRepository.save(p);
         }
         
@@ -202,7 +202,7 @@ public class OrderService {
             Optional<Product> product = productRepository.findById(productId);
             if (product.isPresent()) {
                 Product p = product.get();
-                p.setStock(p.getStock() - quantity);
+                p.setStockQuantity(Math.max(0, (p.getStockQuantity() == null ? 0 : p.getStockQuantity()) - quantity));
                 productRepository.save(p);
             }
 
@@ -234,7 +234,7 @@ public class OrderService {
             Optional<Product> product = productRepository.findById(o.getProductId());
             if (product.isPresent()) {
                 Product p = product.get();
-                p.setStock(p.getStock() + o.getQuantity());
+                p.setStockQuantity((p.getStockQuantity() == null ? 0 : p.getStockQuantity()) + o.getQuantity());
                 productRepository.save(p);
             }
             

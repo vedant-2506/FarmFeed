@@ -3,6 +3,7 @@ package com.example.farmFeed.controller;
 import com.example.farmFeed.entity.Product;
 import com.example.farmFeed.entity.Rating;
 import com.example.farmFeed.service.ProductService;
+import com.example.farmFeed.service.VendorInventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.validation.Valid;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -22,6 +27,9 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
+        @Autowired
+        private VendorInventoryService vendorInventoryService;
+
     /**
      * GET /api/products - Get all available products
      */
@@ -29,7 +37,7 @@ public class ProductController {
     public ResponseEntity<?> getAllProducts() {
         try {
             logger.info("Fetching all products");
-            List<Map<String, Object>> products = productService.getAllProductsForHome();
+            List<Product> products = productService.getAllProducts();
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "count", products.size(),
@@ -43,13 +51,13 @@ public class ProductController {
     }
 
     /**
-     * GET /api/products/debug - Debug endpoint returning all products (no stock filter)
+         * GET /api/products/debug - Debug endpoint returning all products (no stock filter)
      */
     @GetMapping("/debug")
     public ResponseEntity<?> debugAllProducts() {
         try {
             logger.info("Debug: fetching all products (raw)");
-            List<Map<String, Object>> products = productService.getAllProductsRawForHome();
+            List<Product> products = productService.getAllProducts();
             return ResponseEntity.ok(Map.of(
                     "success", true,
                     "count", products.size(),
@@ -88,13 +96,13 @@ public class ProductController {
     }
 
     /**
-     * GET /api/products/search/smart?keyword=keyword - Smart search
+         * GET /api/products/search?keyword=keyword - Smart search
      */
-    @GetMapping("/search/smart")
-    public ResponseEntity<?> smartSearch(@RequestParam String keyword) {
+        @GetMapping("/search")
+        public ResponseEntity<?> smartSearch(@RequestParam String keyword) {
         try {
             logger.info("Smart searching for: {}", keyword);
-            List<Product> results = productService.smartSearch(keyword);
+            List<Product> results = productService.searchProducts(keyword);
 
             return ResponseEntity.ok(Map.of(
                     "success", true,
@@ -232,21 +240,35 @@ public class ProductController {
     }
 
     /**
-     * GET /api/products/vendor/{vendorId} - Get products by vendor
+     * GET /api/products/vendor/{vendorId} - Get products by vendor inventory
      */
     @GetMapping("/vendor/{vendorId}")
     public ResponseEntity<?> getByVendor(@PathVariable Long vendorId) {
         try {
-            logger.info("Fetching products for vendor: {}", vendorId);
-            List<Product> results = productService.getProductsByVendor(vendorId);
-
-            return ResponseEntity.ok(Map.of(
-                    "success", true,
-                    "count", results.size(),
-                    "data", results
-            ));
+            logger.info("Fetching vendor inventory for vendor: {}", vendorId);
+            return ResponseEntity.ok(vendorInventoryService.getVendorInventory(vendorId));
         } catch (Exception e) {
             logger.error("Error fetching vendor products: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("success", false, "error", e.getMessage()));
+        }
+    }
+
+    /**
+     * POST /api/products/bulk - Bulk upload products
+     */
+    @PostMapping("/bulk")
+    public ResponseEntity<?> bulkUploadProducts(@RequestBody List<@Valid Product> products) {
+        try {
+            logger.info("Bulk uploading {} products", products == null ? 0 : products.size());
+            Map<String, Object> result = productService.bulkUploadProducts(products);
+            return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
+                    "success", true,
+                    "message", "Bulk upload completed",
+                    "data", result
+            ));
+        } catch (Exception e) {
+            logger.error("Error bulk uploading products: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("success", false, "error", e.getMessage()));
         }
@@ -258,29 +280,6 @@ public class ProductController {
     @PostMapping
     public ResponseEntity<?> addProduct(@Valid @RequestBody Product product) {
         try {
-            logger.info("Received product data: name='{}', category='{}', price={}, description='{}', vendorId={}",
-                product.getName(), product.getCategory(), product.getPrice(), product.getDescription(), product.getVendorId());
-
-            // Set defaults for empty/null values
-            if (product.getName() == null || product.getName().trim().isEmpty()) {
-                product.setName("Unnamed Product");
-            }
-            if (product.getCategory() == null || product.getCategory().trim().isEmpty()) {
-                product.setCategory("General");
-            }
-            if (product.getPrice() == null || product.getPrice() <= 0) {
-                product.setPrice(0.0);
-            }
-            if (product.getDescription() == null || product.getDescription().trim().isEmpty()) {
-                product.setDescription("No description available");
-            }
-            if (product.getVendorId() == null) {
-                product.setVendorId(1L);
-            }
-
-            logger.info("Product data after defaults: name='{}', category='{}', price={}, description='{}', vendorId={}",
-                product.getName(), product.getCategory(), product.getPrice(), product.getDescription(), product.getVendorId());
-
             Product savedProduct = productService.addProduct(product);
 
             logger.info("Product saved successfully with ID: {}", savedProduct.getId());
@@ -363,15 +362,7 @@ public class ProductController {
             Integer rating = ((Number) ratingData.get("rating")).intValue();
             String review = (String) ratingData.get("review");
             Long farmerId = ratingData.get("farmerId") != null ? ((Number) ratingData.get("farmerId")).longValue() : null;
-            Object vendorObj = ratingData.get("vendorId");
-            Long vendorId = null;
-            if (vendorObj != null) {
-                if (vendorObj instanceof Number) {
-                    vendorId = ((Number) vendorObj).longValue();
-                } else {
-                    vendorId = Long.parseLong(vendorObj.toString());
-                }
-            }
+            Long vendorId = ratingData.get("vendorId") != null ? ((Number) ratingData.get("vendorId")).longValue() : null;
 
             productService.addRating(productId, rating, review, farmerId, vendorId);
 

@@ -5,8 +5,8 @@ import com.example.farmFeed.entity.Rating;
 import com.example.farmFeed.repository.ProductRepository;
 import com.example.farmFeed.repository.RatingRepository;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.slf4j.Logger;
@@ -26,103 +26,13 @@ public class ProductService {
     @Autowired
     private RatingRepository ratingRepository;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     /**
      * Get all available products
      */
     @Transactional(readOnly = true)
     public List<Product> getAllProducts() {
         logger.info("Fetching all products");
-        return productRepository.getAvailableProducts();
-    }
-
-    /**
-     * Home API-safe fetch that supports both legacy JPA schema and raw SQL product feed schema.
-     */
-    @Transactional(readOnly = true)
-    public List<Map<String, Object>> getAllProductsForHome() {
-        try {
-            return fetchProductsFromSqlFeed();
-        } catch (Exception ex) {
-            logger.warn("SQL feed fetch failed, falling back to JPA schema: {}", ex.getMessage());
-            try {
-                return productRepository.getAvailableProducts().stream()
-                        .map(this::toHomeProduct)
-                        .collect(Collectors.toList());
-            } catch (Exception fallbackEx) {
-                logger.error("JPA fallback for home products also failed: {}", fallbackEx.getMessage());
-                return Collections.emptyList();
-            }
-        }
-    }
-
-    /**
-     * Debug helper: return all products from repository (ignores stock filter)
-     */
-    @Transactional(readOnly = true)
-    public List<Product> getAllProductsRaw() {
-        logger.info("Fetching all products (raw findAll) for debug");
-        return productRepository.findAll();
-    }
-
-    @Transactional(readOnly = true)
-    public List<Map<String, Object>> getAllProductsRawForHome() {
-        try {
-            return fetchProductsFromSqlFeed();
-        } catch (Exception ex) {
-            logger.warn("SQL feed fetch failed, falling back to JPA raw schema: {}", ex.getMessage());
-            try {
-                return productRepository.findAll().stream()
-                        .map(this::toHomeProduct)
-                        .collect(Collectors.toList());
-            } catch (Exception fallbackEx) {
-                logger.error("JPA raw fallback for home products also failed: {}", fallbackEx.getMessage());
-                return Collections.emptyList();
-            }
-        }
-    }
-
-    private Map<String, Object> toHomeProduct(Product p) {
-        Map<String, Object> item = new HashMap<>();
-        item.put("id", p.getId());
-        item.put("product_name", p.getName());
-        item.put("name", p.getName());
-        item.put("description_clean", p.getDescription());
-        item.put("description", p.getDescription());
-        item.put("primary_category", p.getCategory());
-        item.put("price_inr", p.getPrice());
-        item.put("price", p.getPrice());
-        item.put("rating", p.getRating());
-        item.put("manufacturer", p.getManufacturer());
-        item.put("vendor_id", p.getVendorId());
-        item.put("vendorId", p.getVendorId());
-        item.put("stock", p.getStock());
-        item.put("total_reviews", p.getTotalReviews());
-        item.put("image_link", p.getImageLink());
-        return item;
-    }
-
-    private List<Map<String, Object>> fetchProductsFromSqlFeed() {
-        // Cast columns explicitly to stable JDBC-friendly types to avoid driver type-inference errors
-        String sql = "SELECT " +
-            "CAST(product_id AS SIGNED) AS product_id, CAST(product_id AS SIGNED) AS id, " +
-            "COALESCE(NULLIF(TRIM(product_name), ''), NULLIF(TRIM(name), ''), CONCAT('Product #', CAST(product_id AS CHAR))) AS product_name, " +
-            "COALESCE(NULLIF(TRIM(product_name), ''), NULLIF(TRIM(name), ''), CONCAT('Product #', CAST(product_id AS CHAR))) AS name, " +
-            "NULLIF(TRIM(image_link), '') AS image_link, NULLIF(TRIM(image), '') AS image, " +
-            "COALESCE(NULLIF(TRIM(primary_category), ''), NULLIF(TRIM(category), ''), 'Other') AS primary_category, " +
-            "COALESCE(NULLIF(TRIM(primary_category), ''), NULLIF(TRIM(category), ''), 'Other') AS category, " +
-            "NULLIF(TRIM(subcategory), '') AS subcategory, " +
-            "COALESCE(price_inr, price) AS price_inr, COALESCE(price, price_inr) AS price, CAST(rating AS DECIMAL(5,2)) AS rating, " +
-            "COALESCE(NULLIF(TRIM(CAST(description_clean AS CHAR)), ''), NULLIF(TRIM(CAST(description AS CHAR)), ''), NULLIF(TRIM(detailed_description_10_sentences), ''), CONCAT('FarmFeed product #', CAST(product_id AS CHAR))) AS description_clean, " +
-            "COALESCE(NULLIF(TRIM(CAST(description_clean AS CHAR)), ''), NULLIF(TRIM(CAST(description AS CHAR)), ''), NULLIF(TRIM(detailed_description_10_sentences), ''), CONCAT('FarmFeed product #', CAST(product_id AS CHAR))) AS description, " +
-            "NULLIF(TRIM(detailed_description_10_sentences), '') AS detailed_description_10_sentences, " +
-            "COALESCE(NULLIF(TRIM(manufacturer), ''), 'FarmFeed') AS manufacturer, " +
-                "CAST(vendor_id AS SIGNED) AS vendor_id, CAST(stock AS SIGNED) AS stock, CAST(total_reviews AS SIGNED) AS total_reviews, " +
-                "CAST(created_at AS CHAR) AS created_at, CAST(updated_at AS CHAR) AS updated_at " +
-                "FROM products WHERE COALESCE(stock, 0) > 0 ORDER BY COALESCE(rating, 0) DESC";
-        return jdbcTemplate.queryForList(sql);
+        return productRepository.findAll(Sort.by(Sort.Order.desc("rating"), Sort.Order.asc("name")));
     }
 
     /**
@@ -139,8 +49,8 @@ public class ProductService {
      */
     @Transactional(readOnly = true)
     public List<Product> getProductsByVendor(Long vendorId) {
-        logger.info("Fetching products for vendor: {}", vendorId);
-        return productRepository.findByVendorId(vendorId);
+        logger.info("Fetching products for vendor inventory: {}", vendorId);
+        return productRepository.getAvailableProducts();
     }
 
     /**
@@ -149,7 +59,10 @@ public class ProductService {
     @Transactional(readOnly = true)
     public List<Product> getProductsByCategory(String category) {
         logger.info("Fetching products for category: {}", category);
-        return productRepository.findByCategory(category);
+        if (category == null || category.trim().isEmpty()) {
+            return getAllProducts();
+        }
+        return productRepository.findByCategoryIgnoreCase(category.trim());
     }
 
     /**
@@ -162,6 +75,14 @@ public class ProductService {
             return getAllProducts();
         }
         return productRepository.smartSearch(keyword);
+    }
+
+    /**
+     * Search products by keyword.
+     */
+    @Transactional(readOnly = true)
+    public List<Product> searchProducts(String keyword) {
+        return smartSearch(keyword);
     }
 
     /**
@@ -194,7 +115,47 @@ public class ProductService {
         if (limit == null || limit <= 0) {
             limit = 10;
         }
-        return productRepository.getTopRatedProducts(0.0, PageRequest.of(0, limit));
+        return productRepository.getTopRatedProducts(0.0, PageRequest.of(0, limit, Sort.by(Sort.Order.desc("rating"), Sort.Order.asc("name"))));
+    }
+
+    /**
+     * Bulk insert products with duplicate protection.
+     */
+    @Transactional
+    public Map<String, Object> bulkUploadProducts(List<Product> products) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        if (products == null || products.isEmpty()) {
+            result.put("inserted", 0);
+            result.put("skipped", 0);
+            result.put("duplicates", List.of());
+            result.put("data", List.of());
+            return result;
+        }
+
+        List<Product> toSave = new ArrayList<>();
+        List<String> duplicates = new ArrayList<>();
+
+        for (Product product : products) {
+            Product sanitized = sanitizeProduct(product);
+            if (sanitized.getName() == null || sanitized.getName().isBlank()) {
+                continue;
+            }
+
+            if (productRepository.existsByNameIgnoreCase(sanitized.getName())) {
+                duplicates.add(sanitized.getName());
+                continue;
+            }
+
+            toSave.add(sanitized);
+        }
+
+        List<Product> saved = productRepository.saveAll(toSave);
+
+        result.put("inserted", saved.size());
+        result.put("skipped", products.size() - saved.size());
+        result.put("duplicates", duplicates);
+        result.put("data", saved);
+        return result;
     }
 
     /**
@@ -237,8 +198,14 @@ public class ProductService {
      */
     @Transactional
     public Product addProduct(Product product) {
-        logger.info("Adding new product: {}", product.getName());
-        return productRepository.save(product);
+        Product sanitized = sanitizeProduct(product);
+        logger.info("Adding new product: {}", sanitized.getName());
+
+        if (productRepository.existsByNameIgnoreCase(sanitized.getName())) {
+            throw new IllegalArgumentException("Product with the same name already exists");
+        }
+
+        return productRepository.save(sanitized);
     }
 
     /**
@@ -252,13 +219,15 @@ public class ProductService {
         if (existingProduct.isPresent()) {
             Product product = existingProduct.get();
 
-            if (productDetails.getName() != null) product.setName(productDetails.getName());
-            if (productDetails.getDescription() != null) product.setDescription(productDetails.getDescription());
-            if (productDetails.getCategory() != null) product.setCategory(productDetails.getCategory());
+            if (productDetails.getName() != null) product.setName(productDetails.getName().trim());
+            if (productDetails.getDescription() != null) product.setDescription(productDetails.getDescription().trim());
+            if (productDetails.getCategory() != null) product.setCategory(productDetails.getCategory().trim());
+            if (productDetails.getSubcategory() != null) product.setSubcategory(productDetails.getSubcategory().trim());
             if (productDetails.getPrice() != null) product.setPrice(productDetails.getPrice());
-            if (productDetails.getStock() != null) product.setStock(productDetails.getStock());
-            if (productDetails.getImageLink() != null) product.setImageLink(productDetails.getImageLink());
-            if (productDetails.getManufacturer() != null) product.setManufacturer(productDetails.getManufacturer());
+            if (productDetails.getStockQuantity() != null) product.setStockQuantity(productDetails.getStockQuantity());
+            if (productDetails.getImageUrl() != null) product.setImageUrl(productDetails.getImageUrl().trim());
+            if (productDetails.getRating() != null) product.setRating(productDetails.getRating());
+            if (productDetails.getTotalReviews() != null) product.setTotalReviews(productDetails.getTotalReviews());
 
             return productRepository.save(product);
         }
@@ -293,7 +262,7 @@ public class ProductService {
         Optional<Product> product = productRepository.findById(id);
         if (product.isPresent()) {
             Product p = product.get();
-            p.setStock(p.getStock() + quantity);
+            p.setStockQuantity(Math.max(0, (p.getStockQuantity() == null ? 0 : p.getStockQuantity()) + quantity));
             return productRepository.save(p);
         }
 
@@ -305,11 +274,11 @@ public class ProductService {
      */
     @Transactional(readOnly = true)
     public List<Product> getLowStockProducts(Long vendorId, Integer threshold) {
-        logger.info("Fetching low stock products for vendor: {} with threshold: {}", vendorId, threshold);
+        logger.info("Fetching low stock products with threshold: {}", threshold);
         if (threshold == null || threshold <= 0) {
             threshold = 10;
         }
-        return productRepository.getLowStockProducts(vendorId, threshold);
+        return productRepository.getLowStockProducts(threshold);
     }
 
     /**
@@ -353,6 +322,52 @@ public class ProductService {
             return Collections.emptyList();
         }
         return ratingRepository.findByProductId(productId);
+    }
+
+    private Product sanitizeProduct(Product product) {
+        if (product == null) {
+            throw new IllegalArgumentException("Product payload is required");
+        }
+
+        if (product.getName() != null) {
+            product.setName(product.getName().trim());
+        }
+        if (product.getCategory() != null) {
+            product.setCategory(product.getCategory().trim());
+        }
+        if (product.getSubcategory() != null) {
+            product.setSubcategory(product.getSubcategory().trim());
+        }
+        if (product.getDescription() != null) {
+            product.setDescription(product.getDescription().trim());
+        }
+        if (product.getImageUrl() != null) {
+            product.setImageUrl(product.getImageUrl().trim());
+        }
+
+        if (product.getName() == null || product.getName().isBlank()) {
+            product.setName("Unnamed Product");
+        }
+        if (product.getCategory() == null || product.getCategory().isBlank()) {
+            product.setCategory("General");
+        }
+        if (product.getDescription() == null || product.getDescription().isBlank()) {
+            product.setDescription("No description available");
+        }
+        if (product.getPrice() == null || product.getPrice() <= 0) {
+            throw new IllegalArgumentException("Price must be greater than 0");
+        }
+        if (product.getStockQuantity() == null || product.getStockQuantity() < 0) {
+            product.setStockQuantity(0);
+        }
+        if (product.getRating() == null) {
+            product.setRating(0.0);
+        }
+        if (product.getTotalReviews() == null) {
+            product.setTotalReviews(0);
+        }
+
+        return product;
     }
 }
 

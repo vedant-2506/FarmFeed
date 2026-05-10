@@ -32,13 +32,14 @@ async function loadInventory() {
     const response = await fetch(`${BASE_URL}/api/products/vendor/${shopId}`);
     const products = await response.json();
 
-    if (products && products.length > 0) {
+    if (Array.isArray(products) && products.length > 0) {
       tableBody.innerHTML = "";
       let availableCount = 0;
       let outOfStockCount = 0;
 
       products.forEach(product => {
-        const isOutOfStock = product.stock <= 0;
+        const stock = product.quantity_in_stock ?? product.stock ?? product.stock_quantity ?? 0;
+        const isOutOfStock = stock <= 0;
         if (isOutOfStock) outOfStockCount++; else availableCount++;
 
         const row = document.createElement("tr");
@@ -47,8 +48,8 @@ async function loadInventory() {
           : '<span class="badge bg-success">Available</span>';
         
         let imageHtml = "";
-        if (product.image) {
-          imageHtml = `<img src="data:image/jpeg;base64,${product.image}" class="rounded" style="width: 50px; height: 50px; object-fit: cover;">`;
+        if (product.image_url || product.image) {
+          imageHtml = `<img src="${product.image_url || product.image}" class="rounded" style="width: 50px; height: 50px; object-fit: cover;">`;
         } else {
           imageHtml = `<div class="rounded bg-light d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;"><i class="bi bi-image text-muted"></i></div>`;
         }
@@ -58,12 +59,12 @@ async function loadInventory() {
           <td><strong>${product.name}</strong></td>
           <td><span class="badge bg-light text-dark border">${product.category}</span></td>
           <td>₹${product.price.toLocaleString("en-IN")}</td>
-          <td>${product.stock} units</td>
+          <td>${stock} units</td>
           <td>${statusBadge}</td>
           <td class="text-center">
             <div class="btn-group">
-              <button class="btn btn-sm btn-outline-primary" onclick="editProduct(${product.id})"><i class="bi bi-pencil"></i></button>
-              <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct(${product.id})"><i class="bi bi-trash"></i></button>
+              <button class="btn btn-sm btn-outline-primary" onclick="editProduct(${product.inventory_id || product.fertilizer_id || product.id})"><i class="bi bi-pencil"></i></button>
+              <button class="btn btn-sm btn-outline-danger" onclick="deleteProduct(${product.inventory_id || product.fertilizer_id || product.id})"><i class="bi bi-trash"></i></button>
             </div>
           </td>
         `;
