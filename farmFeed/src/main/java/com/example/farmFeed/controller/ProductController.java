@@ -261,6 +261,26 @@ public class ProductController {
             logger.info("Received product data: name='{}', category='{}', price={}, description='{}', vendorId={}",
                 product.getName(), product.getCategory(), product.getPrice(), product.getDescription(), product.getVendorId());
 
+            // Set defaults for empty/null values
+            if (product.getName() == null || product.getName().trim().isEmpty()) {
+                product.setName("Unnamed Product");
+            }
+            if (product.getCategory() == null || product.getCategory().trim().isEmpty()) {
+                product.setCategory("General");
+            }
+            if (product.getPrice() == null || product.getPrice() <= 0) {
+                product.setPrice(0.0);
+            }
+            if (product.getDescription() == null || product.getDescription().trim().isEmpty()) {
+                product.setDescription("No description available");
+            }
+            if (product.getVendorId() == null) {
+                product.setVendorId(1L);
+            }
+
+            logger.info("Product data after defaults: name='{}', category='{}', price={}, description='{}', vendorId={}",
+                product.getName(), product.getCategory(), product.getPrice(), product.getDescription(), product.getVendorId());
+
             Product savedProduct = productService.addProduct(product);
 
             logger.info("Product saved successfully with ID: {}", savedProduct.getId());
