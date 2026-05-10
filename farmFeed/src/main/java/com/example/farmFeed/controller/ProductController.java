@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import jakarta.validation.Valid;
 
 @RestController
 @CrossOrigin(origins = "*")
@@ -256,11 +256,14 @@ public class ProductController {
      * POST /api/products - Add new product (vendor only)
      */
     @PostMapping
-    public ResponseEntity<?> addProduct(@RequestBody Product product) {
+    public ResponseEntity<?> addProduct(@Valid @RequestBody Product product) {
         try {
-            logger.info("Adding new product: {}", product.getName());
+            logger.info("Received product data: name='{}', category='{}', price={}, description='{}', vendorId={}",
+                product.getName(), product.getCategory(), product.getPrice(), product.getDescription(), product.getVendorId());
 
             Product savedProduct = productService.addProduct(product);
+
+            logger.info("Product saved successfully with ID: {}", savedProduct.getId());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(Map.of(
                     "success", true,
