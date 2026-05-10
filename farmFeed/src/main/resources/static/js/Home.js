@@ -1,9 +1,5 @@
 const API_BASE_URL = window.API_BASE_URL || window.location.origin;
-<<<<<<< HEAD
-const FERTILIZER_API = `${API_BASE_URL}/api/products`;
-=======
 const PRODUCTS_API = `${API_BASE_URL}/api/products`;
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
 const FALLBACK_IMAGE = "https://images.unsplash.com/photo-1592982537447-6f2a6a0b2d8f?w=800&q=80";
 
 let allProducts = [];
@@ -27,15 +23,6 @@ async function loadProductsFromApi() {
     const response = await fetch(PRODUCTS_API);
     if (!response.ok) throw new Error(`Failed with status ${response.status}`);
 
-<<<<<<< HEAD
-    const result = await response.json();
-    
-    // Handle wrapped response format: { success: true, count: N, data: [...] }
-    const fertilizers = result.data || result;
-    
-    if (!Array.isArray(fertilizers) || fertilizers.length === 0) {
-      console.warn("No products returned from API");
-=======
     const responseBody = await response.json();
 
     // Handle both array response and { success, data: [] } envelope
@@ -48,7 +35,6 @@ async function loadProductsFromApi() {
     if (fertilizers.length === 0) {
       console.warn("No products found from API");
       renderProducts([]);
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
       return;
     }
 
@@ -57,18 +43,6 @@ async function loadProductsFromApi() {
     console.log("Sample product:", fertilizers[0]);
 
     allProducts = fertilizers.map(item => ({
-<<<<<<< HEAD
-      id: item.id,
-      name: item.name,
-      description: item.description || "Quality fertilizer for healthier crop growth.",
-      price: item.price,
-      stock: item.stock,
-      image: (item.image && item.image.trim()) ? item.image : FALLBACK_IMAGE,
-      category: item.category || "Fertilizer"
-    }));
-
-    console.log(`✅ Loaded ${allProducts.length} products from API`);
-=======
       // FIX: SQL feed uses product_id/product_name; JPA entity uses id/name — handle both
       id:          item.product_id   || item.id,
       name:        item.product_name || item.name,
@@ -89,7 +63,6 @@ async function loadProductsFromApi() {
     }));
 
     console.log("Processed products:", allProducts.length, allProducts[0]);
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
     applyFilters();
   } catch (error) {
     console.error("Unable to load products from API:", error);
