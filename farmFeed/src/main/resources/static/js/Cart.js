@@ -6,15 +6,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   const vendorId = localStorage.getItem("shop_id");
   
   if (!farmerId && !vendorId) {
-<<<<<<< HEAD
     if (window.Toast) Toast.error("Please login first");
     setTimeout(() => {
       window.location.href = "Login.html";
     }, 2000);
-=======
-    alert("login first");
-    window.location.href = "Login.html";
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
     return;
   }
 
@@ -24,15 +19,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Cart persists across sessions - do NOT clear it on logout
       // Just clear localStorage and redirect
       localStorage.clear();
-<<<<<<< HEAD
       if (window.Toast) Toast.success("Logged out successfully");
       setTimeout(() => {
         window.location.href = "Login.html";
       }, 1000);
-=======
-      sessionStorage.clear();
-      window.location.href = "Login.html";
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
     });
   }
 
@@ -213,18 +203,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
 
     cartContainer.querySelectorAll(".remove-btn").forEach(btn => {
-<<<<<<< HEAD
-      btn.addEventListener("click", () => {
-        const i = parseInt(btn.dataset.index, 10);
-        const name = cart[i].name;
-        cart.splice(i, 1);
-        save();
-        if (window.Toast) Toast.info(`${name} removed from cart`);
-=======
       btn.addEventListener("click", async () => {
         const cartId = btn.dataset.cartId;
         await removeCartItem(cartId);
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
       });
     });
   }

@@ -67,7 +67,7 @@ function normalizeProducts(items) {
         description: description,
         price: Number(item.price || item.price_inr || 0),
         stock: Number(item.stock || 0),
-        image: item.image_url || item.image_link || FALLBACK_IMAGE,
+        image: item.image_url || item.image_link || item.image || FALLBACK_IMAGE,
         primaryCategory: primaryCat,
         subcategory: subcat,
         rating: item.rating || "4.5",

@@ -108,14 +108,15 @@ public class ProductService {
         // Cast columns explicitly to stable JDBC-friendly types to avoid driver type-inference errors
         String sql = "SELECT " +
             "CAST(product_id AS SIGNED) AS product_id, CAST(product_id AS SIGNED) AS id, " +
-            "COALESCE(NULLIF(TRIM(product_name), ''), CONCAT('Product #', CAST(product_id AS CHAR))) AS product_name, " +
-            "COALESCE(NULLIF(TRIM(product_name), ''), CONCAT('Product #', CAST(product_id AS CHAR))) AS name, " +
-            "NULLIF(TRIM(image_link), '') AS image_link, " +
-            "COALESCE(NULLIF(TRIM(primary_category), ''), 'Other') AS primary_category, " +
+            "COALESCE(NULLIF(TRIM(product_name), ''), NULLIF(TRIM(name), ''), CONCAT('Product #', CAST(product_id AS CHAR))) AS product_name, " +
+            "COALESCE(NULLIF(TRIM(product_name), ''), NULLIF(TRIM(name), ''), CONCAT('Product #', CAST(product_id AS CHAR))) AS name, " +
+            "NULLIF(TRIM(image_link), '') AS image_link, NULLIF(TRIM(image), '') AS image, " +
+            "COALESCE(NULLIF(TRIM(primary_category), ''), NULLIF(TRIM(category), ''), 'Other') AS primary_category, " +
+            "COALESCE(NULLIF(TRIM(primary_category), ''), NULLIF(TRIM(category), ''), 'Other') AS category, " +
             "NULLIF(TRIM(subcategory), '') AS subcategory, " +
-            "CAST(price_inr AS DECIMAL(12,2)) AS price_inr, CAST(price_inr AS DECIMAL(12,2)) AS price, CAST(rating AS DECIMAL(5,2)) AS rating, " +
-            "COALESCE(NULLIF(TRIM(CAST(description_clean AS CHAR)), ''), NULLIF(TRIM(detailed_description_10_sentences), ''), CONCAT('FarmFeed product #', CAST(product_id AS CHAR))) AS description_clean, " +
-            "COALESCE(NULLIF(TRIM(CAST(description_clean AS CHAR)), ''), NULLIF(TRIM(detailed_description_10_sentences), ''), CONCAT('FarmFeed product #', CAST(product_id AS CHAR))) AS description, " +
+            "COALESCE(price_inr, price) AS price_inr, COALESCE(price, price_inr) AS price, CAST(rating AS DECIMAL(5,2)) AS rating, " +
+            "COALESCE(NULLIF(TRIM(CAST(description_clean AS CHAR)), ''), NULLIF(TRIM(CAST(description AS CHAR)), ''), NULLIF(TRIM(detailed_description_10_sentences), ''), CONCAT('FarmFeed product #', CAST(product_id AS CHAR))) AS description_clean, " +
+            "COALESCE(NULLIF(TRIM(CAST(description_clean AS CHAR)), ''), NULLIF(TRIM(CAST(description AS CHAR)), ''), NULLIF(TRIM(detailed_description_10_sentences), ''), CONCAT('FarmFeed product #', CAST(product_id AS CHAR))) AS description, " +
             "NULLIF(TRIM(detailed_description_10_sentences), '') AS detailed_description_10_sentences, " +
             "COALESCE(NULLIF(TRIM(manufacturer), ''), 'FarmFeed') AS manufacturer, " +
                 "CAST(vendor_id AS SIGNED) AS vendor_id, CAST(stock AS SIGNED) AS stock, CAST(total_reviews AS SIGNED) AS total_reviews, " +
