@@ -37,15 +37,16 @@ function normalizeProducts(items) {
   if (!Array.isArray(items)) return [];
 
   return items
-    .filter((item) => item && (item.name || item.product_name))
     .map((item, index) => {
-      const name = item.name || item.product_name || "Unnamed";
-      const description = item.description || item.description_clean || item.detailed_description_10_sentences || "";
-      const primaryCat = mapPrimaryCategory(item.primary_category);
+      if (!item) return null;
+
+      const rawId = item.fertilizer_id || item.id || (index + 1);
+      const name = (item.name || item.product_name || "").trim() || `Product #${rawId}`;
+      const description = (item.description || item.description_clean || item.detailed_description_10_sentences || "").trim() || `FarmFeed product #${rawId}`;
+      const primaryCat = mapPrimaryCategory(item.primary_category || item.category);
       const subcat = detectSubcategory(name, description, item.subcategory);
 
       // Extract numeric ID if it's a string like 'pr997' or 'bighaat_1'
-      let rawId = item.fertilizer_id || item.id || (index + 1);
       let numericId = rawId;
       if (typeof rawId === 'string') {
         const matches = /\d+/.exec(rawId);
@@ -72,7 +73,8 @@ function normalizeProducts(items) {
         rating: item.rating || "4.5",
         vendorId: numericVendorId
       };
-    });
+    })
+    .filter(Boolean);
 }
 
 function updateCartCount() {
