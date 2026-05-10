@@ -134,18 +134,8 @@
     </div>
   </div>
 
-<<<<<<< HEAD
-  <!-- Footer -->
-  <footer class="bg-light text-dark pt-5 pb-4 mt-5 border-top">
-    <div class="container text-center">
-      <p class="mb-0">© 2026 <strong>farmFeed</strong> | All Rights Reserved.</p>
-    </div>
-  </footer>
-
-=======
   <script src="js/config.js"></script>
   <script src="js/farmer-orders.js"></script>
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
   <script src="js/toast.js"></script>
   <script src="js/config.js"></script>
@@ -165,18 +155,6 @@
         return;
       }
 
-<<<<<<< HEAD
-      // Logout button
-      document.getElementById("logoutBtn").addEventListener("click", () => {
-        localStorage.clear();
-        if (window.Toast) Toast.success("Logged out successfully!");
-        setTimeout(() => {
-          window.location.href = "Login.html";
-        }, 1000);
-      });
-
-=======
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
       // Populate header
       document.getElementById("farmerName").textContent = farmerName;
       document.getElementById("farmerPhone").textContent = farmerPhone;
@@ -224,9 +202,6 @@
         cartContainer.innerHTML = cartHTML;
       }
 
-<<<<<<< HEAD
-      // Duplicate logout removed
-=======
       // Logout
       document.getElementById("logoutBtn").addEventListener("click", async () => {
         if (confirm("Are you sure you want to logout?")) {
@@ -242,7 +217,6 @@
           window.location.href = "Home.html";
         }
       });
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
     });
   </script>
 </body>

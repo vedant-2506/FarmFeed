@@ -44,13 +44,8 @@ document.addEventListener("DOMContentLoaded", function () {
       });
       const data = await response.json();
       if (response.ok && data.success) {
-<<<<<<< HEAD
-        Toast.success("Farmer Registration Successful! Please login.");
-        setTimeout(() => { window.location.href = "Login.html"; }, 2000);
-=======
       alert("signed up! login now");
         window.location.href = "Login.html";
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
       } else {
         Toast.error(data.error || `Registration failed (${response.status})`);
       }
@@ -70,10 +65,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const password = document.getElementById("vendorPassword").value.trim();
     const confirmPassword = document.getElementById("vendorConfirmPassword").value.trim();
 
-<<<<<<< HEAD
-    if (!ownerName || !shopName || !licenseNumber || !shopAddress || !email || !password || !confirmPassword) {
-      Toast.warning("Please fill all fields"); return;
-=======
     if (!ownerName || !shopName || !licenseNumber || !shopAddress || !phone || !email || !password || !confirmPassword) {
       alert("Please fill all fields"); return;
     }
@@ -82,7 +73,6 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     if (password !== confirmPassword) {
       alert("Passwords do not match"); return;
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
     }
     if (password !== confirmPassword) { Toast.warning("Passwords do not match"); return; }
 
@@ -94,13 +84,8 @@ document.addEventListener("DOMContentLoaded", function () {
       });
       const data = await response.json();
       if (response.ok && data.success) {
-<<<<<<< HEAD
-        Toast.success("Vendor Registration Successful! Please login.");
-        setTimeout(() => { window.location.href = "Login.html"; }, 2000);
-=======
       alert("vendor signup done! login now");
         window.location.href = "Login.html";
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
       } else {
         Toast.error(data.error || `Registration failed (${response.status})`);
       }

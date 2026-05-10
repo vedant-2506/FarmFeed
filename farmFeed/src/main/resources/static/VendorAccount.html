@@ -382,13 +382,8 @@
           <div class="sidebar-item" onclick="showSection('orders')">
             <i class="bi bi-bag-check"></i> Orders
           </div>
-<<<<<<< HEAD
-          <div class="sidebar-item" id="analysisTab" onclick="showSection('analysis')">
-            <i class="bi bi-graph-up"></i> Stock Analysis
-=======
           <div class="sidebar-item" onclick="showSection('shiftingOrders')">
             <i class="bi bi-truck"></i> Shifting Orders
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
           </div>
         </div>
       </div>
@@ -479,42 +474,6 @@
           <div class="content-title">
             <i class="bi bi-bag-check"></i> Your Orders
           </div>
-<<<<<<< HEAD
-          <div class="content-subtitle">Track customer orders</div>
-          <div id="ordersList">
-            <div class="loading-spinner">
-              <div class="spinner-border text-success" role="status">
-                <span class="visually-hidden">Loading...</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Analysis Section -->
-        <div id="analysisSection" class="content-area" style="display: none;">
-          <div class="content-title">
-            <i class="bi bi-graph-up"></i> Stock Analysis
-          </div>
-          <div class="content-subtitle">Insights into your inventory health</div>
-          
-          <div class="row g-3" id="analysisCards">
-            <div class="col-md-6 col-lg-4">
-              <div class="card border-0 shadow-sm p-4 text-center h-100" style="background: #fff4f4;">
-                <h2 id="lowStockCount" class="fw-bold text-danger">0</h2>
-                <p class="text-muted small mb-0">Low Stock Items</p>
-              </div>
-            </div>
-            <div class="col-md-6 col-lg-4">
-              <div class="card border-0 shadow-sm p-4 text-center h-100" style="background: #fdfdfd;">
-                <h2 id="outOfStockCount" class="fw-bold text-dark">0</h2>
-                <p class="text-muted small mb-0">Out of Stock</p>
-              </div>
-            </div>
-            <div class="col-md-6 col-lg-4">
-              <div class="card border-0 shadow-sm p-4 text-center h-100" style="background: #f0fdf4;">
-                <h2 id="avgPrice" class="fw-bold text-success">0</h2>
-                <p class="text-muted small mb-0">Average Price</p>
-=======
           <div class="content-subtitle">Track customer orders pending approval</div>
           <div class="table-responsive mt-4 shadow-sm rounded">
             <table class="table table-hover align-middle mb-0">
@@ -618,17 +577,10 @@
               <div class="analytics-box">
                 <div class="analytics-label">Total Revenue This Month</div>
                 <div class="analytics-value" id="monthlyRevenue">₹0</div>
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
               </div>
             </div>
           </div>
 
-<<<<<<< HEAD
-          <div class="mt-4">
-            <h5 class="fw-bold mb-3">Recommendations</h5>
-            <div id="recommendations" class="list-group list-group-flush">
-              <div class="list-group-item bg-transparent text-muted">Loading insights...</div>
-=======
           <div class="analytics-section mt-4">
             <h5 class="mb-3"><i class="bi bi-bar-chart"></i> Inventory Metrics</h5>
             <div class="analytics-grid">
@@ -670,7 +622,6 @@
                 <div class="analytics-label">Customer Satisfaction Rate</div>
                 <div class="analytics-value" id="satisfactionRate">N/A</div>
               </div>
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
             </div>
           </div>
         </div>
@@ -1075,11 +1026,7 @@
     }
 
     function showSection(section) {
-<<<<<<< HEAD
-      const sections = ['overviewSection', 'inventorySection', 'ordersSection', 'analysisSection'];
-=======
       const sections = ['overviewSection', 'inventorySection', 'ordersSection', 'shiftingOrdersSection', 'analyticsSection'];
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
       sections.forEach(s => document.getElementById(s).style.display = 'none');
 
       if (section === 'overview') document.getElementById("overviewSection").style.display = 'block';
@@ -1087,15 +1034,6 @@
         document.getElementById("inventorySection").style.display = 'block';
         loadInventory();
       }
-<<<<<<< HEAD
-      if (section === 'orders') {
-        document.getElementById("ordersSection").style.display = 'block';
-        loadOrders();
-      }
-      if (section === 'analysis') {
-        document.getElementById("analysisSection").style.display = 'block';
-        loadAnalysis();
-=======
       if (section === 'analytics') {
         document.getElementById("analyticsSection").style.display = 'block';
         loadAnalytics();
@@ -1107,7 +1045,6 @@
       if (section === 'shiftingOrders') {
         document.getElementById("shiftingOrdersSection").style.display = 'block';
         loadShiftingOrders();
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
       }
 
       document.querySelectorAll(".sidebar-item").forEach(item => item.classList.remove("active"));
@@ -1430,13 +1367,6 @@
 
     function logout() {
       if (confirm("Are you sure you want to logout?")) {
-<<<<<<< HEAD
-        localStorage.clear();
-        Toast.success("Logged out successfully");
-        setTimeout(() => {
-            window.location.href = "Login.html";
-        }, 1000);
-=======
         localStorage.removeItem("shop_id");
         localStorage.removeItem("shop_name");
         localStorage.removeItem("owner_name");
@@ -1444,7 +1374,6 @@
         localStorage.removeItem("user_name");
         alert("logged out");
         window.location.href = "Home.html";
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
       }
     }
   </script>

@@ -352,15 +352,8 @@
       const farmerId = localStorage.getItem("farmer_id");
       
       if (!farmerId) {
-<<<<<<< HEAD
-        if (window.Toast) Toast.error("Please login first!");
-        setTimeout(() => {
-            window.location.href = "Login.html";
-        }, 2000);
-=======
         alert("login first");
         window.location.href = "Login.html";
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
         return;
       }
 
@@ -386,15 +379,8 @@
       }
       
       if (cart.length === 0) {
-<<<<<<< HEAD
-        if (window.Toast) Toast.warning("Your cart is empty!");
-        setTimeout(() => {
-            window.location.href = "Cart.html";
-        }, 2000);
-=======
         alert("cart is empty");
         window.location.href = "Cart.html";
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
         return;
       }
 
@@ -522,20 +508,12 @@
 
       // Validation
       if (!fullName || !phone || !streetAddress || !city || !state || !postalCode) {
-<<<<<<< HEAD
-        if (window.Toast) Toast.warning("Please fill all address fields!");
-=======
         alert("fill all address fields");
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
         return;
       }
 
       if (!/^\d{10}$/.test(phone)) {
-<<<<<<< HEAD
-        if (window.Toast) Toast.warning("Phone number must be 10 digits!");
-=======
         alert("phone needs to be 10 digits");
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
         return;
       }
 
@@ -549,13 +527,8 @@
 
       // Prepare cart items for API
       const cartItems = cart.map(item => ({
-<<<<<<< HEAD
-        product_id: item.productId || item.id,
-        vendor_id: item.vendor_id || item.vendorId || 1,
-=======
         product_id: item.id,
         vendor_id: item.vendorId || 1,
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
         quantity: item.qty || 1,
         price: typeof item.price === 'string' ? parseInt(item.price.replace(/[^0-9]/g, ""), 10) : item.price
       }));
@@ -587,32 +560,17 @@
             console.error("error clearing cart from db:", e);
           }
 
-<<<<<<< HEAD
-          if (window.Toast) Toast.success("Order placed successfully!");
-          
-          setTimeout(() => {
-            window.location.href = "FarmerAccount.html";
-          }, 2000);
-        } else {
-          if (window.Toast) Toast.error("Order failed: " + data.error);
-=======
           alert(`order placed\n\n${data.ordersCount} order(s) from ${data.vendorCount} vendor(s)\n\norder ids: ${data.orders.map(o => o.id).join(", ")}`);
           
           window.location.href = "FarmerAccount.html";
         } else {
           alert("order failed: " + data.error);
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
           document.getElementById("placeOrderBtn").disabled = false;
           document.getElementById("placeOrderBtn").innerHTML = 'place order';
         }
       } catch (error) {
-<<<<<<< HEAD
-        console.error("Error:", error);
-        if (window.Toast) Toast.error("Server error. Please try again.");
-=======
         console.error("error:", error);
         alert("server error. try again");
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
         document.getElementById("placeOrderBtn").disabled = false;
         document.getElementById("placeOrderBtn").innerHTML = 'place order';
       }

@@ -160,36 +160,11 @@
 </head>
 
 <body>
-<<<<<<< HEAD
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg sticky-top">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#" onclick="return false;">
-        <img src="logo.png" alt="FarmFeed Logo" onerror="this.style.display='none'">
-        <span>FarmFeed</span>
-      </a>
-      <span class="navbar-text fw-bold text-primary">
-        <i class="bi bi-shield-lock"></i> Admin Panel - <span id="adminUsername">Admin</span>
-      </span>
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item me-2">
-          <a href="AdminSignup.html" class="btn btn-outline-primary btn-sm">
-            <i class="bi bi-person-plus"></i> Add New Admin
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="#" onclick="logout(); return false;" class="btn btn-outline-danger btn-sm" style="color: #dc3545 !important; border-color: #dc3545 !important;">
-            <i class="bi bi-box-arrow-right"></i> Logout
-          </a>
-        </li>
-      </ul>
-=======
   <!-- Sidebar -->
   <div class="sidebar">
     <div class="sidebar-header">
       <img src="logo.png" alt="FarmFeed Logo">
       <h5 class="mb-0 fw-bold text-success">Admin Panel</h5>
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
     </div>
     <div class="nav flex-column mt-4">
       <a href="#" class="nav-link active" data-section="overview">
@@ -500,17 +475,8 @@
     }
 
     function logout() {
-<<<<<<< HEAD
-      localStorage.removeItem("admin_session");
-      localStorage.removeItem("admin_username");
-      Toast.success("Logged out successfully");
-      setTimeout(() => {
-        window.location.href = "AdminLogin.html";
-      }, 1000);
-=======
       localStorage.clear();
       window.location.href = "AdminLogin.html";
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
     }
 
     function setupNavigation() {
@@ -765,78 +731,6 @@
       }).join("");
     }
 
-<<<<<<< HEAD
-    async function viewVendorDetails(vendorId) {
-      try {
-        const res = await fetch(`${BASE_URL}/api/admin/vendor/${vendorId}/inventory`);
-        const data = await res.json();
-
-        if (data.success) {
-          const vendor = allVendors.find(v => v.id === vendorId);
-          const inventory = data.data || [];
-
-          let inventoryHtml = "";
-          if (inventory.length === 0) {
-            inventoryHtml = '<p class="text-muted">No products in inventory</p>';
-          } else {
-            inventoryHtml = `
-              <div class="inventory-details">
-                <div class="inventory-header">
-                  <i class="bi bi-box"></i> Products in Inventory
-                </div>
-                ${inventory.map(item => `
-                  <div class="inventory-item">
-                    <div>
-                      <div class="inventory-name">${item.name}</div>
-                      <small style="color: #999;">Base: ₹${item.base_price} | Vendor: ₹${item.vendor_price}</small>
-                    </div>
-                    <div style="display: flex; gap: 15px; align-items: center;">
-                      <span class="inventory-qty">${item.quantity_in_stock} units</span>
-                      <span class="inventory-price">₹${(item.vendor_price * item.quantity_in_stock).toLocaleString('en-IN')}</span>
-                    </div>
-                  </div>
-                `).join("")}
-              </div>
-            `;
-          }
-
-          document.getElementById("vendorDetailsContent").innerHTML = `
-            <div>
-              <h6 style="color: #667eea; font-weight: 700; margin-bottom: 20px;">
-                <i class="bi bi-shop"></i> ${vendor.shop_name}
-              </h6>
-              <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; margin-bottom: 20px;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; font-size: 14px;">
-                  <div>
-                    <strong>Owner:</strong> ${vendor.owner_name}
-                  </div>
-                  <div>
-                    <strong>Email:</strong> ${vendor.email}
-                  </div>
-                  <div>
-                    <strong>Phone:</strong> ${vendor.phone || 'N/A'}
-                  </div>
-                  <div>
-                    <strong>Location:</strong> ${vendor.address || 'N/A'}
-                  </div>
-                  <div>
-                    <strong>Status:</strong> <span class="badge-status ${vendor.is_active ? 'badge-active' : 'badge-inactive'}">${vendor.is_active ? 'Active' : 'Inactive'}</span>
-                  </div>
-                  <div>
-                    <strong>Total Products:</strong> ${vendor.inventoryCount || 0}
-                  </div>
-                </div>
-              </div>
-              ${inventoryHtml}
-            </div>
-          `;
-
-          vendorModal.show();
-        }
-      } catch (err) {
-        console.error("Error:", err);
-        Toast.error("Error loading inventory details");
-=======
     function getStatusBadgeClass(status) {
       switch(status?.toLowerCase()) {
         case 'pending': return 'bg-warning text-dark';
@@ -844,7 +738,6 @@
         case 'delivered': return 'bg-success';
         case 'rejected': return 'bg-danger';
         default: return 'bg-secondary';
->>>>>>> 80581568b497d44057ac1e76cfd3dc0e15879263
       }
     }
   </script>
